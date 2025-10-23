@@ -134,6 +134,10 @@ export class Backend {
 				});
 				return response.json();
 			},
+			getListByCollectionId: async (collectionId: string):Promise<PaginatedResponse<ResponseExerciseDTO>>  => {
+				const response = await this.request("GET", `/exercises/by_collection/${collectionId}`);
+				return response.json();
+			}
 		},
 	};
 
