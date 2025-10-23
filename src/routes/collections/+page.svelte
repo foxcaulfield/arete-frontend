@@ -6,7 +6,7 @@
 	import { onMount } from "svelte";
 	import type { PageProps } from "./$types";
 	import { toast } from "@zerodevx/svelte-toast";
-	import CollectionsTable from "./CollectionsTable.svelte";
+	import CollectionsTable from "$lib/components/CollectionsTable.svelte";
 
 	const props: PageProps = $props();
 
