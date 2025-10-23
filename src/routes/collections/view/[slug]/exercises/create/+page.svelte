@@ -95,7 +95,7 @@
 			{/if}
 		</div>
 
-		<div class="form-group">
+		<!-- <div class="form-group">
 			<label for="">Alternative Answers (optional)</label>
 			{#each formData.alternativeAnswers as answer, idx (idx)}
 				<div class="alt-answer-row">
@@ -108,9 +108,9 @@
 					<button type="button" onclick={() => removeAltAnswer(idx)}>Remove</button>
 				</div>
 			{/each}
-		</div>
+		</div> -->
 
-		<div class="form-group">
+		<!-- <div class="form-group">
 			<label for="explanation">Explanation (optional)</label>
 			<textarea
 				id="explanation"
@@ -124,9 +124,9 @@
 			{#if fieldErrors?.explanation}
 				<span id="explanation-error" class="field-error">{fieldErrors.explanation}</span>
 			{/if}
-		</div>
+		</div> -->
 
-		<div class="form-group">
+		<!-- <div class="form-group">
 			<label for="tagInput">Tags (optional)</label>
 			<div class="tag-input-row">
 				<input
@@ -153,7 +153,7 @@
 			{#if fieldErrors?.tags}
 				<span id="tags-error" class="field-error">{fieldErrors.tags}</span>
 			{/if}
-		</div>
+		</div> -->
 		<div class="form-actions">
 			<button formaction="?/create">
 				{isSubmitting ? "Creating..." : "Create Exercise"}

@@ -72,11 +72,11 @@ declare global {
 		errorText?: string;
 	}
 
-	interface CurrentQuestion {
+	interface CurrentQuestion { /* ResponseDrillQuestionDto */
 		id: string;
 		question: string;
-		placeholderSequence: string;
-		tags?: string[];
+		// placeholderSequence: string;
+		// tags?: string[];
 	}
 
 	interface DrillResult {
