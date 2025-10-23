@@ -14,10 +14,17 @@
 	let stats = $state({ correct: 0, total: 0 });
 	let showResult = $state(false);
 	let nextButtonRef = $state<HTMLButtonElement | null>(null);
+	let inputRef = $state<HTMLInputElement | null>(null);
 
 	async function exitDrill() {
 		await goto(`/collections/view/${collectionId}`);
 	}
+
+	$effect(() => {
+		if (currentQuestion && !showResult) {
+			inputRef?.focus();
+		}
+	});
 </script>
 
 <div class="drill-container">
@@ -32,17 +39,17 @@
 
 	{#if currentQuestion}
 		<div class="question-card">
-			{#if currentQuestion.tags && currentQuestion.tags.length > 0}
+			<!-- {#if currentQuestion.tags && currentQuestion.tags.length > 0}
 				<div class="tags">
 					{#each currentQuestion.tags as tag}
 						<span class="tag">{tag}</span>
 					{/each}
 				</div>
-			{/if}
+			{/if} -->
 
 			<div class="question">
 				<p>{currentQuestion.question}</p>
-				<div class="placeholder-hint">{currentQuestion.placeholderSequence}</div>
+				<!-- <div class="placeholder-hint">{currentQuestion.placeholderSequence}</div> -->
 			</div>
 
 			{#if !showResult}
@@ -72,7 +79,9 @@
 							type="text"
 							name="userAnswer"
 							bind:value={userAnswer}
+							bind:this={inputRef}
 							placeholder="Enter your answer"
+							autocomplete="off"
 							onkeydown={(e) => e.key === "Enter" && e.currentTarget.form?.requestSubmit()}
 						/>
 						<!-- onkeydown={(e) => e.key === "Enter" && handleSubmitAnswer()} -->
@@ -100,7 +109,7 @@
 						{/if}
 					</div>
 
-					<form action="?/getNextQuestion" method="POST" >
+					<form action="?/getNextQuestion" method="POST">
 						<button bind:this={nextButtonRef} formaction="?/getNextQuestion" class="btn-next">
 							Next Question
 						</button>
