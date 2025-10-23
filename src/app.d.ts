@@ -51,12 +51,13 @@ declare global {
 	}
 
 	interface CreateExerciseDTO {
+		collectionId: string;
+		type: ExerciseType;
 		question: string;
 		correctAnswer: string;
-		alternativeAnswers?: string[];
-		tags?: string[];
+		additionalCorrectAnswers?: string[];
+		distractors?: string[];
 		explanation?: string;
-		collectionId: string;
 	}
 
 	interface CustomApiErrorInterface {
@@ -72,8 +73,10 @@ declare global {
 		errorText?: string;
 	}
 
-	interface CurrentQuestion { /* ResponseDrillQuestionDto */
-		id: string;
+	type ExerciseType = "FILL_IN_THE_BLANK" | "CHOICE_SINGLE";
+
+	interface CurrentQuestion {
+		/* ResponseDrillQuestionDto */ id: string;
 		question: string;
 		// placeholderSequence: string;
 		// tags?: string[];
