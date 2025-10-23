@@ -13,6 +13,7 @@
 	import ExercisesTable from "$lib/components/ExercisesTable.svelte";
 
 	const props: PageProps = $props();
+	const paginatedExercises = props.data.serverData.paginatedExercises;
 
 	// const data = props.data.__data;
 	// const flags = props.;
@@ -73,19 +74,37 @@
 	<h1>{props.data.serverData.collection?.name}</h1>
 	<p>Description: {props.data.serverData.collection?.description}</p>
 	<p>ID: {props.data.serverData.collection?.id}</p>
-	<p>User: {props.data.serverData.collection?.user?.name || "Unnamed User"} ({props.data.serverData.collection?.user?.id || "Unknown ID"})</p>
+	<p>
+		User: {props.data.serverData.collection?.user?.name || "Unnamed User"} ({props.data.serverData.collection?.user
+			?.id || "Unknown ID"})
+	</p>
 
 	<p>Created at: {props.data.serverData.collection?.createdAt}</p>
 	<p>Updated at: {props.data.serverData.collection?.updatedAt}</p>
-	<button onclick={() => goto(`/collections/edit/${props.data.serverData.collection?.id}${page.url.search}`)}>Edit collection</button>
+	<button onclick={() => goto(`/collections/edit/${props.data.serverData.collection?.id}${page.url.search}`)}
+		>Edit collection</button
+	>
 	<form method="post" action="?/delete" onsubmit={confirmDelete} style="display: inline;">
 		<button type="submit" disabled={false} class="delete-button"> Delete collection </button>
 	</form>
 
-	<button onclick={() => goto(`/collections/view/${props.data.serverData.collection?.id}/exercises/create${page.url.search}`)}>Create new exercise</button>
-	<button onclick={() => goto(`/collections/view/${props.data.serverData.collection?.id}/exercises/drill${page.url.search}`)} class="go-drill"> Go drill</button>
+	<button
+		onclick={() =>
+			goto(`/collections/view/${props.data.serverData.collection?.id}/exercises/create${page.url.search}`)}
+		>Create new exercise</button
+	>
+	<button
+		onclick={() =>
+			goto(`/collections/view/${props.data.serverData.collection?.id}/exercises/drill${page.url.search}`)}
+		class="go-drill"
+	>
+		Go drill</button
+	>
 
-	<hr/>
+	<hr />
+	{#if paginatedExercises?.data?.length !== undefined}
+		<ExercisesTable exercises={paginatedExercises.data} />
+	{/if}
 	<!-- {#if props.data.serverData.exercises?.length > 0}
 		<ul>
 			{#each props.data.serverData.exercises as exercise}

@@ -18,8 +18,9 @@ export const load: PageServerLoad = async ({ params, fetch, parent }) => {
 	try {
 		const backend = new Backend(fetch);
 		const collection = await backend.api.collections.getById(collectionId);
+		const paginatedExercises = await backend.api.exercises.getListByCollectionId(collectionId);
 		return {
-			serverData: { collection },
+			serverData: { collection, paginatedExercises },
 			flags: null,
 		};
 	} catch (e) {
