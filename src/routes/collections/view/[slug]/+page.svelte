@@ -10,6 +10,7 @@
 	import Unauthorized from "$lib/components/Unauthorized.svelte";
 
 	import type { PageProps } from "./$types";
+	import ExercisesTable from "$lib/components/ExercisesTable.svelte";
 
 	const props: PageProps = $props();
 

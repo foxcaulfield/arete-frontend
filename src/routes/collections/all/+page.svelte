@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import Forbidden from "$lib/components/Forbidden.svelte";
-	import CollectionsTable from "../CollectionsTable.svelte";
+	import CollectionsTable from "$lib/components/CollectionsTable.svelte";
 	import type { PageProps } from "./$types";
 
 	const props: PageProps = $props();
