@@ -43,8 +43,8 @@ declare global {
 
 	interface ResponseExerciseDTO {
 		id: string;
-		title: string;
-		description: string | null;
+		question: string;
+		explanation: string | null;
 		collectionId: string;
 		createdAt: Date;
 		updatedAt: Date;
