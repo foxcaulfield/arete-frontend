@@ -1,12 +1,15 @@
 <script lang="ts">
 	import type { PageProps } from "./$types";
 	import Unauthorized from "$lib/components/Unauthorized.svelte";
+	import Button from "$lib/components/Button.svelte";
 
 	let props: PageProps = $props();
 	// const { serverData } = data;
+
+	let isUnauthorized = $derived(Boolean(props.data?.flags?.unauthorized));
 </script>
 
-{#if props.data.flags?.unauthorized}
+{#if isUnauthorized}
 	<Unauthorized message="You are not authorized to create a collection." />
 {:else}
 	<h1>Create Collection</h1>
@@ -32,6 +35,6 @@
 			<p style="color: red;">{props.form.message}</p>
 		{/if}
 
-		<button type="submit">Create Collection</button>
+		<Button text="Create Collection" type="submit" />
 	</form>
 {/if}

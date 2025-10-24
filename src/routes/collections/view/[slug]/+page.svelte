@@ -11,12 +11,17 @@
 
 	import type { PageProps } from "./$types";
 	import ExercisesTable from "$lib/components/ExercisesTable.svelte";
+	import Button from "$lib/components/Button.svelte";
 
-	const props: PageProps = $props();
-	const paginatedExercises = props.data.serverData.paginatedExercises;
+	let props: PageProps = $props();
 
-	// const data = props.data.__data;
-	// const flags = props.;
+	let serverData = $derived(props.data?.serverData || {});
+	let paginatedExercises = $derived(serverData.paginatedExercises);
+	let currentCollection = $derived(serverData.collection);
+	let flags = $derived(props.data?.flags || {});
+	let userName = $derived(currentCollection?.user?.name || "Unnamed User");
+	let userId = $derived(currentCollection?.user?.id || "Unknown ID");
+	let hasExercises = $derived(Boolean(paginatedExercises && paginatedExercises?.data?.length > 0));
 
 	// let isDeleting = $state(false);
 	function confirmDelete(e: Event) {
@@ -28,6 +33,25 @@
 	function backToCollections() {
 		const qs = page.url.search;
 		goto(`/collections${qs || ""}`, { noScroll: true });
+	}
+
+	function goToEditCollection() {
+		const qs = page.url.search;
+		goto(`/collections/edit/${currentCollection?.id}${qs || ""}`, { noScroll: true });
+	}
+
+	function goToCreateExercise() {
+		const qs = page.url.search;
+		goto(`/collections/view/${currentCollection?.id}/exercises/create${qs || ""}`, {
+			noScroll: true,
+		});
+	}
+
+	function goToDrill() {
+		const qs = page.url.search;
+		goto(`/collections/view/${currentCollection?.id}/exercises/drill${qs || ""}`, {
+			noScroll: true,
+		});
 	}
 
 	onMount(() => {
@@ -63,78 +87,33 @@
 	});
 </script>
 
-{#if props.data.flags?.unauthorized}
+{#if flags?.unauthorized}
 	<Unauthorized />
-{:else if props.data.flags?.forbidden}
+{:else if flags?.forbidden}
 	<Forbidden />
-{:else if props.data.flags?.notFound}
+{:else if flags?.notFound}
 	<NotFound />
 {:else}
-	<button onclick={backToCollections}>Back to Collections</button>
-	<h1>{props.data.serverData.collection?.name}</h1>
-	<p>Description: {props.data.serverData.collection?.description}</p>
-	<p>ID: {props.data.serverData.collection?.id}</p>
-	<p>
-		User: {props.data.serverData.collection?.user?.name || "Unnamed User"} ({props.data.serverData.collection?.user
-			?.id || "Unknown ID"})
-	</p>
+	<Button text="Back to Collections" onclick={backToCollections} />
 
-	<p>Created at: {props.data.serverData.collection?.createdAt}</p>
-	<p>Updated at: {props.data.serverData.collection?.updatedAt}</p>
-	<button onclick={() => goto(`/collections/edit/${props.data.serverData.collection?.id}${page.url.search}`)}
-		>Edit collection</button
-	>
-	<form method="post" action="?/delete" onsubmit={confirmDelete} style="display: inline;">
-		<button type="submit" disabled={false} class="delete-button"> Delete collection </button>
-	</form>
+	<h1>{currentCollection?.name}</h1>
+	<p>Description: {currentCollection?.description}</p>
+	<p>ID: {currentCollection?.id}</p>
 
-	<button
-		onclick={() =>
-			goto(`/collections/view/${props.data.serverData.collection?.id}/exercises/create${page.url.search}`)}
-		>Create new exercise</button
-	>
-	<button
-		onclick={() =>
-			goto(`/collections/view/${props.data.serverData.collection?.id}/exercises/drill${page.url.search}`)}
-		class="go-drill"
-	>
-		Go drill</button
-	>
+	<p>User: {userName} ({userId})</p>
+
+	<p>Created at: {currentCollection?.createdAt}</p>
+	<p>Updated at: {currentCollection?.updatedAt}</p>
+
+	<Button text="Edit collection" onclick={goToEditCollection} />
+	<Button withAction={true} action="?/delete" onsubmit={confirmDelete} text=" Delete collection" />
+	<Button text="Create new exercise" onclick={goToCreateExercise} />
+	<Button text="Go drill" onclick={goToDrill} />
 
 	<hr />
-	{#if paginatedExercises?.data?.length !== undefined}
+	{#if paginatedExercises && hasExercises}
 		<ExercisesTable exercises={paginatedExercises.data} />
-	{/if}
-	<!-- {#if props.data.serverData.exercises?.length > 0}
-		<ul>
-			{#each props.data.serverData.exercises as exercise}
-				<li>
-					<strong>{exercise.text}</strong> (ID: {exercise.id}) - Created at: {exercise.createdAt}
-				</li>
-			{/each}
-		</ul>
 	{:else}
-		<p>No exercises in this collection.</p>
-	{/if} -->
+		<p>No exercises found in this collection.</p>
+	{/if}
 {/if}
-<!-- 
-<style>
-	.delete-button {
-		background-color: #d9534f;
-		color: white;
-		width: 300px;
-		border: 1px solid transparent;
-	}
-	.delete-button:hover {
-		background-color: #c9302c;
-	}
-	.go-drill {
-		background-color: #5cb85c;
-		color: white;
-		width: 200px;
-		border: 1px solid transparent;
-	}
-	.go-drill:hover {
-		background-color: #4cae4c;
-	}
-</style> -->

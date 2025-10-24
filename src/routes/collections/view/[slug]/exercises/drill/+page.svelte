@@ -1,16 +1,18 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
 	import { goto } from "$app/navigation";
+	import Button from "$lib/components/Button.svelte";
 	import type { PageProps } from "./$types";
 
 	const props: PageProps = $props();
-	const collectionId = props.data.collectionId;
 
-	let currentQuestion = $state<CurrentQuestion | null>(props.data.question);
+	let collectionId = $derived(props.data.collectionId);
+	let currentQuestion = $derived<CurrentQuestion | null>(props.data.question);
+	let error = $derived<string | null>(props.data?.flags?.errorText ?? null);
+
 	let userAnswer = $state("");
 	let lastResult = $state<DrillResult | null>(null);
 	let isSubmitting = $state(false);
-	let error = $state<string | null>(props.data?.flags?.errorText ?? null);
 	let stats = $state({ correct: 0, total: 0 });
 	let showResult = $state(false);
 	let nextButtonRef = $state<HTMLButtonElement | null>(null);
@@ -30,7 +32,8 @@
 <div class="drill-container">
 	<div class="drill-header">
 		<h1>Exercise Drill</h1>
-		<button onclick={exitDrill} class="btn-exit">Exit Drill</button>
+		<!-- stats -->
+		<Button text="Exit Drill" onclick={exitDrill} class="btn-exit" />
 	</div>
 
 	{#if error}
@@ -47,10 +50,7 @@
 				</div>
 			{/if} -->
 
-			<div class="question">
-				<p>{currentQuestion.question}</p>
-				<!-- <div class="placeholder-hint">{currentQuestion.placeholderSequence}</div> -->
-			</div>
+			<div class="question">{currentQuestion.question}</div>
 
 			{#if !showResult}
 				<form
@@ -73,33 +73,24 @@
 						};
 					}}
 				>
-					<div class="answer-form">
-						<input type="hidden" name="exerciseId" value={currentQuestion.id} />
-						<input
-							type="text"
-							name="userAnswer"
-							bind:value={userAnswer}
-							bind:this={inputRef}
-							placeholder="Enter your answer"
-							autocomplete="off"
-							onkeydown={(e) => e.key === "Enter" && e.currentTarget.form?.requestSubmit()}
-						/>
-						<!-- onkeydown={(e) => e.key === "Enter" && handleSubmitAnswer()} -->
-						<!-- disabled={isSubmitting} -->
-						<div>
-							<button
-								type="submit"
-								formaction="?/handleSubmitAnswer"
-								disabled={isSubmitting || !userAnswer.trim()}>Submit</button
-							>
-						</div>
-					</div>
+					<input type="hidden" name="exerciseId" value={currentQuestion.id} />
+					<input
+						type="text"
+						name="userAnswer"
+						bind:value={userAnswer}
+						bind:this={inputRef}
+						placeholder="Enter your answer"
+						autocomplete="off"
+						onkeydown={(e) => e.key === "Enter" && e.currentTarget.form?.requestSubmit()}
+					/>
+					<!-- onkeydown={(e) => e.key === "Enter" && handleSubmitAnswer()} -->
+					<!-- disabled={isSubmitting} -->
+
+					<Button text="Answer" type="submit" disabled={isSubmitting || !userAnswer.trim()} />
 				</form>
 			{:else if lastResult}
 				<div class="result" class:correct={lastResult.isCorrect} class:incorrect={!lastResult.isCorrect}>
-					<div class="result-status">
-						{lastResult.isCorrect ? "✓ Correct!" : "✗ Incorrect"}
-					</div>
+					<div>{lastResult.isCorrect ? "✅ Correct!" : "❌ Incorrect"}</div>
 
 					<div class="result-details">
 						<p><strong>Your answer:</strong> {userAnswer}</p>
@@ -109,11 +100,8 @@
 						{/if}
 					</div>
 
-					<form action="?/getNextQuestion" method="POST">
-						<button bind:this={nextButtonRef} formaction="?/getNextQuestion" class="btn-next">
-							Next Question
-						</button>
-					</form>
+					<!-- bind:this={nextButtonRef} -->
+					<Button withAction action="?/getNextQuestion" text="Next Question" />
 				</div>
 			{/if}
 		</div>
@@ -121,7 +109,7 @@
 		<div class="message">No exercises found in this collection.</div>
 	{/if}
 </div>
-
+<!-- 
 <style>
 	.drill-container {
 		max-width: 800px;
@@ -263,4 +251,4 @@
 			flex-direction: column;
 		}
 	}
-</style>
+</style> -->

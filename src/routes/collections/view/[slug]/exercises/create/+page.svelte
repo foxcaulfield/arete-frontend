@@ -3,15 +3,16 @@
 	// import { page } from "$app/state";
 	import { toast } from "@zerodevx/svelte-toast";
 	import type { PageProps } from "./$types";
+	import Button from "$lib/components/Button.svelte";
+	// import { on } from "events";
 
 	const props: PageProps = $props();
-	const collectionId = props.data.collectionId;
+    
+	let collectionId = $derived(props.data.collectionId);
+	let additionalCorrectAnswers = $derived(props.form?.values?.additionalCorrectAnswers || []);
+    let distractors = $derived(props.form?.values?.distractors || []);
+	let fieldErrors = $derived(props.form?.errors);
 
-	let additionalCorrectAnswers = $state(props.form?.values?.additionalCorrectAnswers || []);
-    let distractors = $state(props.form?.values?.distractors || []);
-
-	let isSubmitting = $state(false);
-	let fieldErrors = $state<Record<string, string> | null>(null);
 	// let tagInput = $state("");
 
 	// Handle server action response
@@ -20,10 +21,14 @@
 			toast.push(props.form.errorText, {});
 		}
 
-		if (props.form?.errors) {
-			fieldErrors = props.form.errors;
-		}
+		// if (props.form?.errors) {
+		// 	fieldErrors = props.form.errors;
+		// }
 	});
+    
+    function goBack() {
+        goto(`/collections/view/${collectionId}`);
+    }
 
 	// function addTag() {
 	// 	if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
@@ -119,10 +124,10 @@
 						value={answer}
 						placeholder="Additional correct answer"
 					/>
-					<button type="button" class="btn-remove" onclick={() => removeAdditionalAnswer(idx)}>Remove</button>
+                    <Button text="Remove" onclick={() => removeAdditionalAnswer(idx)} />
 				</div>
 			{/each}
-			<button type="button" class="btn-add" onclick={addAdditionalAnswer}>Add Another Answer</button>
+            <Button text="Add Another Answer" onclick={addAdditionalAnswer} />
 			{#if fieldErrors?.additionalCorrectAnswers}
 				<span class="field-error">{fieldErrors.additionalCorrectAnswers}</span>
 			{/if}
@@ -138,10 +143,10 @@
 						value={distractor}
 						placeholder="Distractor answer"
 					/>
-					<button type="button" onclick={() => removeDistractor(idx)}>Remove</button>
+					<Button text="Remove" onclick={() => removeDistractor(idx)} />
 				</div>
 			{/each}
-            <button type="button" class="btn-add" onclick={addDistractor}>Add Distractor</button>
+            <Button text="Add Distractor" onclick={addDistractor} />
             {#if fieldErrors?.distractors}
                 <span class="field-error">{fieldErrors.distractors}</span>
             {/if}
@@ -192,12 +197,8 @@
 			{/if}
 		</div> -->
 		<div class="form-actions">
-			<button formaction="?/create">
-				{isSubmitting ? "Creating..." : "Create Exercise"}
-			</button>
-			<button type="button" onclick={() => goto(`/collections/view/${collectionId}`)} class="btn-cancel">
-				Cancel
-			</button>
+            <Button text="Create Exercise" type="submit" />
+            <Button text="Cancel" type="button" onclick={goBack} />
 		</div>
 	</form>
 </div>

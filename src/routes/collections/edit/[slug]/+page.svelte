@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
+	import Button from "$lib/components/Button.svelte";
 	import NotFound from "$lib/components/NotFound.svelte";
 
 	import Unauthorized from "$lib/components/Unauthorized.svelte";
@@ -8,15 +9,21 @@
 
 	const props: PageProps = $props();
 
+	let flags = $derived(props.data?.flags || {});
+	let serverData = $derived(props.data?.serverData || {});
+	let collection = $derived(serverData?.collection || null);
+	let form = $derived(props.form || null);
+	let formValues = $derived(form?.values || {});
+
 	function backToView(collectionId: string) {
 		const queryString = page.url.search;
 		goto(`/collections/view/${collectionId}${queryString || ""}`, { noScroll: true });
 	}
 </script>
 
-{#if props.data.flags?.unauthorized}
+{#if flags?.unauthorized}
 	<Unauthorized />
-{:else if !props.data.serverData?.collection}
+{:else if !collection}
 	<NotFound />
 {:else}
 	<h1>Edit collection</h1>
@@ -29,7 +36,7 @@
 				id="name"
 				name="name"
 				required
-				value={props.form?.values?.name ?? props.data.serverData?.collection.name}
+				value={formValues?.name ?? collection?.name}
 			/>
 			<!-- {#if props.data.form?.fieldErrors?.name}
 				<p class="error">{props.data.form.fieldErrors.name}</p>
@@ -39,18 +46,18 @@
 		<div>
 			<label for="description">Description</label>
 			<textarea id="description" name="description" rows="4"
-				>{props.form?.values?.description ?? props.data.serverData?.collection.description}</textarea
+				>{formValues?.description ?? collection?.description}</textarea
 			>
 		</div>
 
-		{#if props.form?.message}
-			<p class="error">{props.form.message}</p>
+		{#if form?.message}
+			<p class="error">{form.message}</p>
 		{/if}
 
-		{#if props.data.serverData?.collection !== null}
-			<button type="button" onclick={() => backToView(props.data.serverData.collection!.id)}>Cancel</button>
+		{#if collection !== null}
+			<Button text="Cancel" onclick={() => backToView(collection.id)} />
 		{/if}
-		<button formaction="?/update">Save</button>
+		<Button text="Save" type="submit" />
 	</form>
 {/if}
 
