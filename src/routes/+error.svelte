@@ -7,9 +7,9 @@
 	<title>Oops! Error</title>
 </svelte:head>
 
-<div class="error-container">
+<div >
 	<h1>Oops!!! Something went wrong.</h1>
-	<p class="error-message">{error?.message || "An unexpected error occurred."}</p>
-	<p class="error-status">Status Code: <strong>{status}</strong></p>
-	<p class="error-url">URL: <a href={url.href} target="_blank">{url.href}</a></p>
+	<p >{error?.message || "An unexpected error occurred."}</p>
+	<p>Status Code: <strong>{status}</strong></p>
+	<p>URL: <a href={url.href} target="_blank">{url.href}</a></p>
 </div>

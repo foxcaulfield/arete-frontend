@@ -3,15 +3,20 @@
 	import Forbidden from "$lib/components/Forbidden.svelte";
 	import CollectionsTable from "$lib/components/CollectionsTable.svelte";
 	import type { PageProps } from "./$types";
+	import Button from "$lib/components/Button.svelte";
 
 	const props: PageProps = $props();
 	const { serverData, flags } = props.data;
+
+	function gotoCollections() {
+		goto("/collections");
+	}
 </script>
 
 {#if flags?.forbidden}
 	<Forbidden />
 {:else}
-	<button onclick={() => goto("/collections")}>Back to Your Collections</button>
+	<Button text="Back to Your Collections" onclick={gotoCollections} />
 	<h1>All collections</h1>
 	<CollectionsTable collections={serverData?.paginatedResponse.data || []} />
 {/if}
