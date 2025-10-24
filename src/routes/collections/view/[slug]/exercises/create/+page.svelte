@@ -4,13 +4,16 @@
 	import { toast } from "@zerodevx/svelte-toast";
 	import type { PageProps } from "./$types";
 	import Button from "$lib/components/Button.svelte";
-	// import { on } from "events";
+	import TextInput from "$lib/components/TextInput.svelte";
+	import FormGroupTextarea from "$lib/components/FormGroupTextarea.svelte";
+	import FormGroupTextInput from "$lib/components/FormGroupTextInput.svelte";
 
 	const props: PageProps = $props();
-    
+
 	let collectionId = $derived(props.data.collectionId);
-	let additionalCorrectAnswers = $derived(props.form?.values?.additionalCorrectAnswers || []);
-    let distractors = $derived(props.form?.values?.distractors || []);
+	let formValues = $derived(props.form?.values);
+	let additionalCorrectAnswers = $derived(formValues?.additionalCorrectAnswers || []);
+	let distractors = $derived(formValues?.distractors || []);
 	let fieldErrors = $derived(props.form?.errors);
 
 	// let tagInput = $state("");
@@ -25,35 +28,19 @@
 		// 	fieldErrors = props.form.errors;
 		// }
 	});
-    
-    function goBack() {
-        goto(`/collections/view/${collectionId}`);
-    }
 
-	// function addTag() {
-	// 	if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
-	// 		formData.tags = [...formData.tags, tagInput.trim()];
-	// 		tagInput = "";
+	function goBack() {
+		goto(`/collections/view/${collectionId}`);
+	}
 
-	// 		// Clear any tag-related errors
-	// 		if (fieldErrors?.tags) {
-	// 			delete fieldErrors.tags;
-	// 		}
-	// 	}
-	// }
+	function addDistractor() {
+		distractors = [...distractors, ""];
+	}
 
-	// function removeTag(tag: string) {
-	// 	formData.tags = formData.tags.filter((t) => t !== tag);
-	// }
-
-    function addDistractor() {
-        distractors = [...distractors, ""];
-    }
-
-    function removeDistractor(index: number) {
-        distractors.splice(index, 1);
-        distractors = [...distractors];
-    }
+	function removeDistractor(index: number) {
+		distractors.splice(index, 1);
+		distractors = [...distractors];
+	}
 
 	function addAdditionalAnswer() {
 		additionalCorrectAnswers = [...additionalCorrectAnswers, ""];
@@ -71,63 +58,40 @@
 	<form action="?/create" method="POST">
 		<div class="form-group">
 			<label for="exercise-type"> Choose type </label>
-			<select value={props.form?.values?.type || ""} name="exercise-type" id="exercise-type">
+			<select value={props.form?.values?.type || "FILL_IN_THE_BLANK"} name="exercise-type" id="exercise-type">
 				{#each ["FILL_IN_THE_BLANK", "CHOICE_SINGLE"] as ExerciseType[] as type}
 					<option value={type}>{type.replaceAll("_", " ").toLowerCase()}</option>
 				{/each}
 			</select>
 		</div>
-		<div class="form-group">
-			<label for="question">Question *</label>
-			<textarea
-				id="question"
-				name="question"
-				value={props.form?.values?.question || ""}
-				placeholder="Enter the question (5-500 chars)"
-				required
-				minlength="5"
-				maxlength="500"
-				aria-invalid={fieldErrors?.question ? "true" : "false"}
-				aria-describedby={fieldErrors?.question ? "question-error" : undefined}
-			></textarea>
-			{#if fieldErrors?.question}
-				<span id="question-error" class="field-error">{fieldErrors.question}</span>
-			{/if}
-		</div>
 
-		<div class="form-group">
-			<label for="correctAnswer">Correct Answer *</label>
-			<input
-				type="text"
-				id="correctAnswer"
-				name="correctAnswer"
-				value={props.form?.values?.correctAnswer || ""}
-				placeholder="Enter the correct answer (1-50 chars)"
-				required
-				minlength="1"
-				maxlength="50"
-				aria-invalid={fieldErrors?.correctAnswer ? "true" : "false"}
-				aria-describedby={fieldErrors?.correctAnswer ? "correctAnswer-error" : undefined}
-			/>
-			{#if fieldErrors?.correctAnswer}
-				<span id="correctAnswer-error" class="field-error">{fieldErrors.correctAnswer}</span>
-			{/if}
-		</div>
+		<FormGroupTextarea
+			idName="question"
+			label="Question *"
+			placeholder="Enter the question"
+			value={props.form?.values?.question || ""}
+			minMax={[5, 500]}
+			errorText={fieldErrors?.question}
+		/>
+
+		<FormGroupTextInput
+			idName="correctAnswer"
+			label="Correct answer *"
+			placeholder="Enter the correct answer"
+			value={props.form?.values?.correctAnswer || ""}
+			minMax={[1, 50]}
+			errorText={fieldErrors?.correctAnswer}
+		/>
 
 		<div class="form-group">
 			<label for="">Additional Correct Answers (optional)</label>
+			<Button text="Add Another Answer" onclick={addAdditionalAnswer} />
 			{#each additionalCorrectAnswers as answer, idx (idx)}
 				<div class="alt-answer-row">
-					<input
-						type="text"
-						name="additionalCorrectAnswers"
-						value={answer}
-						placeholder="Additional correct answer"
-					/>
-                    <Button text="Remove" onclick={() => removeAdditionalAnswer(idx)} />
+					<TextInput name="additionalCorrectAnswers" value={answer} placeholder="Additional correct answer" />
+					<Button text="Remove" onclick={() => removeAdditionalAnswer(idx)} />
 				</div>
 			{/each}
-            <Button text="Add Another Answer" onclick={addAdditionalAnswer} />
 			{#if fieldErrors?.additionalCorrectAnswers}
 				<span class="field-error">{fieldErrors.additionalCorrectAnswers}</span>
 			{/if}
@@ -135,70 +99,31 @@
 
 		<div class="form-group">
 			<label for="">Distractors (optional)</label>
+			<Button text="Add Distractor" onclick={addDistractor} />
 			{#each distractors as distractor, idx (idx)}
 				<div class="alt-answer-row">
-					<input
-						type="text"
-						name="distractors"
-						value={distractor}
-						placeholder="Distractor answer"
-					/>
+					<TextInput name="distractors" value={distractor} placeholder="Distractor answer" />
 					<Button text="Remove" onclick={() => removeDistractor(idx)} />
 				</div>
 			{/each}
-            <Button text="Add Distractor" onclick={addDistractor} />
-            {#if fieldErrors?.distractors}
-                <span class="field-error">{fieldErrors.distractors}</span>
-            {/if}
-		</div>
-		
-		<div class="form-group">
-			<label for="explanation">Explanation (optional)</label>
-			<textarea
-				id="explanation"
-				name="explanation"
-				value={props.form?.values?.explanation || ""}
-				placeholder="Explain the answer (0-1000 chars)"
-				maxlength="1000"
-				aria-invalid={fieldErrors?.explanation ? "true" : "false"}
-				aria-describedby={fieldErrors?.explanation ? "explanation-error" : undefined}
-			></textarea>
-			{#if fieldErrors?.explanation}
-				<span id="explanation-error" class="field-error">{fieldErrors.explanation}</span>
+			{#if fieldErrors?.distractors}
+				<span class="field-error">{fieldErrors.distractors}</span>
 			{/if}
 		</div>
 
-		<!-- <div class="form-group">
-			<label for="tagInput">Tags (optional)</label>
-			<div class="tag-input-row">
-				<input
-					type="text"
-					id="tagInput"
-					name="tagInput"
-					bind:value={tagInput}
-					placeholder="Add tag"
-					onkeydown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
-				/>
-				<button type="button" onclick={addTag}>Add Tag</button>
-			</div>
-			{#if formData.tags.length > 0}
-				<div class="tags">
-					{#each formData.tags as tag (tag)}
-						<input type="hidden" name="tags" value={tag} />
-						<span class="tag">
-							{tag}
-							<button type="button" onclick={() => removeTag(tag)}>×</button>
-						</span>
-					{/each}
-				</div>
-			{/if}
-			{#if fieldErrors?.tags}
-				<span id="tags-error" class="field-error">{fieldErrors.tags}</span>
-			{/if}
-		</div> -->
+		<FormGroupTextarea
+			idName="explanation"
+			label="Explanation (optional)"
+			placeholder="Explain the answer (0-1000 chars)"
+			value={props.form?.values?.explanation || ""}
+			minMax={[0, 1000]}
+			errorText={fieldErrors?.explanation}
+			required={false}
+		/>
+
 		<div class="form-actions">
-            <Button text="Create Exercise" type="submit" />
-            <Button text="Cancel" type="button" onclick={goBack} />
+			<Button text="Create Exercise" type="submit" />
+			<Button text="Cancel" type="button" onclick={goBack} />
 		</div>
 	</form>
 </div>
