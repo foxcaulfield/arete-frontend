@@ -11,7 +11,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	event.locals.backendUrl = backendUrl;
 
-	console.log("[hook] Backend URL:", backendUrl);
+	// console.log("[hook] Backend URL:", backendUrl);
 
 	// Continue with auth check for protected routes
 	// Check if secure better-auth cookie exists
