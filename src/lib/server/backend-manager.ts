@@ -52,11 +52,19 @@ export class Backend {
 		const safeBaseUrl = Backend.backendBaseUrl.replace(/\/$/, "");
 		const safeEndpoint = endpoint.replace(/^\//, "");
 
+		const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
+		const headers = { ...this.headers };
+		if (isFormData) {
+			delete headers["Content-Type"];
+		}
+
 		const res = await this.fetch(`${safeBaseUrl}/${safeEndpoint}`, {
 			method,
 			credentials: "include",
-			headers: this.headers,
-			body: body ? JSON.stringify(body) : undefined,
+			headers,
+			body: isFormData ? body : body ? JSON.stringify(body) : undefined,
+			// headers: this.headers,
+			// body: body ? JSON.stringify(body) : undefined,
 		});
 
 		if (!res.ok) {
@@ -115,8 +123,8 @@ export class Backend {
 			},
 		},
 		exercises: {
-			create: async (dto: CreateExerciseDTO): Promise<ResponseExerciseDTO> => {
-				const response = await this.request("POST", `/exercises/create`, dto);
+			create: async (payload: CreateExerciseDTO | FormData): Promise<ResponseExerciseDTO> => {
+				const response = await this.request("POST", `/exercises/create`, payload);
 				return response.json();
 			},
 			getDrillQuestion: async (collectionId: string): Promise<CurrentQuestion> => {
@@ -134,10 +142,10 @@ export class Backend {
 				});
 				return response.json();
 			},
-			getListByCollectionId: async (collectionId: string):Promise<PaginatedResponse<ResponseExerciseDTO>>  => {
+			getListByCollectionId: async (collectionId: string): Promise<PaginatedResponse<ResponseExerciseDTO>> => {
 				const response = await this.request("GET", `/exercises/by_collection/${collectionId}`);
 				return response.json();
-			}
+			},
 		},
 	};
 

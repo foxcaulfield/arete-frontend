@@ -55,7 +55,7 @@
 <div class="create-exercise">
 	<h1>Create New Exercise</h1>
 
-	<form action="?/create" method="POST">
+	<form action="?/create" method="POST" enctype="multipart/form-data">
 		<div class="form-group">
 			<label for="exercise-type"> Choose type </label>
 			<select value={props.form?.values?.type || "FILL_IN_THE_BLANK"} name="exercise-type" id="exercise-type">
@@ -114,12 +114,15 @@
 		<FormGroupTextarea
 			idName="explanation"
 			label="Explanation (optional)"
-			placeholder="Explain the answer (0-1000 chars)"
+			placeholder="Explain the answer"
 			value={props.form?.values?.explanation || ""}
 			minMax={[0, 1000]}
 			errorText={fieldErrors?.explanation}
 			required={false}
 		/>
+
+		<input type="file" name="image" accept="image/*" />
+		<input type="file" name="audio" accept="audio/*" />
 
 		<div class="form-actions">
 			<Button text="Create Exercise" type="submit" />

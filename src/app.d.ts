@@ -76,8 +76,11 @@ declare global {
 	type ExerciseType = "FILL_IN_THE_BLANK" | "CHOICE_SINGLE";
 
 	interface CurrentQuestion {
-		/* ResponseDrillQuestionDto */ id: string;
+		/* ResponseDrillQuestionDto */
+		id: string;
 		question: string;
+		audioUrl?: string | null;
+		imageUrl?: string | null;
 		// placeholderSequence: string;
 		// tags?: string[];
 	}

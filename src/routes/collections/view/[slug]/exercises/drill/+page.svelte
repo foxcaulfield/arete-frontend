@@ -8,8 +8,8 @@
 	const props: PageProps = $props();
 
 	let collectionId = $derived(props.data.collectionId);
-	let currentQuestion = $derived<CurrentQuestion | null>(props.data.question);
-	let error = $derived<string | null>(props.data?.flags?.errorText ?? null);
+	let currentQuestion = $derived(props.data.question);
+	let error = $derived(props.data?.flags?.errorText ?? null);
 
 	let userAnswer = $state("");
 	let lastResult = $state<DrillResult | null>(null);
@@ -78,6 +78,15 @@
 					<TextInput type="hidden" name="exerciseId" value={currentQuestion.id} />
 					<TextInput name="userAnswer" placeholder="Enter your answer" bind:value={userAnswer} />
 					<Button text="Answer" type="submit" disabled={isSubmitting || !userAnswer.trim()} />
+					{#if currentQuestion.imageUrl}
+						<img
+							src={"/api/files?type=image&name=" + currentQuestion.imageUrl}
+							alt="Visual representation of the question"
+						/>
+					{/if}
+					{#if currentQuestion.audioUrl}
+						<audio controls src={"/api/files?type=audio&name=" + currentQuestion.audioUrl}></audio>
+					{/if}
 				</form>
 			{:else if lastResult}
 				<div class:correct={lastResult.isCorrect} class:incorrect={!lastResult.isCorrect}>
