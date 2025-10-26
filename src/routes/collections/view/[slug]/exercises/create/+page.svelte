@@ -52,82 +52,120 @@
 	}
 </script>
 
-<div class="create-exercise">
-	<h1>Create New Exercise</h1>
+<div class="container">
+	<div class="card-lg">
+		<h1>Create New Exercise</h1>
+			<p class="muted" style="margin-top:.4rem">
+				Compose a question, answers and optional media. Use the add buttons to provide alternatives.
+			</p>
+	</div>
 
-	<form action="?/create" method="POST" enctype="multipart/form-data">
-		<div class="form-group">
-			<label for="exercise-type"> Choose type </label>
-			<select value={props.form?.values?.type || "FILL_IN_THE_BLANK"} name="exercise-type" id="exercise-type">
-				{#each ["FILL_IN_THE_BLANK", "CHOICE_SINGLE"] as ExerciseType[] as type}
-					<option value={type}>{type.replaceAll("_", " ").toLowerCase()}</option>
-				{/each}
-			</select>
-		</div>
+	<form action="?/create" method="POST" enctype="multipart/form-data" class="card form-card" style="margin-top:1rem">
+		<div class="form-grid">
+			<div class="form-group">
+				<label for="exercise-type" class="label">Choose type</label>
+				<select id="exercise-type" name="exercise-type" value={props.form?.values?.type || "FILL_IN_THE_BLANK"}>
+					{#each ["FILL_IN_THE_BLANK", "CHOICE_SINGLE"] as ExerciseType[] as type}
+						<option value={type}>{type.replaceAll("_", " ").toLowerCase()}</option>
+					{/each}
+				</select>
+			</div>
 
-		<FormGroupTextarea
-			idName="question"
-			label="Question *"
-			placeholder="Enter the question"
-			value={props.form?.values?.question || ""}
-			minMax={[5, 500]}
-			errorText={fieldErrors?.question}
-		/>
+			<FormGroupTextInput
+				idName="question"
+				label="Question *"
+				placeholder="Enter the question"
+				value={props.form?.values?.question || ""}
+				minMax={[5, 300]}
+				errorText={fieldErrors?.question}
+			/>
 
-		<FormGroupTextInput
-			idName="correctAnswer"
-			label="Correct answer *"
-			placeholder="Enter the correct answer"
-			value={props.form?.values?.correctAnswer || ""}
-			minMax={[1, 50]}
-			errorText={fieldErrors?.correctAnswer}
-		/>
+			<FormGroupTextInput
+				idName="correctAnswer"
+				label="Correct answer *"
+				placeholder="Enter the correct answer"
+				value={props.form?.values?.correctAnswer || ""}
+				minMax={[1, 50]}
+				errorText={fieldErrors?.correctAnswer}
+			/>
 
-		<div class="form-group">
-			<label for="">Additional Correct Answers (optional)</label>
-			<Button text="Add Another Answer" onclick={addAdditionalAnswer} />
-			{#each additionalCorrectAnswers as answer, idx (idx)}
-				<div class="alt-answer-row">
-					<TextInput name="additionalCorrectAnswers" value={answer} placeholder="Additional correct answer" />
-					<Button text="Remove" onclick={() => removeAdditionalAnswer(idx)} />
+			<div class="two-columns">
+				<div class="form-group">
+					<!-- <label class="label">Additional Correct Answers (optional)</label> -->
+					<div style="display:flex;gap:.6rem;align-items:center;margin-top:.35rem">
+						<Button
+							text="Add Another Answer"
+							type="button"
+							variant="secondary"
+							onclick={addAdditionalAnswer}
+						/>
+					</div>
+					{#each additionalCorrectAnswers as answer, idx (idx)}
+						<div class="alt-answer-row">
+							<TextInput
+								name="additionalCorrectAnswers"
+								value={answer}
+								placeholder="Additional correct answer"
+							/>
+							<Button
+								text="Remove"
+								type="button"
+								variant="ghost"
+								onclick={() => removeAdditionalAnswer(idx)}
+							/>
+						</div>
+					{/each}
+					{#if fieldErrors?.additionalCorrectAnswers}
+						<span class="field-error">{fieldErrors.additionalCorrectAnswers}</span>
+					{/if}
 				</div>
-			{/each}
-			{#if fieldErrors?.additionalCorrectAnswers}
-				<span class="field-error">{fieldErrors.additionalCorrectAnswers}</span>
-			{/if}
-		</div>
 
-		<div class="form-group">
-			<label for="">Distractors (optional)</label>
-			<Button text="Add Distractor" onclick={addDistractor} />
-			{#each distractors as distractor, idx (idx)}
-				<div class="alt-answer-row">
-					<TextInput name="distractors" value={distractor} placeholder="Distractor answer" />
-					<Button text="Remove" onclick={() => removeDistractor(idx)} />
+				<div class="form-group">
+					<!-- <label class="label">Distractors (optional)</label> -->
+					<div style="display:flex;gap:.6rem;align-items:center;margin-top:.35rem">
+						<Button text="Add Distractor" type="button" variant="secondary" onclick={addDistractor} />
+					</div>
+					{#each distractors as distractor, idx (idx)}
+						<div class="alt-answer-row">
+							<TextInput name="distractors" value={distractor} placeholder="Distractor answer" />
+							<Button text="Remove" type="button" variant="ghost" onclick={() => removeDistractor(idx)} />
+						</div>
+					{/each}
+					{#if fieldErrors?.distractors}
+						<span class="field-error">{fieldErrors.distractors}</span>
+					{/if}
 				</div>
-			{/each}
-			{#if fieldErrors?.distractors}
-				<span class="field-error">{fieldErrors.distractors}</span>
-			{/if}
+			</div>
+
+			<div class="two-columns">
+				<FormGroupTextarea
+					idName="explanation"
+					label="Explanation (optional)"
+					placeholder="Explain the answer"
+					value={props.form?.values?.explanation || ""}
+					minMax={[0, 1000]}
+					errorText={fieldErrors?.explanation}
+					required={false}
+				/>
+				<div class="form-group">
+					<label class="label">Media (optional)</label>
+					<!-- <div class="file-row"> -->
+						<div>
+							<!-- <label for="image" class="muted">Image</label> -->
+							<input type="file" name="image" accept="image/*" />
+						</div>
+						<div>
+							<!-- <label for="audio" class="muted">Audio</label> -->
+							<input type="file" name="audio" accept="audio/*" />
+						</div>
+					<!-- </div> -->
+				</div>
+			</div>
 		</div>
-
-		<FormGroupTextarea
-			idName="explanation"
-			label="Explanation (optional)"
-			placeholder="Explain the answer"
-			value={props.form?.values?.explanation || ""}
-			minMax={[0, 1000]}
-			errorText={fieldErrors?.explanation}
-			required={false}
-		/>
-
-		<input type="file" name="image" accept="image/*" />
-		<input type="file" name="audio" accept="audio/*" />
 
 		<div class="form-actions">
 			<Button text="Create Exercise" type="submit" />
-			<Button text="Cancel" type="button" onclick={goBack} />
+			<Button text="Cancel" type="button" variant="secondary" onclick={goBack} />
 		</div>
 	</form>
 </div>
- 
