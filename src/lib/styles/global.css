@@ -145,6 +145,15 @@ nav a:hover{background:linear-gradient(90deg, rgba(255,60,0,0.12), rgba(255,94,2
 .compact-form .text-input,.compact-form select{padding:.45rem .6rem}
 .compact-form .text-area{min-height:80px;padding:.5rem .6rem}
 
+/* drill page tweaks: narrower form and question styling */
+.drill .form-card{max-width:760px}
+.drill .question{font-size:1rem;font-weight:600;margin:0 0 .6rem;color:var(--text)}
+.drill .btn-exit{margin-left:.5rem}
+
+/* media row for drill page */
+.media-row{margin-top:.6rem;display:flex;gap:.6rem;align-items:center}
+.media-card{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));padding:1rem;border-radius:8px;display:flex;justify-content:center}
+
 /* small utility for inline action buttons inside form groups */
 .form-group > .button{align-self:flex-start}
 

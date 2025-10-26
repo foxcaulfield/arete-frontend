@@ -101,6 +101,7 @@
 			<Button text="Edit collection" onclick={goToEditCollection} />
 			<Button text="Create new exercise" onclick={goToCreateExercise} />
 			<Button text="Go drill" onclick={goToDrill} />
+			<Button withAction={true} action="?/delete" onsubmit={confirmDelete} text="Delete collection" />
 		</div>
 		<div class="info-card">
 			<h1>{currentCollection?.name}</h1>
@@ -131,7 +132,6 @@
 			{/if}
 		</div>
 		<div class="delete-row">
-			<Button withAction={true} action="?/delete" onsubmit={confirmDelete} text="Delete collection" />
 		</div>
 	</div>
 {/if}
