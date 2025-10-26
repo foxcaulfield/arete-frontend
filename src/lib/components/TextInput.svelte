@@ -13,11 +13,12 @@
 		autocomplete?: FullAutoFill;
 		placeholder?: string;
         nameIsSameAsId?: boolean;
+		inputElement?: HTMLInputElement;
 		[rest: string]: any;
 	} & (withLabel | withoutLabel);
 
 	// Mark `value` as bindable so parent components can use `bind:value={...}`
-	let { value = $bindable(), autocomplete, placeholder, name, withLabel, id, nameIsSameAsId, ...rest }: TextInputProps = $props();
+	let { value = $bindable(), autocomplete, placeholder, name, withLabel, id, nameIsSameAsId, inputElement = $bindable(), ...rest }: TextInputProps = $props();
 </script>
 
 {#if withLabel}
@@ -26,6 +27,7 @@
 <input
 	class="text-input"
 	bind:value
+	bind:this={inputElement}
 	autocomplete={autocomplete ?? "off"}
 	type="text"
 	placeholder={placeholder ?? "Enter text"}

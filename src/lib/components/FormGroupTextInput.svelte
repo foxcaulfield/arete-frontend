@@ -8,27 +8,41 @@
 		idName: string;
 		label?: string;
 		errorText?: string;
-		minMax: [number, number];
+		minMax?: [number, number];
 		required?: boolean;
-		// [rest: string]: any;
+		inputElement?: HTMLInputElement;
+		[rest: string]: any;
 	}
-	const props: FormGroupTextInputProps = $props();
+	let {
+		cssClass,
+		value = $bindable(),
+		placeholder,
+		idName,
+		label,
+		errorText,
+		minMax = [0, 1000],
+		required,
+		inputElement = $bindable(),
+		...rest
+	}: FormGroupTextInputProps = $props();
 </script>
 
-<div class={`form-group ${props.cssClass ?? ''}`}>
-	<label for={props.idName} class="label">{props.label}</label>
+<div class={`form-group ${cssClass ?? ""}`}>
+	<label for={idName} class="label">{label}</label>
 	<TextInput
-		id={props.idName}
-		name={props.idName}
-		value={props.value}
-		placeholder={props.placeholder}
-		required={props.required}
-		minlength={props.minMax[0]}
-		maxlength={props.minMax[1]}
-		aria-invalid={props.errorText ? "true" : "false"}
-		aria-describedby={props.errorText ? `${props.idName}-error` : undefined}
+		id={idName}
+		name={idName}
+		bind:value={value}
+		bind:inputElement={inputElement}
+		{placeholder}
+		{required}
+		minlength={minMax[0]}
+		maxlength={minMax[1]}
+		aria-invalid={errorText ? "true" : "false"}
+		aria-describedby={errorText ? `${idName}-error` : undefined}
+		{...rest}
 	/>
-	{#if props.errorText}
-		<span id={`${props.idName}-error`} class="field-error">{props.errorText}</span>
+	{#if errorText}
+		<span id={`${idName}-error`} class="field-error">{errorText}</span>
 	{/if}
 </div>
