@@ -81,6 +81,10 @@ declare global {
 		question: string;
 		audioUrl?: string | null;
 		imageUrl?: string | null;
+		type: ExerciseType;
+		translation?: string | null;
+		explanation?: string | null;
+		distractors?: string[] | null;
 		// placeholderSequence: string;
 		// tags?: string[];
 	}
