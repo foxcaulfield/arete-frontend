@@ -56,32 +56,44 @@
 </script>
 
 {#if props.data.user}
-	<Button text="All Collections" onclick={() => goto("/collections/all")} />
-	<Button text="Create New Collection" onclick={() => goto("/collections/create")} />
+	<div class="container">
+		<div class="card-lg">
+			<div class="actions-row" style="justify-content:space-between;align-items:center">
+				<div class="flex">
+					<Button text="All Collections" onclick={() => goto("/collections/all")} variant="secondary" />
+					<Button text="Create New Collection" onclick={() => goto("/collections/create")} style="margin-left: .6rem" />
+				</div>
+				<div class="flex" style="gap:.75rem;align-items:center">
+					<label for="limit" class="muted" style="margin-right:.4rem">Show</label>
+					<select id="limit" class="" onchange={handleLimitChange} value={limit}>
+						<option value="5">5 per page</option>
+						<option value="10">10 per page</option>
+						<option value="25">25 per page</option>
+					</select>
+				</div>
+			</div>
 
-	<br />
-	<h2>Your Collections</h2>
+			<h2 style="margin-top:1rem">Your Collections</h2>
 
-	{#if pagination}
-		<select style="width: 200px;" onchange={handleLimitChange} value={limit}>
-			<option value="5">5 per page</option>
-			<option value="10">10 per page</option>
-			<option value="25">25 per page</option>
-		</select>
-		<div class="pagination">
-			<Button text="Previous" onclick={goToPreviousPage} disabled={!hasPreviousPage} />
-			<span class="page-info">
-				Page {currentPage} of {totalPages} ({totalItems} items total)
-			</span>
-			<Button text="Next" onclick={goToNextPage} disabled={!hasNextPage} />
+			{#if pagination}
+				<div class="pagination" style="margin-top:1rem;display:flex;align-items:center;gap:1rem;justify-content:flex-end">
+					<Button text="Previous" onclick={goToPreviousPage} disabled={!hasPreviousPage} variant="secondary" />
+					<span class="page-info muted">
+						Page {currentPage} of {totalPages} ({totalItems} items total)
+					</span>
+					<Button text="Next" onclick={goToNextPage} disabled={!hasNextPage} variant="secondary" />
+				</div>
+			{/if}
 		</div>
-	{/if}
 
-	{#if !collections || collections?.length === 0}
-		<p>You have no collections yet. Create one!</p>
-	{:else}
-		<CollectionsTable {collections} />
-	{/if}
+		<div style="margin-top:1.25rem">
+			{#if !collections || collections?.length === 0}
+				<div class="empty-state">You have no collections yet. Create one!</div>
+			{:else}
+				<CollectionsTable {collections} />
+			{/if}
+		</div>
+	</div>
 {:else}
 	<Unauthorized />
 {/if}
