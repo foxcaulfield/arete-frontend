@@ -69,6 +69,10 @@ button,.button{
 button:hover,.button:hover{background:var(--accent-2);transform:translateY(-1px)}
 button:active,.button:active{transform:translateY(0)}
 button:disabled{opacity:.5;cursor:not-allowed}
+button:disabled:hover, .button:disabled:hover {
+  transform: none;
+  background: var(--accent);
+}
 
 /* inputs */
 input,textarea,select{
