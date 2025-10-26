@@ -2,7 +2,8 @@
 	const props: { exercises: ResponseExerciseDTO[] } = $props();
 </script>
 
-<table>
+<div class="table-container">
+	<table>
 	<thead>
 		<tr>
 			<th>id</th>
@@ -14,15 +15,16 @@
 		</tr>
 	</thead>
 	<tbody>
-		{#each props.exercises as exercise (exercise.id)}
-			<tr>
-				<td>{exercise.id}</td>
-				<td>{exercise.question}</td>
-				<td>{exercise.collectionId}</td>
-				<td>{exercise.explanation}</td>
-				<td>{exercise.createdAt}</td>
-				<td>{exercise.updatedAt}</td>
-			</tr>
-		{/each}
+				{#each props.exercises as exercise (exercise.id)}
+					<tr>
+						<td>{exercise.id}</td>
+						<td>{exercise.question}</td>
+						<td>{exercise.collectionId}</td>
+						<td>{exercise.explanation}</td>
+						<td>{exercise.createdAt}</td>
+						<td>{exercise.updatedAt}</td>
+					</tr>
+				{/each}
 	</tbody>
-</table>
+	</table>
+</div>
