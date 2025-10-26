@@ -138,7 +138,7 @@ nav a:hover{background:linear-gradient(90deg, rgba(255,60,0,0.12), rgba(255,94,2
 .two-columns{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start}
 
 /* compact form variant to reduce vertical spacing and fit more fields without scrolling */
-.compact-form{padding:.6rem .8rem}
+.compact-form{padding:1rem 1.2rem}
 .compact-form .form-grid{gap:.6rem}
 .compact-form .form-group{gap:.3rem}
 .compact-form .label{font-size:.95rem}
@@ -147,7 +147,7 @@ nav a:hover{background:linear-gradient(90deg, rgba(255,60,0,0.12), rgba(255,94,2
 
 /* drill page tweaks: narrower form and question styling */
 .drill .form-card{max-width:760px}
-.drill .question{font-size:1rem;font-weight:600;margin:0 0 .6rem;color:var(--text)}
+.drill .question{font-size:1.75rem;font-weight:600;margin:0.5rem 0 .6rem;color:var(--text)}
 .drill .btn-exit{margin-left:.5rem}
 
 /* media row for drill page */
