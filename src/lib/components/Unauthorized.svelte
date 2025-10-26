@@ -1,7 +1,10 @@
 <script lang="ts">
-	// import type { PageProps } from "./$types";
-
 	let { message = "Please sign in to continue." }: { message?: string } = $props();
 </script>
 
-<p>{message}</p>
+<div class="card center" role="status" aria-live="polite">
+	<div>
+		<h2 class="accent">Unauthorized</h2>
+		<p class="muted">{message}</p>
+	</div>
+</div>

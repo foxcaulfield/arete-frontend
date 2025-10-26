@@ -21,14 +21,15 @@
 </script>
 
 {#if withLabel}
-	<label for={id}>{withLabel}</label>
+	<label for={id} class="label">{withLabel}</label>
 {/if}
 <input
+	class="text-input"
 	bind:value
 	autocomplete={autocomplete ?? "off"}
 	type="text"
 	placeholder={placeholder ?? "Enter text"}
 	id={id}
-    name={nameIsSameAsId ? id : name} 
+	name={nameIsSameAsId ? id : name}
 	{...rest}
 />

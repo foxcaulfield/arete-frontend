@@ -55,11 +55,14 @@ button,.button{
 	color:#fff;
 	border:0;
 	border-radius:var(--radius-sm);
-	padding:.55em 1.05em;
+	padding:.45em .9em;
 	font-weight:600;
 	cursor:pointer;
 	transition:transform var(--transition), box-shadow var(--transition), background var(--transition);
 	box-shadow: 0 6px 18px rgba(255,60,0,0.06);
+	display:inline-flex;
+	align-items:center;
+	justify-content:center;
 }
 .button.secondary{background:transparent;color:var(--text);border:1px solid var(--border)}
 .button.ghost{background:transparent;color:var(--muted)}
@@ -121,6 +124,47 @@ nav a:hover{background:linear-gradient(90deg, rgba(255,60,0,0.12), rgba(255,94,2
 .info-section{flex:1 1 260px;margin-bottom:1rem}
 .user-id{color:var(--accent);font-weight:700}
 .exercises-block{margin-top:1rem}
+
+/* form helpers */
+.form-card{padding:1rem 1.25rem;display:flex;flex-direction:column;min-height:auto;max-width:920px;margin:0 auto}
+.form-grid{display:grid;gap:1rem;grid-template-columns:1fr}
+.form-group{display:flex;flex-direction:column;gap:.45rem;height:100%}
+.label{font-weight:700;color:var(--text);}
+.text-input{width:100%;padding:.55rem .75rem;border-radius:6px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--text)}
+.text-area{width:100%;min-height:90px;padding:.6rem .7rem;border-radius:6px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--text);resize:vertical;flex:1}
+.actions-right{justify-content:flex-end}
+
+/* helper to present two sections side-by-side (additional answers + distractors) */
+.two-columns{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start}
+
+/* compact form variant to reduce vertical spacing and fit more fields without scrolling */
+.compact-form{padding:.6rem .8rem}
+.compact-form .form-grid{gap:.6rem}
+.compact-form .form-group{gap:.3rem}
+.compact-form .label{font-size:.95rem}
+.compact-form .text-input,.compact-form select{padding:.45rem .6rem}
+.compact-form .text-area{min-height:80px;padding:.5rem .6rem}
+
+/* small utility for inline action buttons inside form groups */
+.form-group > .button{align-self:flex-start}
+
+/* alt answer rows (additional answers/distractors) */
+.alt-answer-row{display:flex;gap:.6rem;align-items:center;margin-top:.5rem}
+.alt-answer-row .text-input{flex:1;min-width:0}
+
+/* smaller inline buttons for add/remove rows */
+.alt-answer-row .button{padding:.32em .6em;font-size:.9rem}
+.button.ghost{padding:.32em .6em}
+.button.secondary{padding:.36em .7em}
+
+/* file inputs */
+.file-row{display:flex;gap:1rem;align-items:center;margin-top:.75rem}
+.file-row input[type="file"]{background:transparent;padding:.4rem;border-radius:6px}
+
+/* form actions */
+.form-actions{display:flex;gap:.6rem;margin-top:1rem}
+
+/* single-column form layout (stack fields vertically) */
 .empty-state{background:var(--bg-alt);border-radius:8px;padding:1.5rem;text-align:center;color:var(--muted);box-shadow:var(--shadow-2)}
 .delete-row{display:flex;justify-content:center;margin-top:1rem}
 .delete-row button{min-width:180px;background:var(--accent-strong);box-shadow:0 6px 20px rgba(214,40,0,0.14)}
