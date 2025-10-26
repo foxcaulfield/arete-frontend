@@ -27,15 +27,4 @@
     <SvelteToast />
     {@render children?.()}
 </main>
-
-<style>
-    :global(main) {
-        flex: 1;
-    }
-
-    :global(body) {
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-    }
-</style>
+ 

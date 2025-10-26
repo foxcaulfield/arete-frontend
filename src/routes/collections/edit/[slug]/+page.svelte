@@ -60,12 +60,4 @@
 		<Button text="Save" type="submit" />
 	</form>
 {/if}
-
-<style>
-	.error {
-		color: #b00020;
-	}
-	form > div {
-		margin-bottom: 0.75rem;
-	}
-</style>
+ 

@@ -16,14 +16,4 @@
 <main class="redirect">
   <p>Redirecting to <a href="/">home</a></p>
 </main>
-
-<style>
-  .redirect {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 40vh;
-    color: var(--text, #e6eef8);
-  }
-  a { color: #7ee7c7; }
-</style>
+ 
