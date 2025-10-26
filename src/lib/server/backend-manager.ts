@@ -146,6 +146,12 @@ export class Backend {
 				const response = await this.request("GET", `/exercises/by_collection/${collectionId}`);
 				return response.json();
 			},
+			getFile: async (fileType: string, filename: string): Promise<Response> => {
+				const safeType = encodeURIComponent(fileType);
+				const safeName = encodeURIComponent(filename);
+				const response = await this.request("GET", `/exercises/files/${safeType}/${safeName}`);
+				return response;
+			},
 		},
 	};
 
