@@ -60,6 +60,15 @@
 
 		{#if currentQuestion}
 			<div>
+				{#if currentQuestion.audioUrl}
+					<!-- keep audio element mounted even when we show result so we can autoplay on success -->
+					<audio
+						bind:this={audioEl}
+						src={"/api/files?type=audio&name=" + currentQuestion.audioUrl}
+						preload="auto"
+						hidden
+					></audio>
+				{/if}
 				<!-- {#if currentQuestion.tags && currentQuestion.tags.length > 0}
 				<div class="tags">
 					{#each currentQuestion.tags as tag}
@@ -119,12 +128,6 @@
 							/>
 						{/if}
 						{#if currentQuestion.audioUrl}
-							<!-- <div class="media-row"> -->
-							<audio
-								bind:this={audioEl}
-								src={"/api/files?type=audio&name=" + currentQuestion.audioUrl}
-								preload="auto"
-							></audio>
 							<Button
 								type="button"
 								variant="secondary"
@@ -167,11 +170,7 @@
 						<Button withAction action="?/getNextQuestion" text="Next Question" />
 
 						{#if lastResult.isCorrect && currentQuestion.audioUrl}
-							<!-- autoplay audio on correct result -->
-							<script>
-								// attempt to play; may be blocked by browser
-								audioEl?.play().catch(() => {});
-							</script>
+							<!-- autoplay audio on correct result (handled in $effect) -->
 						{/if}
 					</div>
 				{/if}
