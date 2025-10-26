@@ -1,7 +1,7 @@
 <script lang="ts">
-	import Forbidden from "$lib/components/Forbidden.svelte";
-	import NotFound from "$lib/components/NotFound.svelte";
-	import Unauthorized from "$lib/components/Unauthorized.svelte";
+    import Forbidden from "$lib/components/Forbidden.svelte";
+    import NotFound from "$lib/components/NotFound.svelte";
+    import Unauthorized from "$lib/components/Unauthorized.svelte";
 
     let { flags = {}, children } = $props<{
         flags?: {
@@ -15,11 +15,11 @@
 </script>
 
 {#if flags.unauthorized}
-	<Unauthorized message="Please sign in to continue." />
+    <Unauthorized message={flags.errorText ?? "Please sign in to continue."} />
 {:else if flags.forbidden}
-	<Forbidden message="You don't have permission to view this page." />
+    <Forbidden message={flags.errorText ?? "You don't have permission to view this page."} />
 {:else if flags.notFound}
-	<NotFound message="The requested resource was not found." />
+    <NotFound message={flags.errorText ?? "The requested resource was not found."} />
 {:else}
-	{@render children?.()}
+    {@render children?.()}
 {/if}
