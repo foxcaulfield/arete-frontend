@@ -9,25 +9,35 @@
 	}
 </script>
 
-<table>
-	<thead>
-		<tr>
-			<th>Name</th>
-			<th>Description</th>
-			<th>User name</th>
-			<th>Created At</th>
-			<th>Updated At</th>
-		</tr>
-	</thead>
-	<tbody>
-		{#each props.collections as collection (collection.id)}
-			<tr onclick={() => open(collection.id)}>
-				<td>{collection.name}</td>
-				<td>{collection.description}</td>
-				<td>{collection.user?.name}</td>
-				<td>{collection.createdAt}</td>
-				<td>{collection.updatedAt}</td>
+<div class="table-container">
+	<table>
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Description</th>
+				<th>User name</th>
+				<th>Created At</th>
+				<th>Updated At</th>
 			</tr>
-		{/each}
-	</tbody>
-</table>
+		</thead>
+		<tbody>
+			{#each props.collections as collection (collection.id)}
+				<tr
+					class="clickable-row"
+					role="button"
+					tabindex="0"
+					onclick={() => open(collection.id)}
+					onkeydown={(e) => {
+						if (e.key === "Enter" || e.key === " ") open(collection.id);
+					}}
+				>
+					<td>{collection.name}</td>
+					<td>{collection.description}</td>
+					<td>{collection.user?.name}</td>
+					<td>{collection.createdAt}</td>
+					<td>{collection.updatedAt}</td>
+				</tr>
+			{/each}
+		</tbody>
+	</table>
+</div>
