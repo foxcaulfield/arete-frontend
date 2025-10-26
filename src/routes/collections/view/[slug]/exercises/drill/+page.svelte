@@ -2,7 +2,10 @@
 	import { enhance } from "$app/forms";
 	import { goto } from "$app/navigation";
 	import Button from "$lib/components/Button.svelte";
+	import { getTypeDesc, getTypeIcon, getTypeLabel } from "$lib/utils/exercise-type.utils";
+	import type { SvelteComponent } from "svelte";
 	import type { PageProps } from "./$types";
+	import QuestionText from "./QuestionText.svelte";
 
 	const props: PageProps = $props();
 
@@ -13,15 +16,15 @@
 	let userAnswer = $state("");
 	let lastResult = $state<DrillResult | null>(null);
 	let isSubmitting = $state(false);
-	let stats = $state({ correct: 0, total: 0 });
 	let showResult = $state(false);
 	let inputEl = $state<HTMLInputElement | null>(null);
 	let imageEl = $state<HTMLImageElement | null>(null);
 	let audioEl = $state<HTMLAudioElement | null>(null);
-	let resultEl = $state<HTMLElement | null>(null);
+	let nextButtonEl = $state<HTMLButtonElement | undefined>(undefined);
+	let explanationEl = $state<HTMLElement | null>(null);
+
 	let showImage = $state(false);
-	// let nextButtonRef = $state<HTMLButtonElement | null>(null);
-	// let inputRef = $state<HTMLInputElement | null>(null);
+	let showExplanation = $state(false);
 
 	async function exitDrill() {
 		await goto(`/collections/view/${collectionId}`);
@@ -37,7 +40,7 @@
 	$effect(() => {
 		if (showResult) {
 			// focus result area for keyboard users and screen readers
-			setTimeout(() => resultEl?.focus?.(), 50);
+			setTimeout(() => nextButtonEl?.focus?.(), 50);
 			// autoplay audio on correct result when possible
 			if (lastResult?.isCorrect && currentQuestion?.audioUrl) {
 				audioEl?.play?.().catch(() => {});
@@ -47,10 +50,23 @@
 </script>
 
 <div class="container drill">
-	<div class="card-lg">
-		<h1>Exercise Drill</h1>
-		<!-- stats -->
-		<Button text="Exit Drill" onclick={exitDrill} class="btn-exit" />
+	<div class="header-row">
+		<div class="card-lg">
+			<h1>Exercise Drill</h1>
+			<!-- stats -->
+			<Button text="Exit Drill" onclick={exitDrill} class="btn-exit" />
+		</div>
+		{#if currentQuestion?.type}
+			<div class="question-type-row">
+				<span class="type-badge" title={getTypeLabel(currentQuestion.type)}>
+					{@html getTypeIcon(currentQuestion.type)}
+				</span>
+				<div class="type-info">
+					<div class="type-name">{getTypeLabel(currentQuestion.type)}</div>
+					<div class="type-desc">{getTypeDesc(currentQuestion.type)}</div>
+				</div>
+			</div>
+		{/if}
 	</div>
 
 	<div class="card form-card compact-form" style="margin-top:1rem">
@@ -69,15 +85,15 @@
 						hidden
 					></audio>
 				{/if}
-				<!-- {#if currentQuestion.tags && currentQuestion.tags.length > 0}
-				<div class="tags">
-					{#each currentQuestion.tags as tag}
-						<span class="tag">{tag}</span>
-					{/each}
+				<div class="question">
+					<QuestionText questionText={currentQuestion.question} isAnswered={showResult} />
 				</div>
-			{/if} -->
 
-				<div class="question">{currentQuestion.question}</div>
+				{#if currentQuestion.translation}
+					<div class="translation">
+						Translation: {currentQuestion.translation}
+					</div>
+				{/if}
 
 				{#if !showResult}
 					<form
@@ -89,8 +105,8 @@
 								isSubmitting = false;
 								if (result.type === "success" && result.data) {
 									lastResult = result.data as unknown as DrillResult;
-									stats.total++;
-									if (result.data.isCorrect) stats.correct++;
+									// stats.total++;
+									// if (result.data.isCorrect) stats.correct++;
 									showResult = true;
 									// Focus the Next Question button after showing result
 									// setTimeout(() => nextButtonRef?.focus(), 0);
@@ -107,36 +123,66 @@
 							name="userAnswer"
 							id="userAnswer"
 							placeholder="Enter your answer"
+							autocomplete="off"
 							bind:value={userAnswer}
 							bind:this={inputEl}
 						/>
-						<Button text="Answer" type="submit" disabled={isSubmitting || !userAnswer.trim()} />
-						{#if currentQuestion.imageUrl}
-							<Button
-								type="button"
-								variant="secondary"
-								text="Show image"
-								onclick={() => {
-									showImage = !showImage;
-									if (showImage) {
-										setTimeout(
-											() => imageEl?.scrollIntoView({ behavior: "smooth", block: "center" }),
-											60
-										);
-									}
-								}}
-							/>
-						{/if}
-						{#if currentQuestion.audioUrl}
-							<Button
-								type="button"
-								variant="secondary"
-								text="Play audio"
-								onclick={() => {
-									audioEl?.play().catch(() => {});
-								}}
-							/>
-						{/if}
+						<div class="button-row" style="margin-top:0.5rem">
+							<Button text="Answer" type="submit" disabled={isSubmitting || !userAnswer.trim()} />
+							<div class="media-row" style="margin-top:0.5rem;gap:0.5rem">
+								{#if currentQuestion.imageUrl}
+									<Button
+										type="button"
+										variant="secondary"
+										text="Show image"
+										onclick={() => {
+											showImage = !showImage;
+											if (showImage) {
+												setTimeout(
+													() =>
+														imageEl?.scrollIntoView({
+															behavior: "smooth",
+															block: "center",
+														}),
+													60
+												);
+											}
+										}}
+									/>
+								{/if}
+								{#if currentQuestion.audioUrl}
+									<Button
+										type="button"
+										variant="secondary"
+										text="Play audio"
+										onclick={() => {
+											audioEl?.play().catch(() => {});
+										}}
+									/>
+								{/if}
+								{#if currentQuestion.explanation}
+									<Button
+										type="button"
+										variant="secondary"
+										text="Show explanation"
+										onclick={() => {
+											// alert(currentQuestion.explanation);
+											showExplanation = !showExplanation;
+											if (showExplanation) {
+												setTimeout(
+													() =>
+														explanationEl?.scrollIntoView({
+															behavior: "smooth",
+															block: "center",
+														}),
+													60
+												);
+											}
+										}}
+									/>
+								{/if}
+							</div>
+						</div>
 					</form>
 
 					{#if showImage}
@@ -149,29 +195,21 @@
 							/>
 						</div>
 					{/if}
+					{#if showExplanation}
+						<div class="explanation-card" bind:this={explanationEl} tabindex="-1" aria-live="polite">
+							<p><strong>Explanation:</strong> {currentQuestion.explanation}</p>
+						</div>
+					{/if}
 				{:else if lastResult}
 					<div
-						bind:this={resultEl}
 						tabindex="-1"
 						aria-live="polite"
 						class:correct={lastResult.isCorrect}
 						class:incorrect={!lastResult.isCorrect}
 					>
-						<div>{lastResult.isCorrect ? "✅ Correct!" : "❌ Incorrect"}</div>
+						<div class="result-message">{lastResult.isCorrect ? "✅ Correct!" : "❌ Incorrect"}</div>
 
-						<div>
-							<p><strong>Your answer:</strong> {userAnswer}</p>
-							<p><strong>Correct answer:</strong> {lastResult.correctAnswer}</p>
-							{#if lastResult.explanation}
-								<p><strong>Explanation:</strong> {lastResult.explanation}</p>
-							{/if}
-						</div>
-
-						<Button withAction action="?/getNextQuestion" text="Next Question" />
-
-						{#if lastResult.isCorrect && currentQuestion.audioUrl}
-							<!-- autoplay audio on correct result (handled in $effect) -->
-						{/if}
+						<Button bind:buttonElement={nextButtonEl} withAction action="?/getNextQuestion" text="Next Question" />
 					</div>
 				{/if}
 			</div>
@@ -180,3 +218,74 @@
 		{/if}
 	</div>
 </div>
+
+<style>
+	.question-type-row {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		margin: 0.4rem 0;
+	}
+	.type-badge {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 40px;
+		height: 40px;
+		border-radius: 8px;
+		/* background: var(--card-bg, #f5f7fa); */
+		color: var(--muted, #334155);
+		flex: 0 0 40px;
+	}
+	.type-info {
+		display: flex;
+		flex-direction: column;
+	}
+	.type-name {
+		font-weight: 600;
+		font-size: 0.95rem;
+	}
+	.type-desc {
+		font-size: 0.82rem;
+		color: var(--muted, #667085);
+	}
+	.drill .header-row {
+		display: flex;
+		flex-direction: row;
+		align-items: stretch;
+		justify-content: space-between;
+		gap: 0.6rem;
+	}
+
+	/* .drill .btn-exit {
+		margin-left: auto;
+	} */
+
+	.translation {
+		margin: 0.5rem 0 1rem 0;
+		font-size: 0.9rem;
+		color: var(--muted, #667085);
+	}
+
+	.explanation-card {
+		margin-top: 1rem;
+		padding: 1rem;
+		background-color: var(--card-bg);
+		border: 1px solid var(--border);
+		border-radius: 8px;
+	}
+
+	.button-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
+		margin-top: 0.5rem;
+	}
+
+	.result-message {
+		font-size: 1.25rem;
+		font-weight: 600;
+		margin-bottom: 0.75rem;
+	}
+</style>
