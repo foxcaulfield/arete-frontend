@@ -87,6 +87,7 @@
 	});
 </script>
 
+
 {#if flags?.unauthorized}
 	<Unauthorized />
 {:else if flags?.forbidden}
@@ -94,26 +95,43 @@
 {:else if flags?.notFound}
 	<NotFound />
 {:else}
-	<Button text="Back to Collections" onclick={backToCollections} />
-
-	<h1>{currentCollection?.name}</h1>
-	<p>Description: {currentCollection?.description}</p>
-	<p>ID: {currentCollection?.id}</p>
-
-	<p>User: {userName} ({userId})</p>
-
-	<p>Created at: {currentCollection?.createdAt}</p>
-	<p>Updated at: {currentCollection?.updatedAt}</p>
-
-	<Button text="Edit collection" onclick={goToEditCollection} />
-	<Button withAction={true} action="?/delete" onsubmit={confirmDelete} text=" Delete collection" />
-	<Button text="Create new exercise" onclick={goToCreateExercise} />
-	<Button text="Go drill" onclick={goToDrill} />
-
-	<hr />
-	{#if paginatedExercises && hasExercises}
-		<ExercisesTable exercises={paginatedExercises.data} />
-	{:else}
-		<p>No exercises found in this collection.</p>
-	{/if}
+	<div class="collection-page">
+		<div class="actions-row">
+			<Button text="Back to Collections" onclick={backToCollections} />
+			<Button text="Edit collection" onclick={goToEditCollection} />
+			<Button text="Create new exercise" onclick={goToCreateExercise} />
+			<Button text="Go drill" onclick={goToDrill} />
+		</div>
+		<div class="info-card">
+			<h1>{currentCollection?.name}</h1>
+			<div class="info-sections">
+				<div class="info-section">
+					<h2>Details</h2>
+					<p><strong>Description:</strong> {currentCollection?.description}</p>
+					<p><strong>ID:</strong> {currentCollection?.id}</p>
+				</div>
+				<div class="info-section">
+					<h2>Owner & Dates</h2>
+					<p><strong>User:</strong> {userName} <span class="user-id">({userId})</span></p>
+					<p><strong>Created:</strong> {currentCollection?.createdAt}</p>
+					<p><strong>Updated:</strong> {currentCollection?.updatedAt}</p>
+				</div>
+			</div>
+		</div>
+		<div class="exercises-block">
+			<h2>Exercises</h2>
+			{#if paginatedExercises && hasExercises}
+				<div class="table-container">
+					<ExercisesTable exercises={paginatedExercises.data} />
+				</div>
+			{:else}
+				<div class="empty-state">
+					<p>No exercises found in this collection.</p>
+				</div>
+			{/if}
+		</div>
+		<div class="delete-row">
+			<Button withAction={true} action="?/delete" onsubmit={confirmDelete} text="Delete collection" />
+		</div>
+	</div>
 {/if}
