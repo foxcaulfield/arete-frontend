@@ -13,9 +13,10 @@
 	const props: FormGroupTextareaProps = $props();
 </script>
 
-<div class={props.cssClass}>
-	<label for={props.idName}>{props.label}</label>
+<div class={`form-group ${props.cssClass ?? ''}`}>
+	<label for={props.idName} class="label">{props.label}</label>
 	<textarea
+		class="text-area"
 		id={props.idName}
 		name={props.idName}
 		value={props.value}

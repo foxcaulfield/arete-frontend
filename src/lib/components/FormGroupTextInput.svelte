@@ -15,8 +15,8 @@
 	const props: FormGroupTextInputProps = $props();
 </script>
 
-<div class={props.cssClass}>
-	<label for={props.idName}>{props.label}</label>
+<div class={`form-group ${props.cssClass ?? ''}`}>
+	<label for={props.idName} class="label">{props.label}</label>
 	<TextInput
 		id={props.idName}
 		name={props.idName}
