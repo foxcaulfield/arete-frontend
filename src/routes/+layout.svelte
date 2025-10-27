@@ -1,7 +1,7 @@
 <script lang="ts">
 	import favicon from "$lib/assets/favicon.svg";
 	// import "@picocss/pico/css/pico.css";
-	import "$lib/styles/global.css";
+	import "$lib/styles/global.scss";
 	import { SvelteToast } from "@zerodevx/svelte-toast";
 	import type { LayoutProps } from "./$types";
 	
