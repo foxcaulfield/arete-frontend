@@ -85,14 +85,11 @@
 						hidden
 					></audio>
 				{/if}
-				<div class="question">
-					<QuestionText questionText={currentQuestion.question} isAnswered={showResult} />
-				</div>
+
+				<QuestionText questionText={currentQuestion.question} isAnswered={showResult} />
 
 				{#if currentQuestion.translation}
-					<div class="translation">
-						Translation: {currentQuestion.translation}
-					</div>
+					<TranslationText translationText={currentQuestion.translation} />
 				{/if}
 
 				{#if !showResult}
