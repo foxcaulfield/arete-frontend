@@ -206,7 +206,7 @@
 		{/if}
 	</div>
 </div>
-<!-- 
+
 <style>
 	.drill .header-row {
 		display: flex;
@@ -217,7 +217,7 @@
 	}
 
 	.with-border {
-		border: var(--default-border);
+		/* border: var(--default-border); */
 	}
 
 	.failed {
@@ -244,4 +244,4 @@
 		gap: 0.5rem;
 		margin-left: auto;
 	}
-</style> -->
+</style> 

@@ -114,7 +114,7 @@
 							<Button
 								text="Remove"
 								type="button"
-								variant="ghost"
+								appearance="ghost"
 								onclick={() => removeAdditionalAnswer(idx)}
 							/>
 						</div>
@@ -132,7 +132,7 @@
 					{#each distractors as distractor, idx (idx)}
 						<div class="alt-answer-row">
 							<TextInput name="distractors" value={distractor} placeholder="Distractor answer" />
-							<Button text="Remove" type="button" variant="ghost" onclick={() => removeDistractor(idx)} />
+							<Button text="Remove" type="button" appearance="ghost" onclick={() => removeDistractor(idx)} />
 						</div>
 					{/each}
 					{#if fieldErrors?.distractors}
@@ -152,7 +152,7 @@
 					required={false}
 				/>
 				<div class="form-group">
-					<label class="label">Media (optional)</label>
+					<label class="label" for="">Media (optional)</label>
 					<!-- <div class="file-row"> -->
 						<div>
 							<!-- <label for="image" class="muted">Image</label> -->
