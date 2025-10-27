@@ -27,7 +27,7 @@
 	});
 </script>
 
-<div class="question">
+<div class="question-text">
 	{#each parts as part, i (i)}
 		{#if !part.isAnswer}
 			<span>{part.text}</span>
