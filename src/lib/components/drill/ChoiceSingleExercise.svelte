@@ -1,0 +1,64 @@
+<script lang="ts">
+	import Button from "../Button.svelte";
+
+	interface Props {
+		distractors: string[];
+		showResult: boolean;
+		lastResult: DrillResult | null;
+		lastUserAnswer: string;
+	}
+	const { distractors, showResult, lastResult, lastUserAnswer }: Props = $props();
+	let choiceButtons = $state<HTMLButtonElement[]>([]);
+
+	let isPressed = $state<boolean>(false);
+
+	const KEYBOARD_MAP: Record<string, number> = {
+		"4": 0,
+		"5": 1,
+		"1": 2,
+		"2": 3,
+	};
+
+	function handleKeyDown(e: KeyboardEvent) {
+		if (showResult) {
+			return;
+		}
+
+		const buttonIndex = KEYBOARD_MAP[e.key.toLowerCase()];
+
+		if (buttonIndex !== undefined && choiceButtons[buttonIndex]) {
+			isPressed = true;
+			e.preventDefault();
+			choiceButtons[buttonIndex]?.click();
+		}
+	}
+</script>
+
+<svelte:window on:keydown={handleKeyDown} />
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+	{#each distractors as distractor, index (index)}
+		<Button
+			bind:buttonElement={choiceButtons[index]}
+			disabled={showResult || isPressed}
+			type="submit"
+			variant={showResult
+				? lastResult?.isCorrect
+					? distractor === lastResult?.correctAnswer
+						? "success"
+						: "secondary"
+					: distractor === lastUserAnswer
+						? "danger"
+						: distractor === lastResult?.correctAnswer
+							? "success"
+							: "secondary"
+				: "secondary"}
+			appearance={showResult && distractor === lastUserAnswer ? "filled" : "outline"}
+			name="userAnswer"
+			value={distractor}
+			text={distractor}
+			fullWidth={true}
+			title={`Press '${Object.entries(KEYBOARD_MAP).find(([_, i]) => i === index)?.[0] || ""}' to select`}
+		/>
+	{/each}
+</div>
