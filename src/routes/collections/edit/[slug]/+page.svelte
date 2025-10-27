@@ -8,13 +8,19 @@
 
 	let props: PageProps = $props();
 
-	// derived-like accessors (keeps original logic shape)
+	// // derived-like accessors (keeps original logic shape)
+	// let flags = $derived(props.data?.flags || {});
+	// let serverData = $derived(props.data?.serverData || {});
+	// let collection = $derived(serverData?.collection || null);
+	// let form = $derived(props.form || null);
+
+	// // helper to read submitted values if validation failed
+	// let formValues = $derived(form?.values || {});
+
 	let flags = $derived(props.data?.flags || {});
 	let serverData = $derived(props.data?.serverData || {});
 	let collection = $derived(serverData?.collection || null);
 	let form = $derived(props.form || null);
-
-	// helper to read submitted values if validation failed
 	let formValues = $derived(form?.values || {});
 
 	function backToView(collectionId: string) {

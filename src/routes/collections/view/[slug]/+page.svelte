@@ -87,7 +87,6 @@
 	});
 </script>
 
-
 {#if flags?.unauthorized}
 	<Unauthorized />
 {:else if flags?.forbidden}

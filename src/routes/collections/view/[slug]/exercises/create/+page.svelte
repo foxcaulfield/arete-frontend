@@ -28,6 +28,10 @@
 		// 	fieldErrors = props.form.errors;
 		// }
 	});
+    
+    // function goBack() {
+    //     goto(`/collections/view/${collectionId}`);
+    // }
 
 	function goBack() {
 		goto(`/collections/view/${collectionId}`);
