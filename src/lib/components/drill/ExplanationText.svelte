@@ -25,7 +25,7 @@
 		margin-top: 1rem;
 		padding: 1rem;
 		background-color: var(--card-bg);
-		border: 1px solid var(--border);
+		border: var(--default-border);
 		border-radius: 8px;
 	}
 

@@ -48,7 +48,7 @@ video {
 	--accent-strong: #d62800;
 	/* danger / stronger */
 	--success: #1aff8c;
-	--border: #262626;
+	--border-color: #262626;
 	--input-bg: #141414;
 	--input-border: #333;
 	--radius: 10px;
@@ -56,6 +56,7 @@ video {
 	--shadow-1: 0 6px 20px rgba(0, 0, 0, 0.45);
 	--shadow-2: 0 4px 12px rgba(0, 0, 0, 0.35);
 	--transition: 180ms ease;
+	--default-border: 2px solid var(--border-color);
 }
 
 /* typography */
@@ -122,7 +123,7 @@ button,
 .button.secondary {
 	background: transparent;
 	color: var(--text);
-	border: 1px solid var(--border)
+	border: 1px solid var(--border-color)
 }
 
 .button.ghost {
@@ -231,7 +232,7 @@ th,
 td {
 	padding: .65rem .9rem;
 	text-align: left;
-	border-bottom: 1px solid var(--border)
+	border-bottom: 1px solid var(--border-color)
 }
 
 th {
@@ -251,7 +252,7 @@ tr:hover {
 /* nav */
 nav {
 	background: var(--bg-alt);
-	border-bottom: 1px solid var(--border);
+	border-bottom: 1px solid var(--border-color);
 	box-shadow: 0 6px 30px rgba(0, 0, 0, 0.35)
 }
 
@@ -455,22 +456,8 @@ nav a:hover {
 	padding: .5rem .6rem
 }
 
-/* drill page tweaks: narrower form and question styling */
-.drill {
-	.form-card {
-		max-width: 760px;
-	}
-
-	.btn-exit {
-		margin-left: .5rem;
-	}
-}
 
 
-
-// .drill .form-card{max-width:760px}
-// .drill .question{font-size:1.75rem;font-weight:600;margin:0.5rem 0 .6rem;color:var(--text)}
-// .drill .btn-exit{margin-left:.5rem}
 
 /* media row for drill page */
 .media-row {
@@ -480,13 +467,6 @@ nav a:hover {
 	align-items: center
 }
 
-.media-card {
-	background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.02));
-	padding: 1rem;
-	border-radius: 8px;
-	display: flex;
-	justify-content: center
-}
 
 /* small utility for inline action buttons inside form groups */
 .form-group>.button {
