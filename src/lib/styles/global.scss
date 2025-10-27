@@ -31,22 +31,15 @@ video {
 
 /* --- theme tokens (single source of truth) --- */
 :root {
+	/* existing variables */
 	--bg: #0b0b0b;
-	/* page background */
 	--bg-alt: #141414;
-	/* cards / nav */
 	--surface: #1c1c1c;
-	/* elevated surfaces */
 	--text: #f7f7f7;
-	/* primary text */
 	--muted: #9aa0a6;
-	/* secondary text */
 	--accent: #ff3c00;
-	/* main accent (orange/red) */
 	--accent-2: #ff5e1a;
-	/* accent hover */
 	--accent-strong: #d62800;
-	/* danger / stronger */
 	--success: #1aff8c;
 	--border-color: #262626;
 	--input-bg: #141414;
@@ -56,7 +49,26 @@ video {
 	--shadow-1: 0 6px 20px rgba(0, 0, 0, 0.45);
 	--shadow-2: 0 4px 12px rgba(0, 0, 0, 0.35);
 	--transition: 180ms ease;
-	--default-border: 2px solid var(--border-color);
+	--default-border: 1px solid var(--border-color);
+
+	/* NEW: Interactive state colors */
+	--hover-overlay: rgba(255, 60, 0, 0.08);
+	--hover-overlay-strong: rgba(255, 60, 0, 0.15);
+
+	/* NEW: Semantic colors for consistency */
+	--success-light: rgba(26, 255, 140, 0.1);
+	--danger-light: rgba(214, 40, 0, 0.1);
+
+	/* NEW: Additional shadows for depth */
+	--shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.25);
+	--shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.55);
+
+	/* NEW: Focus state (for accessibility) */
+	--focus-ring: 0 0 0 3px rgba(255, 60, 0, 0.3);
+
+	/* NEW: Disabled state */
+	--disabled-opacity: 0.5;
+	--disabled-bg: #262626;
 }
 
 /* typography */
@@ -104,54 +116,9 @@ a:hover {
 }
 
 /* buttons */
-button,
-.button {
-	background: var(--accent);
-	color: #fff;
-	border: 0;
-	border-radius: var(--radius-sm);
-	padding: .45em .9em;
-	font-weight: 600;
-	cursor: pointer;
-	transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
-	box-shadow: 0 6px 18px rgba(255, 60, 0, 0.06);
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-}
 
-.button.secondary {
-	background: transparent;
-	color: var(--text);
-	border: 1px solid var(--border-color)
-}
 
-.button.ghost {
-	background: transparent;
-	color: var(--muted)
-}
 
-button:hover,
-.button:hover {
-	background: var(--accent-2);
-	transform: translateY(-1px)
-}
-
-button:active,
-.button:active {
-	transform: translateY(0)
-}
-
-button:disabled {
-	opacity: .5;
-	cursor: not-allowed
-}
-
-button:disabled:hover,
-.button:disabled:hover {
-	transform: none;
-	background: var(--accent);
-}
 
 /* inputs */
 input,
@@ -283,10 +250,6 @@ nav a:hover {
 
 .muted {
 	color: var(--muted)
-}
-
-.danger {
-	color: var(--accent-strong)
 }
 
 .flex {
@@ -461,10 +424,7 @@ nav a:hover {
 
 
 
-/* small utility for inline action buttons inside form groups */
-.form-group>.button {
-	align-self: flex-start
-}
+
 
 /* alt answer rows (additional answers/distractors) */
 .alt-answer-row {
@@ -477,20 +437,6 @@ nav a:hover {
 .alt-answer-row .text-input {
 	flex: 1;
 	min-width: 0
-}
-
-/* smaller inline buttons for add/remove rows */
-.alt-answer-row .button {
-	padding: .32em .6em;
-	font-size: .9rem
-}
-
-.button.ghost {
-	padding: .32em .6em
-}
-
-.button.secondary {
-	padding: .36em .7em
 }
 
 /* file inputs */
