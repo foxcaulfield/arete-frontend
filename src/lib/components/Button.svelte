@@ -4,6 +4,7 @@
 		type?: "button" | "submit" | "reset";
 		variant?: "primary" | "secondary" | "ghost" | "danger";
 		buttonElement?: HTMLButtonElement | undefined;
+		class?: string;
 		[rest: string]: any;
 	};
 
@@ -24,16 +25,12 @@
 	}: ButtonProps = $props();
 	const classes = ["button"];
 	
-	if (variant === "secondary") classes.push("secondary");
-	if (variant === "ghost") classes.push("ghost");
-	if (variant === "danger") classes.push("danger");
-	if (cls) classes.push(cls as string);
 </script>
 
 {#if withAction}
 	<form method="POST" {action} {onsubmit} class="inline-form" aria-hidden={false}>
-		<button bind:this={buttonElement} type={type ?? "submit"} class={classes.join(" ")} {...rest}>{text}</button>
+		<button bind:this={buttonElement} type={type ?? "submit"} class={`button ${variant} ${cls}`} {...rest}>{text}</button>
 	</form>
 {:else}
-	<button bind:this={buttonElement} type={type ?? "button"} class={classes.join(" ")} {...rest}>{text}</button>
+	<button bind:this={buttonElement} type={type ?? "button"} class={`button ${variant} ${cls}`} {...rest}>{text}</button>
 {/if}
