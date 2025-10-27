@@ -1,7 +1,7 @@
 <script lang="ts">
 	import favicon from "$lib/assets/favicon.svg";
 	// import "@picocss/pico/css/pico.css";
-	import "$lib/styles/global.css";
+	import "$lib/styles/global.scss";
 	import { SvelteToast } from "@zerodevx/svelte-toast";
 	import type { LayoutProps } from "./$types";
 	
@@ -27,15 +27,4 @@
     <SvelteToast />
     {@render children?.()}
 </main>
-
-<style>
-    :global(main) {
-        flex: 1;
-    }
-
-    :global(body) {
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-    }
-</style>
+ 

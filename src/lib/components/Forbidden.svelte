@@ -1,7 +1,10 @@
 <script lang="ts">
-	// import type { PageProps } from "./$types";
-
 	let { message = "Access denied." }: { message?: string } = $props();
 </script>
 
-<p>{message}</p>
+<div class="card center" role="status" aria-live="polite">
+	<div>
+		<h2 class="accent">Access denied</h2>
+		<p class="muted">{message}</p>
+	</div>
+</div>

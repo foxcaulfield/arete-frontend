@@ -1,254 +1,247 @@
 <script lang="ts">
+	//  import type { SubmitFunction } from '$app/forms';
+	import { tick } from "svelte";
 	import { enhance } from "$app/forms";
 	import { goto } from "$app/navigation";
 	import Button from "$lib/components/Button.svelte";
+	import type { SubmitFunction } from "@sveltejs/kit";
 	import type { PageProps } from "./$types";
+	import QuestionText from "$lib/components/drill/QuestionText.svelte";
+	// import FormGroupTextInput from "$lib/components/FormGroupTextInput.svelte";
+	import TranslationText from "$lib/components/drill/TranslationText.svelte";
+	import ExplanationText from "$lib/components/drill/ExplanationText.svelte";
+	import ExerciseImage from "$lib/components/drill/ExerciseImage.svelte";
+	import ExerciseTypeBadge from "$lib/components/drill/ExerciseTypeBadge.svelte";
+	import FillInExercise from "$lib/components/drill/FillInExercise.svelte";
+	import ChoiceSingleExercise from "$lib/components/drill/ChoiceSingleExercise.svelte";
 
 	const props: PageProps = $props();
 
 	let collectionId = $derived(props.data.collectionId);
-	let currentQuestion = $derived<CurrentQuestion | null>(props.data.question);
-	let error = $derived<string | null>(props.data?.flags?.errorText ?? null);
+	let currentQuestion = $derived(props.data.question);
+	let error = $derived(props.data?.flags?.errorText ?? null);
 
 	let userAnswer = $state("");
-	let lastResult = $state<DrillResult | null>(null);
-	let isSubmitting = $state(false);
-	let stats = $state({ correct: 0, total: 0 });
+
 	let showResult = $state(false);
-	let nextButtonRef = $state<HTMLButtonElement | null>(null);
-	let inputRef = $state<HTMLInputElement | null>(null);
+	let showImage = $state(false);
+	let showExplanation = $state(false);
+
+	let inputElement = $state<HTMLInputElement | undefined>(undefined);
+	let imageElement = $state<HTMLImageElement | undefined>(undefined);
+	let audioElement = $state<HTMLAudioElement | null>(null);
+	let nextButtonEl = $state<HTMLButtonElement | undefined>(undefined);
+	let explanationEl = $state<HTMLElement | undefined>(undefined);
+
+	let lastResult = $state<DrillResult | null>(null);
+	let lastUserAnswer = $state("");
 
 	async function exitDrill() {
 		await goto(`/collections/view/${collectionId}`);
 	}
 
+	const handleFormEnhance: SubmitFunction = () => {
+		// isSubmitting = true;
+		return async ({ result, formData }) => {
+			// isSubmitting = false;
+			if (result.type === "success" && result.data) {
+				lastResult = result.data as unknown as DrillResult;
+				lastUserAnswer = formData.get("userAnswer")?.toString() || "";
+				// stats.total++;
+				// if (result.data.isCorrect) stats.correct++;
+				showResult = true;
+				// Focus the Next Question button after showing result
+				// setTimeout(() => nextButtonRef?.focus(), 0);
+			} else if (result.type === "failure") {
+				error = String(result.data?.message) || "Error submitting answer";
+			}
+		};
+	};
+
+	const scrollOptions = { behavior: "smooth", block: "center" } as const;
+
+	async function handleShowImage() {
+		showImage = !showImage;
+		if (showImage) {
+			await tick();
+			imageElement?.scrollIntoView(scrollOptions);
+		}
+	}
+
+	async function handleShowExplanation() {
+		showExplanation = !showExplanation;
+		if (showExplanation) {
+			await tick();
+			explanationEl?.scrollIntoView(scrollOptions);
+		}
+	}
+
+	async function handlePlayAudio() {
+		if (audioElement) {
+			await audioElement.play().catch(() => {});
+		}
+	}
+
 	$effect(() => {
-		if (currentQuestion && !showResult) {
-			inputRef?.focus();
+		if (currentQuestion && !showResult && currentQuestion.type === "FILL_IN_THE_BLANK") {
+			// focus the input for fast typing
+			tick().then(() => inputElement?.focus?.());
+		}
+	});
+
+	$effect(() => {
+		if (showResult) {
+			tick().then(() => nextButtonEl?.focus?.());
+			// autoplay audio on correct result when possible
+			if (lastResult?.isCorrect && currentQuestion?.audioUrl) {
+				audioElement?.play?.().catch(() => {});
+			}
 		}
 	});
 </script>
 
-<div class="drill-container">
-	<div class="drill-header">
-		<h1>Exercise Drill</h1>
-		<!-- stats -->
-		<Button text="Exit Drill" onclick={exitDrill} class="btn-exit" />
+<div class="container drill">
+	<div class="header-row">
+		<div class="card-lg">
+			<Button text="Exit Drill" onclick={exitDrill} variant="secondary" appearance="ghost" />
+		</div>
+		{#if currentQuestion?.type}
+			<ExerciseTypeBadge exerciseType={currentQuestion.type} />
+		{/if}
 	</div>
 
-	{#if error}
-		<div class="alert alert-error">{error}</div>
-	{/if}
+	<div
+		class="card form-card compact-form with-border"
+		class:failed={showResult && lastResult && !lastResult.isCorrect}
+		class:success={showResult && lastResult && lastResult.isCorrect}
+	>
+		{#if error}
+			<div class="field-error">{error}</div>
+		{/if}
 
-	{#if currentQuestion}
-		<div class="question-card">
-			<!-- {#if currentQuestion.tags && currentQuestion.tags.length > 0}
-				<div class="tags">
-					{#each currentQuestion.tags as tag}
-						<span class="tag">{tag}</span>
-					{/each}
-				</div>
-			{/if} -->
+		{#if currentQuestion}
+			<div>
+				{#if currentQuestion.audioUrl}
+					<!-- keep audio element mounted even when we show result so we can autoplay on success -->
+					<audio
+						bind:this={audioElement}
+						src={"/api/files?type=audio&name=" + currentQuestion.audioUrl}
+						preload="auto"
+						hidden
+					></audio>
+				{/if}
 
-			<div class="question">{currentQuestion.question}</div>
+				<QuestionText questionText={currentQuestion.question} isAnswered={showResult} />
 
-			{#if !showResult}
-				<form
-					action="?/handleSubmitAnswer"
-					method="POST"
-					use:enhance={() => {
-						isSubmitting = true;
-						return async ({ result }) => {
-							isSubmitting = false;
-							if (result.type === "success" && result.data) {
-								lastResult = result.data as unknown as DrillResult;
-								stats.total++;
-								if (result.data.isCorrect) stats.correct++;
-								showResult = true;
-								// Focus the Next Question button after showing result
-								setTimeout(() => nextButtonRef?.focus(), 0);
-							} else if (result.type === "failure") {
-								error = String(result.data?.message) || "Error submitting answer";
-							}
-						};
-					}}
-				>
+				{#if currentQuestion.translation}
+					<TranslationText translationText={currentQuestion.translation} />
+				{/if}
+
+				<!-- {#if !showResult} -->
+				<form action="?/handleSubmitAnswer" method="POST" use:enhance={handleFormEnhance}>
 					<input type="hidden" name="exerciseId" value={currentQuestion.id} />
-					<input
-						type="text"
-						name="userAnswer"
-						bind:value={userAnswer}
-						bind:this={inputRef}
-						placeholder="Enter your answer"
-						autocomplete="off"
-						onkeydown={(e) => e.key === "Enter" && e.currentTarget.form?.requestSubmit()}
-					/>
-					<!-- onkeydown={(e) => e.key === "Enter" && handleSubmitAnswer()} -->
-					<!-- disabled={isSubmitting} -->
-
-					<Button text="Answer" type="submit" disabled={isSubmitting || !userAnswer.trim()} />
+					{#if currentQuestion.type === "FILL_IN_THE_BLANK"}
+						<FillInExercise {showResult} bind:userAnswer bind:inputElement />
+					{:else if currentQuestion.type === "CHOICE_SINGLE"}
+						<ChoiceSingleExercise
+							distractors={currentQuestion.distractors || []}
+							{lastResult}
+							{lastUserAnswer}
+							{showResult}
+						/>
+					{/if}
 				</form>
-			{:else if lastResult}
-				<div class="result" class:correct={lastResult.isCorrect} class:incorrect={!lastResult.isCorrect}>
-					<div>{lastResult.isCorrect ? "✅ Correct!" : "❌ Incorrect"}</div>
-
-					<div class="result-details">
-						<p><strong>Your answer:</strong> {userAnswer}</p>
-						<p><strong>Correct answer:</strong> {lastResult.correctAnswer}</p>
-						{#if lastResult.explanation}
-							<p><strong>Explanation:</strong> {lastResult.explanation}</p>
-						{/if}
-					</div>
-
-					<!-- bind:this={nextButtonRef} -->
-					<Button withAction action="?/getNextQuestion" text="Next Question" />
+				<div class="media-row">
+					{#if showResult}
+						<Button
+							bind:buttonElement={nextButtonEl}
+							withAction
+							action="?/getNextQuestion"
+							variant="primary"
+							appearance="ghost"
+							size="sm"
+							text="Next Question"
+						/>
+					{/if}
+					{#if currentQuestion.imageUrl}
+						<Button
+							type="button"
+							variant="secondary"
+							appearance="ghost"
+							size="sm"
+							text="Show image"
+							onclick={handleShowImage}
+						/>
+					{/if}
+					{#if currentQuestion.audioUrl}
+						<Button
+							type="button"
+							variant="secondary"
+							appearance="ghost"
+							size="sm"
+							text="Play audio"
+							onclick={handlePlayAudio}
+						/>
+					{/if}
+					{#if currentQuestion.explanation}
+						<Button
+							type="button"
+							variant="secondary"
+							appearance="ghost"
+							size="sm"
+							text="Show explanation"
+							onclick={handleShowExplanation}
+						/>
+					{/if}
 				</div>
-			{/if}
-		</div>
-	{:else}
-		<div class="message">No exercises found in this collection.</div>
-	{/if}
+				{#if showImage && currentQuestion.imageUrl}
+					<ExerciseImage bind:imageElement imageUrl={currentQuestion.imageUrl} />
+				{/if}
+				{#if showExplanation && currentQuestion.explanation}
+					<ExplanationText bind:explanationEl text={currentQuestion.explanation} />
+				{/if}
+			</div>
+		{:else}
+			<div>No exercises found in this collection.</div>
+		{/if}
+	</div>
 </div>
 <!-- 
 <style>
-	.drill-container {
-		max-width: 800px;
-		margin: 0 auto;
-		padding: 2rem 1.5rem;
-		min-height: 100vh;
-	}
-
-	.drill-header {
+	.drill .header-row {
 		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 2.5rem;
-		gap: 1.5rem;
-		flex-wrap: wrap;
-	}
-
-	.stats {
-		display: flex;
-		gap: 1rem;
-		align-items: center;
-		font-weight: 600;
-		background: rgba(30, 41, 59, 0.8);
-		padding: 0.75rem 1.5rem;
-		border-radius: var(--radius-lg);
-		box-shadow: var(--shadow-md);
-		border: 1px solid var(--color-border-primary);
-		color: var(--color-text-secondary);
-	}
-
-	.accuracy {
-		background: var(--gradient-primary);
-		color: var(--color-accent-dark);
-		padding: 0.5rem 1.25rem;
-		border-radius: 20px;
-		font-size: 0.95rem;
-		font-weight: 700;
-		box-shadow: var(--shadow-accent);
-	}
-
-	.tags-group {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.75rem;
-		margin-bottom: 1.5rem;
-	}
-
-	.question-section {
-		margin-bottom: 2.5rem;
-	}
-
-	.question-text {
-		font-size: 1.3rem;
-		margin: 0 0 1rem 0;
-		font-weight: 600;
-		color: #f1f5f9;
-		line-height: 1.6;
-	}
-
-	.placeholder-hint {
-		background: rgba(15, 23, 42, 0.8);
-		padding: 1rem;
-		border-radius: var(--radius-md);
-		font-size: 0.95rem;
-		color: var(--color-text-tertiary);
-		font-family: "Courier New", monospace;
-		border-left: 4px solid var(--color-accent-primary);
-		line-height: 1.6;
-		border: 1px solid var(--color-border-primary);
-	}
-
-	.answer-form {
-		display: flex;
-		gap: 0.75rem;
+		flex-direction: row;
 		align-items: stretch;
+		justify-content: space-between;
+		gap: 0.6rem;
 	}
 
-	.result {
-		padding: 2rem;
-		border-radius: var(--radius-lg);
-		margin-top: 2rem;
-		border-left: 6px solid;
-		animation: slideUp var(--transition-normal);
-		backdrop-filter: blur(10px);
+	.with-border {
+		border: var(--default-border);
 	}
 
-	.result.correct {
-		background: var(--color-success-bg);
-		border-color: var(--color-success);
-		color: var(--color-success-light);
+	.failed {
+		background-color: rgba(239, 68, 68, 0.1);
+		border-color: #ef4444;
 	}
 
-	.result.incorrect {
-		background: var(--color-error-bg);
-		border-color: var(--color-error);
-		color: var(--color-error-light);
+	.success {
+		background-color: rgba(34, 197, 94, 0.05);
+		border-color: #22c55e;
 	}
 
-	.result-status {
-		font-size: 1.4rem;
-		font-weight: 700;
-		margin-bottom: 1.5rem;
+	.drill .form-card {
+		max-width: 760px;
 	}
 
-	.result-details {
-		margin: 0;
-	}
-
-	.result-details p {
-		margin: 0.75rem 0;
-		font-size: 1rem;
-		line-height: 1.6;
-		color: var(--color-text-primary);
-	}
-
-	.message {
-		text-align: center;
-		padding: 3rem 2rem;
-		color: var(--color-text-tertiary);
-		font-size: 1.1rem;
-		font-weight: 500;
-	}
-
-	@media (max-width: 640px) {
-		.drill-container {
-			padding: 1rem;
-		}
-
-		.drill-header {
-			flex-direction: column;
-			align-items: stretch;
-		}
-
-		.stats {
-			justify-content: space-around;
-		}
-
-		.answer-form {
-			flex-direction: column;
-		}
+	.media-row {
+		margin-top: 0.6rem;
+		display: flex;
+		gap: 0.6rem;
+		align-items: center;
+		justify-content: center;
+		margin-top: 0.5rem;
+		gap: 0.5rem;
+		margin-left: auto;
 	}
 </style> -->

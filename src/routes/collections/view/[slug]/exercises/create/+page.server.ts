@@ -5,7 +5,8 @@ import { Backend } from "$lib/server/backend-manager";
 const valueToString = (v: FormDataEntryValue) => String(v).trim();
 const hasLength = (s: string) => s.length > 0;
 const getAll = (formData: FormData, key: string) => formData.getAll(key).map(valueToString).filter(hasLength);
-const getStrField = <T extends string>(formData: FormData, key: string): T => String(formData.get(key) || "").trim() as T;
+const getStrField = <T extends string>(formData: FormData, key: string): T =>
+	String(formData.get(key) || "").trim() as T;
 
 function parseExerciseForm(
 	formData: FormData,
@@ -20,6 +21,8 @@ function parseExerciseForm(
 		exerciseType: getStrField<ExerciseType>(formData, "exercise-type"),
 		distractors: getAll(formData, "distractors"),
 		explanation: getStrField(formData, "explanation"),
+		// image: formData.get("image") as File | null,
+		// audio: formData.get("audio") as File | null,
 	};
 
 	const { additionalCorrectAnswers, exerciseType, question, correctAnswer, distractors, explanation } = values;
@@ -113,16 +116,15 @@ export const load: PageServerLoad = async ({ params, parent }) => {
 
 export const actions = {
 	create: async ({ request, fetch, params }) => {
-        
-        if (!params.slug) {
-            return fail(400, {
-                errorText: "Missing collection ID",
+		if (!params.slug) {
+			return fail(400, {
+				errorText: "Missing collection ID",
 				errors: {} as Record<string, string>,
 				values: undefined,
 			});
 		}
-        
-        const formData = await request.formData();
+
+		const formData = await request.formData();
 		const { dto: exerciseData, errors } = parseExerciseForm(formData, params.slug);
 
 		// Return validation errors
@@ -134,9 +136,11 @@ export const actions = {
 			});
 		}
 
+		const outbound = createOutboundFormData(formData, exerciseData);
+
 		try {
 			const backend = new Backend(fetch);
-			await backend.api.exercises.create(exerciseData);
+			await backend.api.exercises.create(outbound);
 			// console.log('Exercise created:', result);
 			throw redirect(303, `/collections/view/${params.slug}?exerciseCreated=1`);
 		} catch (error) {
@@ -150,3 +154,40 @@ export const actions = {
 		}
 	},
 } satisfies Actions;
+
+function createOutboundFormData(formData: FormData, exerciseData: CreateExerciseDTO) {
+	const outbound = new FormData();
+	outbound.append("type", exerciseData.type);
+	outbound.append("collectionId", exerciseData.collectionId);
+	outbound.append("question", exerciseData.question);
+	outbound.append("correctAnswer", exerciseData.correctAnswer);
+
+	if (exerciseData.additionalCorrectAnswers?.length) {
+		for (const extraAnswer of exerciseData.additionalCorrectAnswers) {
+			outbound.append("additionalCorrectAnswers", extraAnswer);
+		}
+	}
+
+	if (exerciseData.distractors?.length) {
+		for (const extraAnswer of exerciseData.distractors) {
+			outbound.append("distractors", extraAnswer);
+		}
+	}
+
+	if (exerciseData.explanation) {
+		outbound.append("explanation", exerciseData.explanation);
+	}
+
+	const rawImage = formData.get("image");
+	const rawAudio = formData.get("audio");
+
+	if (rawImage instanceof File) {
+		outbound.append("image", rawImage, rawImage.name);
+	}
+
+	if (rawAudio instanceof File) {
+		outbound.append("audio", rawAudio, rawAudio.name);
+	}
+
+	return outbound;
+}

@@ -1,13 +1,21 @@
 <script lang="ts">
+	import type { PageProps } from "./$types";
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
-	import Button from "$lib/components/Button.svelte";
-	import NotFound from "$lib/components/NotFound.svelte";
-
 	import Unauthorized from "$lib/components/Unauthorized.svelte";
-	import type { PageProps } from "./$types";
+	import NotFound from "$lib/components/NotFound.svelte";
+	import Button from "$lib/components/Button.svelte";
 
-	const props: PageProps = $props();
+	let props: PageProps = $props();
+
+	// // derived-like accessors (keeps original logic shape)
+	// let flags = $derived(props.data?.flags || {});
+	// let serverData = $derived(props.data?.serverData || {});
+	// let collection = $derived(serverData?.collection || null);
+	// let form = $derived(props.form || null);
+
+	// // helper to read submitted values if validation failed
+	// let formValues = $derived(form?.values || {});
 
 	let flags = $derived(props.data?.flags || {});
 	let serverData = $derived(props.data?.serverData || {});
@@ -22,50 +30,59 @@
 </script>
 
 {#if flags?.unauthorized}
-	<Unauthorized />
-{:else if !collection}
+	<Unauthorized message="You are not authorized to edit this collection." />
+{:else if collection === null}
 	<NotFound />
 {:else}
-	<h1>Edit collection</h1>
-
-	<form action="?/update" method="POST">
-		<div>
-			<label for="name">Name</label>
-			<input
-				type="text"
-				id="name"
-				name="name"
-				required
-				value={formValues?.name ?? collection?.name}
-			/>
-			<!-- {#if props.data.form?.fieldErrors?.name}
-				<p class="error">{props.data.form.fieldErrors.name}</p>
-			{/if} -->
+	<div class="container">
+		<div class="card-lg">
+			<h1>Edit Collection</h1>
+			<p class="muted" style="margin-top:.5rem">Update details for this collection.</p>
 		</div>
 
-		<div>
-			<label for="description">Description</label>
-			<textarea id="description" name="description" rows="4"
-				>{formValues?.description ?? collection?.description}</textarea
-			>
-		</div>
+		<form action="?/update" method="POST" class="card form-card" style="margin-top:1rem">
+			<div class="form-grid">
+				<div class="form-group">
+					<label for="name" class="label">Name</label>
+					<input
+						id="name"
+						name="name"
+						class="text-input"
+						placeholder="Collection name"
+						required
+						value={formValues?.name ?? collection?.name}
+					/>
 
-		{#if form?.message}
-			<p class="error">{form.message}</p>
-		{/if}
+					{#if (props.form as any)?.fieldErrors?.name}
+						<span class="field-error">{(props.form as any).fieldErrors.name}</span>
+					{/if}
+				</div>
 
-		{#if collection !== null}
-			<Button text="Cancel" onclick={() => backToView(collection.id)} />
-		{/if}
-		<Button text="Save" type="submit" />
-	</form>
+				<div class="form-group">
+					<label for="description" class="label">Description</label>
+					<textarea
+						id="description"
+						name="description"
+						class="text-area"
+						placeholder="Description (optional)"
+						rows="4"
+					>{formValues?.description ?? collection?.description}</textarea>
+
+					{#if (props.form as any)?.fieldErrors?.description}
+						<span class="field-error">{(props.form as any).fieldErrors.description}</span>
+					{/if}
+				</div>
+			</div>
+
+			{#if (props.form as any)?.message}
+				<div style="margin-top:.6rem"><span class="field-error">{(props.form as any).message}</span></div>
+			{/if}
+
+			<div class="actions-row actions-right" style="margin-top:1rem">
+				<Button text="Save" type="submit" />
+				<Button text="Cancel" type="button" variant="secondary" onclick={() => backToView(collection.id)} />
+			</div>
+		</form>
+	</div>
 {/if}
-
-<style>
-	.error {
-		color: #b00020;
-	}
-	form > div {
-		margin-bottom: 0.75rem;
-	}
-</style>
+ 
