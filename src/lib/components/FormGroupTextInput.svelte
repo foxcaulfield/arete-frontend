@@ -28,12 +28,14 @@
 </script>
 
 <div class={`form-group ${cssClass ?? ""}`}>
-	<label for={idName} class="label">{label}</label>
+	{#if label}
+		<label for={idName} class="label">{label}</label>
+	{/if}
 	<TextInput
 		id={idName}
 		name={idName}
-		bind:value={value}
-		bind:inputElement={inputElement}
+		bind:value
+		bind:inputElement
 		{placeholder}
 		{required}
 		minlength={minMax[0]}
@@ -46,3 +48,10 @@
 		<span id={`${idName}-error`} class="field-error">{errorText}</span>
 	{/if}
 </div>
+
+<style>
+	.form-group {
+		flex: 1;
+		width: 100%;
+	}
+</style>
