@@ -24,13 +24,16 @@
 		...rest
 	}: ButtonProps = $props();
 	const classes = ["button"];
-	
 </script>
 
 {#if withAction}
 	<form method="POST" {action} {onsubmit} class="inline-form" aria-hidden={false}>
-		<button bind:this={buttonElement} type={type ?? "submit"} class={`button ${variant} ${cls}`} {...rest}>{text}</button>
+		<button bind:this={buttonElement} type={type ?? "submit"} class={`button ${variant} ${cls}`} {...rest}
+			>{text}</button
+		>
 	</form>
 {:else}
-	<button bind:this={buttonElement} type={type ?? "button"} class={`button ${variant} ${cls}`} {...rest}>{text}</button>
+	<button bind:this={buttonElement} type={type ?? "button"} class={`button ${variant} ${cls}`} {...rest}
+		>{text}</button
+	>
 {/if}
