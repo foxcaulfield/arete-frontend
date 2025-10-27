@@ -466,29 +466,7 @@ nav a:hover {
 	}
 }
 
-.question-text {
-	font-size: 1.75rem;
-	font-weight: 600;
-	margin: 0.5rem 0 0.6rem;
-	color: var(--text);
 
-	.answer {
-		border-radius: var(--radius-sm);
-		padding: 0.1em 0.3em;
-		margin: 0 0.15em;
-	}
-
-	.answer-revealed {
-		@extend .answer;
-		color: var(--success);
-	}
-
-	.answer-hidden {
-		@extend .answer;
-		background-color: var(--accent);
-		color: var(--accent);
-	}
-}
 
 // .drill .form-card{max-width:760px}
 // .drill .question{font-size:1.75rem;font-weight:600;margin:0.5rem 0 .6rem;color:var(--text)}
