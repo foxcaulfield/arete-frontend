@@ -36,6 +36,17 @@
 	let lastResult = $state<DrillResult | null>(null);
 	let lastUserAnswer = $state("");
 
+	let isForceTextInput = $state(true);
+
+	function handleForceTextInput() {
+		isForceTextInput = !isForceTextInput;
+		if (isForceTextInput) {
+			tick().then(() => {
+				inputElement?.focus?.();
+			});
+		}
+	}
+
 	async function exitDrill() {
 		await goto(`/collections/view/${collectionId}`);
 	}
@@ -83,7 +94,7 @@
 	}
 
 	$effect(() => {
-		if (currentQuestion && !showResult && currentQuestion.type === "FILL_IN_THE_BLANK") {
+		if (currentQuestion && !showResult && (currentQuestion.type === "FILL_IN_THE_BLANK" || isForceTextInput)) {
 			// focus the input for fast typing
 			tick().then(() => inputElement?.focus?.());
 		}
@@ -120,7 +131,7 @@
 		{/if}
 
 		{#if currentQuestion}
-			<div>
+			<div class="question-container">
 				{#if currentQuestion.audioUrl}
 					<!-- keep audio element mounted even when we show result so we can autoplay on success -->
 					<audio
@@ -131,6 +142,30 @@
 					></audio>
 				{/if}
 
+				<!-- Buttons row at top right -->
+				<div class="button-controls">
+					<!-- refresh question button -->
+					<Button
+						bind:buttonElement={nextButtonEl}
+						withAction
+						action="?/getNextQuestion"
+						variant="secondary"
+						appearance="ghost"
+						size="sm"
+
+						text={`⟳`}
+					/>
+					<!-- force text input button -->
+					<Button
+						type="button"
+						variant="secondary"
+						appearance="ghost"
+						size="sm"
+						text="Force Text Input"
+						onclick={handleForceTextInput}
+					/>
+				</div>
+
 				<QuestionText questionText={currentQuestion.question} isAnswered={showResult} />
 
 				{#if currentQuestion.translation}
@@ -140,7 +175,7 @@
 				<!-- {#if !showResult} -->
 				<form action="?/handleSubmitAnswer" method="POST" use:enhance={handleFormEnhance}>
 					<input type="hidden" name="exerciseId" value={currentQuestion.id} />
-					{#if currentQuestion.type === "FILL_IN_THE_BLANK"}
+					{#if currentQuestion.type === "FILL_IN_THE_BLANK" || isForceTextInput}
 						<FillInExercise {showResult} bind:userAnswer bind:inputElement />
 					{:else if currentQuestion.type === "CHOICE_SINGLE"}
 						<ChoiceSingleExercise
@@ -157,8 +192,8 @@
 							bind:buttonElement={nextButtonEl}
 							withAction
 							action="?/getNextQuestion"
-							variant="primary"
-							appearance="ghost"
+							variant="secondary"
+							appearance="outline"
 							size="sm"
 							text="Next Question"
 						/>
@@ -217,7 +252,7 @@
 	}
 
 	.with-border {
-		/* border: var(--default-border); */
+		border: var(--default-border);
 	}
 
 	.failed {
@@ -234,6 +269,17 @@
 		max-width: 760px;
 	}
 
+	.question-container {
+		position: relative;
+	}
+
+	.button-controls {
+		display: flex;
+		gap: 0.5rem;
+		justify-content: flex-end;
+		margin-bottom: 1rem;
+	}
+
 	.media-row {
 		margin-top: 0.6rem;
 		display: flex;
@@ -244,4 +290,4 @@
 		gap: 0.5rem;
 		margin-left: auto;
 	}
-</style> 
+</style>
