@@ -172,6 +172,15 @@
 
 				<!-- Buttons row at top right -->
 				<div class="button-controls">
+					<Button
+						disabled={showResult}
+						type="button"
+						variant="secondary"
+						appearance="ghost"
+						size="sm"
+						text="Force Text Input"
+						onclick={handleForceTextInput}
+					/>
 					<form method="POST" action="?/getNextQuestion" use:enhance={handleGetNextQuestionEnhance}>
 						<Button
 							type="submit"
@@ -182,14 +191,6 @@
 							text={`⟳`}
 						/>
 					</form>
-					<Button
-						type="button"
-						variant="secondary"
-						appearance="ghost"
-						size="sm"
-						text="Force Text Input"
-						onclick={handleForceTextInput}
-					/>
 				</div>
 
 				<QuestionText questionText={currentQuestion.question} isAnswered={showResult} />
