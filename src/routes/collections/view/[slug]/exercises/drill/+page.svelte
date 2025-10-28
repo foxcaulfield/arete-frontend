@@ -1,6 +1,6 @@
 <script lang="ts">
 	//  import type { SubmitFunction } from '$app/forms';
-	import { tick } from "svelte";
+	import { tick, onMount } from "svelte";
 	import { enhance } from "$app/forms";
 	import { goto } from "$app/navigation";
 	import Button from "$lib/components/Button.svelte";
@@ -21,6 +21,8 @@
 	let currentQuestion = $derived(props.data.question);
 	let error = $derived(props.data?.flags?.errorText ?? null);
 
+	let forceTextStorageCookieKey = $derived(`drill.forceTextInput.${collectionId ?? "global"}`);
+
 	let userAnswer = $state("");
 
 	let showResult = $state(false);
@@ -36,10 +38,24 @@
 	let lastResult = $state<DrillResult | null>(null);
 	let lastUserAnswer = $state("");
 
-	let isForceTextInput = $state(true);
+	// Initialize from server-provided prop when available so initial renders
+	let isForceTextInput = $derived.by(() =>
+		typeof props.data?.forceTextInput === "boolean" ? props.data?.forceTextInput : true
+	);
 
 	function handleForceTextInput() {
 		isForceTextInput = !isForceTextInput;
+
+		// Set a cookie so the server can render the correct UI on
+		// subsequent navigations/partial updates. Keep it for 1 week.
+		try {
+			const key = forceTextStorageCookieKey;
+			const maxAge = 60 * 60 * 24 * 7; // 1 week
+			document.cookie = `${encodeURIComponent(key)}=${isForceTextInput ? "true" : "false"}; path=/; max-age=${maxAge}; SameSite=Lax`;
+		} catch (e) {
+			// ignore cookie set errors
+		}
+
 		if (isForceTextInput) {
 			tick().then(() => {
 				inputElement?.focus?.();
@@ -152,7 +168,6 @@
 						variant="secondary"
 						appearance="ghost"
 						size="sm"
-
 						text={`⟳`}
 					/>
 					<!-- force text input button -->
@@ -289,5 +304,9 @@
 		margin-top: 0.5rem;
 		gap: 0.5rem;
 		margin-left: auto;
+	}
+
+	.hidden {
+		display: none !important;
 	}
 </style>
