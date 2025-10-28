@@ -223,7 +223,7 @@
 		&.style-filled {
 			background: var(--bg-alt);
 			color: var(--text);
-			border: 2px solid var(--border-color);
+			// border: 2px solid var(--border-color);
 
 			&:hover:not(:disabled) {
 				background: var(--surface);
