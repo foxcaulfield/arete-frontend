@@ -10,8 +10,6 @@
 	const { distractors, showResult, lastResult, lastUserAnswer }: Props = $props();
 	let choiceButtons = $state<HTMLButtonElement[]>([]);
 
-	let isPressed = $state<boolean>(false);
-
 	const KEYBOARD_MAP: Record<string, number> = {
 		"4": 0,
 		"5": 1,
@@ -27,8 +25,7 @@
 		const buttonIndex = KEYBOARD_MAP[e.key.toLowerCase()];
 
 		if (buttonIndex !== undefined && choiceButtons[buttonIndex]) {
-			isPressed = true;
-			e.preventDefault();
+			// e.preventDefault();
 			choiceButtons[buttonIndex]?.click();
 		}
 	}
@@ -40,7 +37,7 @@
 	{#each distractors as distractor, index (index)}
 		<Button
 			bind:buttonElement={choiceButtons[index]}
-			disabled={showResult || isPressed}
+			disabled={showResult}
 			type="submit"
 			variant={showResult
 				? lastResult?.isCorrect

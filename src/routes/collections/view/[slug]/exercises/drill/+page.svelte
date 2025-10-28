@@ -1,8 +1,8 @@
 <script lang="ts">
 	//  import type { SubmitFunction } from '$app/forms';
 	import { tick, onMount } from "svelte";
-	import { enhance } from "$app/forms";
-	import { goto } from "$app/navigation";
+	import { applyAction, enhance } from "$app/forms";
+	import { goto, invalidateAll } from "$app/navigation";
 	import Button from "$lib/components/Button.svelte";
 	import type { SubmitFunction } from "@sveltejs/kit";
 	import type { PageProps } from "./$types";
@@ -43,7 +43,7 @@
 		typeof props.data?.forceTextInput === "boolean" ? props.data?.forceTextInput : true
 	);
 
-	function handleForceTextInput() {
+	async function handleForceTextInput() {
 		isForceTextInput = !isForceTextInput;
 
 		// Set a cookie so the server can render the correct UI on
@@ -57,9 +57,8 @@
 		}
 
 		if (isForceTextInput) {
-			tick().then(() => {
-				inputElement?.focus?.();
-			});
+			await tick();
+			inputElement?.focus?.();
 		}
 	}
 
@@ -77,11 +76,18 @@
 				// stats.total++;
 				// if (result.data.isCorrect) stats.correct++;
 				showResult = true;
+				if (lastResult?.isCorrect && currentQuestion?.audioUrl) {
+					await audioElement?.play?.().catch(() => {});
+				}
 				// Focus the Next Question button after showing result
 				// setTimeout(() => nextButtonRef?.focus(), 0);
 			} else if (result.type === "failure") {
 				error = String(result.data?.message) || "Error submitting answer";
 			}
+
+			await tick();
+			nextButtonEl?.focus();
+			// setTimeout(() => nextButtonEl?.focus(), 0);
 		};
 	};
 
@@ -108,21 +114,27 @@
 			await audioElement.play().catch(() => {});
 		}
 	}
+	const handleGetNextQuestionEnhance: SubmitFunction = () => {
+		console.log("Refreshing question");
+		showExplanation = false;
+		showImage = false;
 
-	$effect(() => {
-		if (currentQuestion && !showResult && (currentQuestion.type === "FILL_IN_THE_BLANK" || isForceTextInput)) {
-			// focus the input for fast typing
-			tick().then(() => inputElement?.focus?.());
-		}
-	});
-
-	$effect(() => {
-		if (showResult) {
-			tick().then(() => nextButtonEl?.focus?.());
-			// autoplay audio on correct result when possible
-			if (lastResult?.isCorrect && currentQuestion?.audioUrl) {
-				audioElement?.play?.().catch(() => {});
+		return async ({ update }) => {
+			await invalidateAll();
+			showResult = false;
+			userAnswer = "";
+			// await update();
+			if (currentQuestion && (currentQuestion.type === "FILL_IN_THE_BLANK" || isForceTextInput)) {
+				await tick();
+				inputElement?.focus?.({ preventScroll: true });
 			}
+		};
+	};
+
+	onMount(() => {
+		// Focus the input element on mount if applicable
+		if (currentQuestion && (currentQuestion.type === "FILL_IN_THE_BLANK" || isForceTextInput)) {
+			inputElement?.focus?.({ preventScroll: true });
 		}
 	});
 </script>
@@ -160,17 +172,16 @@
 
 				<!-- Buttons row at top right -->
 				<div class="button-controls">
-					<!-- refresh question button -->
-					<Button
-						bind:buttonElement={nextButtonEl}
-						withAction
-						action="?/getNextQuestion"
-						variant="secondary"
-						appearance="ghost"
-						size="sm"
-						text={`⟳`}
-					/>
-					<!-- force text input button -->
+					<form method="POST" action="?/getNextQuestion" use:enhance={handleGetNextQuestionEnhance}>
+						<Button
+							type="submit"
+							bind:buttonElement={nextButtonEl}
+							variant="secondary"
+							appearance="ghost"
+							size="sm"
+							text={`⟳`}
+						/>
+					</form>
 					<Button
 						type="button"
 						variant="secondary"
@@ -203,15 +214,16 @@
 				</form>
 				<div class="media-row">
 					{#if showResult}
-						<Button
-							bind:buttonElement={nextButtonEl}
-							withAction
-							action="?/getNextQuestion"
-							variant="secondary"
-							appearance="outline"
-							size="sm"
-							text="Next Question"
-						/>
+						<form method="POST" action="?/getNextQuestion" use:enhance={handleGetNextQuestionEnhance}>
+							<Button
+								type="submit"
+								bind:buttonElement={nextButtonEl}
+								variant="secondary"
+								appearance="outline"
+								size="sm"
+								text="Next Question"
+							/>
+						</form>
 					{/if}
 					{#if currentQuestion.imageUrl}
 						<Button
