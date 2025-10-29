@@ -13,53 +13,88 @@ declare global {
 		};
 	}
 
-	interface CreateCollectionDTO {
-		name: string;
-		description?: string;
-	}
+	/* Collection Interfaces */
+	namespace Collection {
+		interface CreateDto {
+			name: string;
+			description?: string;
+		}
 
-	interface UpdateCollectionDTO {
-		name?: string;
-		description?: string;
-	}
-
-	interface ResponseCollectionDTO {
-		id: string;
-		name: string;
-		description: string;
-		user: {
-			id: string;
+		interface UpdateDto {
 			name?: string;
-		};
-		createdAt: Date;
-		updatedAt: Date;
+			description?: string;
+		}
+
+		interface ResponseDto {
+			id: string;
+			name: string;
+			description: string;
+			user: {
+				id: string;
+				name?: string;
+			};
+			createdAt: Date;
+			updatedAt: Date;
+		}
 	}
 
-	interface User {
-		id: string;
-		email: string | null;
-		name: string | null;
+	/* Exercise Interfaces */
+	namespace Exercise {
+		type ExerciseType = "FILL_IN_THE_BLANK" | "CHOICE_SINGLE";
+
+		interface ResponseDto {
+			id: string;
+			question: string;
+			explanation: string | null;
+			collectionId: string;
+			createdAt: Date;
+			updatedAt: Date;
+			audioUrl: string | null;
+			imageUrl: string | null;
+		}
+
+		interface CreateDto {
+			collectionId: string;
+			type: ExerciseType;
+			question: string;
+			correctAnswer: string;
+			additionalCorrectAnswers?: string[];
+			distractors?: string[];
+			explanation?: string;
+		}
+
+		type UpdateDto = Partial<CreateDto>;
 	}
 
-	interface ResponseExerciseDTO {
-		id: string;
-		question: string;
-		explanation: string | null;
-		collectionId: string;
-		createdAt: Date;
-		updatedAt: Date;
+	/* Quiz Interfaces */
+	namespace Quiz {
+		interface QuestionDto {
+			id: string;
+			question: string;
+			audioUrl?: string | null;
+			imageUrl?: string | null;
+			type: ExerciseType;
+			translation?: string | null;
+			explanation?: string | null;
+			distractors?: string[] | null;
+			// placeholderSequence: string;
+			// tags?: string[];
+		}
+
+		interface UserAnswerFeedbackDto {
+			isCorrect: boolean;
+			correctAnswer: string;
+			explanation?: string;
+			nextExerciseId?: string;
+		}
+
+		interface UserAnswerDto {
+			exerciseId: string;
+			userAnswer: string;
+		}
 	}
 
-	interface CreateExerciseDTO {
-		collectionId: string;
-		type: ExerciseType;
-		question: string;
-		correctAnswer: string;
-		additionalCorrectAnswers?: string[];
-		distractors?: string[];
-		explanation?: string;
-	}
-
+	/* Custom API Error Interface */
 	interface CustomApiErrorInterface {
 		requestStatusCode: number;
 		errorText: string;
@@ -73,32 +108,11 @@ declare global {
 		errorText?: string;
 	}
 
-	type ExerciseType = "FILL_IN_THE_BLANK" | "CHOICE_SINGLE";
-
-	interface QuizQuestionDto {
-		/* QuizQuestionDto */
+	/* *** User Interface *** */
+	interface User {
 		id: string;
-		question: string;
-		audioUrl?: string | null;
-		imageUrl?: string | null;
-		type: ExerciseType;
-		translation?: string | null;
-		explanation?: string | null;
-		distractors?: string[] | null;
-		// placeholderSequence: string;
-		// tags?: string[];
-	}
-
-	interface UserAnswerFeedbackDto {
-		isCorrect: boolean;
-		correctAnswer: string;
-		explanation?: string;
-		nextExerciseId?: string;
-	}
-
-	interface UserAnswerDto {
-		exerciseId: string;
-		userAnswer: string;
+		email: string | null;
+		name: string | null;
 	}
 
 	namespace App {
