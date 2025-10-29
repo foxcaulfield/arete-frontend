@@ -1,19 +1,19 @@
 <script lang="ts">
 	//  import type { SubmitFunction } from '$app/forms';
-	import { tick, onMount } from "svelte";
-	import { applyAction, enhance } from "$app/forms";
+	import { enhance } from "$app/forms";
 	import { goto, invalidateAll } from "$app/navigation";
 	import Button from "$lib/components/Button.svelte";
-	import type { SubmitFunction } from "@sveltejs/kit";
-	import type { PageProps } from "./$types";
 	import QuestionText from "$lib/components/drill/QuestionText.svelte";
+	import type { SubmitFunction } from "@sveltejs/kit";
+	import { onMount, tick } from "svelte";
+	import type { PageProps } from "./$types";
 	// import FormGroupTextInput from "$lib/components/FormGroupTextInput.svelte";
-	import TranslationText from "$lib/components/drill/TranslationText.svelte";
-	import ExplanationText from "$lib/components/drill/ExplanationText.svelte";
+	import ChoiceSingleExercise from "$lib/components/drill/ChoiceSingleExercise.svelte";
 	import ExerciseImage from "$lib/components/drill/ExerciseImage.svelte";
 	import ExerciseTypeBadge from "$lib/components/drill/ExerciseTypeBadge.svelte";
+	import ExplanationText from "$lib/components/drill/ExplanationText.svelte";
 	import FillInExercise from "$lib/components/drill/FillInExercise.svelte";
-	import ChoiceSingleExercise from "$lib/components/drill/ChoiceSingleExercise.svelte";
+	import TranslationText from "$lib/components/drill/TranslationText.svelte";
 
 	const props: PageProps = $props();
 
@@ -31,11 +31,11 @@
 
 	let inputElement = $state<HTMLInputElement | undefined>(undefined);
 	let imageElement = $state<HTMLImageElement | undefined>(undefined);
-	let audioElement = $state<HTMLAudioElement | null>(null);
-	let nextButtonEl = $state<HTMLButtonElement | undefined>(undefined);
-	let explanationEl = $state<HTMLElement | undefined>(undefined);
+	let audioElement = $state<HTMLAudioElement | undefined>(undefined);
+	let nextButtonElement = $state<HTMLButtonElement | undefined>(undefined);
+	let explanationElement = $state<HTMLElement | undefined>(undefined);
 
-	let lastResult = $state<DrillResult | null>(null);
+	let lastResult = $state<Quiz.UserAnswerFeedbackDto | null>(null);
 	let lastUserAnswer = $state("");
 
 	// Initialize from server-provided prop when available so initial renders
@@ -71,22 +71,19 @@
 		return async ({ result, formData }) => {
 			// isSubmitting = false;
 			if (result.type === "success" && result.data) {
-				lastResult = result.data as unknown as DrillResult;
+				lastResult = result.data as unknown as Quiz.UserAnswerFeedbackDto;
 				lastUserAnswer = formData.get("userAnswer")?.toString() || "";
-				// stats.total++;
-				// if (result.data.isCorrect) stats.correct++;
 				showResult = true;
+
 				if (lastResult?.isCorrect && currentQuestion?.audioUrl) {
 					await audioElement?.play?.().catch(() => {});
 				}
-				// Focus the Next Question button after showing result
-				// setTimeout(() => nextButtonRef?.focus(), 0);
 			} else if (result.type === "failure") {
 				error = String(result.data?.message) || "Error submitting answer";
 			}
 
 			await tick();
-			nextButtonEl?.focus();
+			nextButtonElement?.focus();
 			// setTimeout(() => nextButtonEl?.focus(), 0);
 		};
 	};
@@ -105,7 +102,7 @@
 		showExplanation = !showExplanation;
 		if (showExplanation) {
 			await tick();
-			explanationEl?.scrollIntoView(scrollOptions);
+			explanationElement?.scrollIntoView(scrollOptions);
 		}
 	}
 
@@ -184,7 +181,7 @@
 					<form method="POST" action="?/getNextQuestion" use:enhance={handleGetNextQuestionEnhance}>
 						<Button
 							type="submit"
-							bind:buttonElement={nextButtonEl}
+							bind:buttonElement={nextButtonElement}
 							variant="secondary"
 							appearance="ghost"
 							size="sm"
@@ -218,7 +215,7 @@
 						<form method="POST" action="?/getNextQuestion" use:enhance={handleGetNextQuestionEnhance}>
 							<Button
 								type="submit"
-								bind:buttonElement={nextButtonEl}
+								bind:buttonElement={nextButtonElement}
 								variant="secondary"
 								appearance="outline"
 								size="sm"
@@ -261,7 +258,7 @@
 					<ExerciseImage bind:imageElement imageUrl={currentQuestion.imageUrl} />
 				{/if}
 				{#if showExplanation && currentQuestion.explanation}
-					<ExplanationText bind:explanationEl text={currentQuestion.explanation} />
+					<ExplanationText bind:explanationEl={explanationElement} text={currentQuestion.explanation} />
 				{/if}
 			</div>
 		{:else}
