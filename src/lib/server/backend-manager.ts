@@ -97,23 +97,23 @@ export class Backend {
 			},
 		},
 		collections: {
-			list: async (page: number = 1, limit: number = 10): Promise<PaginatedResponse<ResponseCollectionDTO>> => {
+			list: async (page: number = 1, limit: number = 10): Promise<PaginatedResponse<Collection.ResponseDto>> => {
 				const response = await this.request("GET", `/collections/list?page=${page}&limit=${limit}`);
 				return response.json();
 			},
-			all: async (page: number = 1, limit: number = 10): Promise<PaginatedResponse<ResponseCollectionDTO>> => {
+			all: async (page: number = 1, limit: number = 10): Promise<PaginatedResponse<Collection.ResponseDto>> => {
 				const response = await this.request("GET", `/collections/all?page=${page}&limit=${limit}`);
 				return response.json();
 			},
-			create: async (name: string, description?: string): Promise<ResponseCollectionDTO> => {
+			create: async (name: string, description?: string): Promise<Collection.ResponseDto> => {
 				const response = await this.request("POST", "/collections/create", { name, description });
 				return response.json();
 			},
-			getById: async (id: string): Promise<ResponseCollectionDTO> => {
+			getById: async (id: string): Promise<Collection.ResponseDto> => {
 				const response = await this.request("GET", `/collections/get_by_id/${id}`);
 				return response.json();
 			},
-			update: async (id: string, data: UpdateCollectionDTO): Promise<ResponseCollectionDTO> => {
+			update: async (id: string, data: Collection.UpdateDto): Promise<Collection.ResponseDto> => {
 				const response = await this.request("PATCH", `/collections/update/${id}`, data);
 				return response.json();
 			},
@@ -123,11 +123,16 @@ export class Backend {
 			},
 		},
 		exercises: {
-			create: async (payload: CreateExerciseDTO | FormData): Promise<ResponseExerciseDTO> => {
+			getById: async (id: string): Promise<Exercise.ResponseDto> => {
+				const response = await this.request("GET", `/exercises/get_by_id/${id}`);
+				return response.json();
+			},
+
+			create: async (payload: Exercise.CreateDto | FormData): Promise<Exercise.ResponseDto> => {
 				const response = await this.request("POST", `/exercises/create`, payload);
 				return response.json();
 			},
-			getDrillQuestion: async (collectionId: string): Promise<CurrentQuestion> => {
+			getDrillQuestion: async (collectionId: string): Promise<Quiz.QuestionDto> => {
 				const response = await this.request("GET", `/exercises/drill/${collectionId}`);
 				return response.json();
 			},
@@ -135,14 +140,14 @@ export class Backend {
 				collectionId: string,
 				exerciseId: string,
 				userAnswer: string
-			): Promise<DrillResult> => {
+			): Promise<Quiz.UserAnswerFeedbackDto> => {
 				const response = await this.request("POST", `/exercises/drill/${collectionId}/submit`, {
 					exerciseId,
 					userAnswer,
 				});
 				return response.json();
 			},
-			getListByCollectionId: async (collectionId: string): Promise<PaginatedResponse<ResponseExerciseDTO>> => {
+			getListByCollectionId: async (collectionId: string): Promise<PaginatedResponse<Exercise.ResponseDto>> => {
 				const response = await this.request("GET", `/exercises/by_collection/${collectionId}`);
 				return response.json();
 			},
