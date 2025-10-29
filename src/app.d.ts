@@ -75,8 +75,8 @@ declare global {
 
 	type ExerciseType = "FILL_IN_THE_BLANK" | "CHOICE_SINGLE";
 
-	interface CurrentQuestion {
-		/* ResponseDrillQuestionDto */
+	interface QuizQuestionDto {
+		/* QuizQuestionDto */
 		id: string;
 		question: string;
 		audioUrl?: string | null;
@@ -89,14 +89,14 @@ declare global {
 		// tags?: string[];
 	}
 
-	interface DrillResult {
+	interface UserAnswerFeedbackDto {
 		isCorrect: boolean;
 		correctAnswer: string;
 		explanation?: string;
 		nextExerciseId?: string;
 	}
 
-	interface UserAnswerSubmission {
+	interface UserAnswerDto {
 		exerciseId: string;
 		userAnswer: string;
 	}
