@@ -4,7 +4,7 @@
 	interface Props {
 		distractors: string[];
 		showResult: boolean;
-		lastResult: DrillResult | null;
+		lastResult: UserAnswerFeedbackDto | null;
 		lastUserAnswer: string;
 	}
 	const { distractors, showResult, lastResult, lastUserAnswer }: Props = $props();
