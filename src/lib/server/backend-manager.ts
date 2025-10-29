@@ -1,30 +1,8 @@
 // Get backend URL from runtime environment - NOT from import.meta.env (build-time only)
-// Use process.env which reads from container environment variables at runtime
 // Note: BACKEND_BASE_URL is validated in hooks.server.ts at app startup
 import { fail } from "@sveltejs/kit";
 import { env } from "$env/dynamic/private";
-
-class Response500 extends Response {
-	constructor(message: string) {
-		super(JSON.stringify({ error: message }), {
-			status: 500,
-			headers: { "Content-Type": "application/json" },
-		});
-	}
-}
-
-export class CustomApiError extends Error implements CustomApiErrorInterface {
-	constructor(
-		public requestStatusCode: number,
-		public errorText: string
-		// public messages?: string[]
-	) {
-		super(errorText || `Request failed with status ${requestStatusCode}`);
-	}
-}
-
-const isStr = (val: unknown): val is string => typeof val === "string";
-const convertToString = (val: unknown): string => (isStr(val) ? val : JSON.stringify(val));
+import { ApiError, ValidationError } from "./errors";
 
 export class Backend {
 	public static readonly backendBaseUrl = env.BACKEND_BASE_URL;
@@ -36,7 +14,6 @@ export class Backend {
 
 	public constructor(fetch: typeof globalThis.fetch) {
 		this.fetch = fetch;
-		// this.baseUrl = baseUrl;
 	}
 
 	private async request(
@@ -46,7 +23,7 @@ export class Backend {
 	): Promise<Response> {
 		const BACKEND_URL = Backend.backendBaseUrl;
 		if (!BACKEND_URL) {
-			return new Response500("BACKEND_URL is not configured");
+			return new Response("Backend URL is not configured", { status: 500 });
 		}
 
 		const safeBaseUrl = Backend.backendBaseUrl.replace(/\/$/, "");
@@ -63,17 +40,42 @@ export class Backend {
 			credentials: "include",
 			headers,
 			body: isFormData ? body : body ? JSON.stringify(body) : undefined,
-			// headers: this.headers,
-			// body: body ? JSON.stringify(body) : undefined,
 		});
 
 		if (!res.ok) {
-			const { requestStatusCode: status, errorText } = await this.extractBackendErrorData(res);
-
-			throw new CustomApiError(status, errorText);
+			await this.handleErrorResponse(res);
 		}
 
 		return res;
+	}
+
+	private async handleErrorResponse(res: Response): Promise<never> {
+		let errorData: {
+			statusCode?: number;
+			error?: string;
+			message?: string;
+			fields?: Record<string, string[]>;
+		};
+
+		try {
+			errorData = await res.json();
+		} catch {
+			// If response is not JSON, throw generic error
+			throw new ApiError(res.status, res.statusText, `Request failed with status ${res.status}`);
+		}
+
+		// Handle validation errors (400 with fields)
+		if (res.status === 400 && errorData.fields) {
+			throw new ValidationError(errorData.fields, errorData.message);
+		}
+
+		// Handle other API errors
+		throw new ApiError(
+			errorData.statusCode || res.status,
+			errorData.error || res.statusText,
+			errorData.message || `Request failed with status ${res.status}`,
+			errorData.fields
+		);
 	}
 
 	public api = {
@@ -160,51 +162,11 @@ export class Backend {
 		},
 	};
 
-	private async extractBackendErrorData(res: Response): Promise<CustomApiErrorInterface> {
-		let rawText: string = "";
-		let parsed: Record<string, unknown> = {};
-
-		try {
-			// Try to parse JSON, otherwise get text, otherwise ignore
-			const contentType = res.headers.get("Content-Type") ?? "";
-			if (contentType.includes("application/json")) {
-				parsed = await res.json();
-			} else {
-				rawText = await res.text();
-			}
-
-			const msgField: unknown = parsed?.message;
-			const errField: unknown = parsed?.error;
-
-			// Try to surface a human-friendly message (NestJS often returns { message: string | string[] })
-			const messages = Array.isArray(msgField)
-				? msgField
-				: [
-						(isStr(msgField) ? msgField : isStr(errField) ? errField : rawText) ||
-							`Request failed with status ${res.status}`,
-					];
-
-			return {
-				requestStatusCode: res.status,
-				errorText:
-					parsed || messages
-						? `${parsed ? JSON.stringify(parsed) : rawText}: ${messages.map(convertToString).join("; ")}`
-						: `Request failed with status ${res.status}`,
-			};
-		} catch (e: unknown | Error) {
-			// Ignore parsing errors, return generic message
-			return {
-				requestStatusCode: res.status,
-				errorText: res.text ? await res.text() : `Request failed with status ${res.status + JSON.stringify(e)}`,
-			};
-		}
-	}
-
 	public static extractApiErrorFlags(e: unknown): AccessFlags {
-		if (e instanceof CustomApiError) {
-			if (e.requestStatusCode === 401) return { unauthorized: true, errorText: e.message } as const;
-			if (e.requestStatusCode === 403) return { forbidden: true, errorText: e.message } as const;
-			if (e.requestStatusCode === 404) return { notFound: true, errorText: e.message } as const;
+		if (e instanceof ApiError) {
+			if (e.statusCode === 401) return { unauthorized: true, errorText: e.message } as const;
+			if (e.statusCode === 403) return { forbidden: true, errorText: e.message } as const;
+			if (e.statusCode === 404) return { notFound: true, errorText: e.message } as const;
 		}
 		throw e; // unexpected -> bubble to +error.svelte
 	}
@@ -212,19 +174,19 @@ export class Backend {
 		e: unknown,
 		opts?: { redirectToOn401?: string; values?: TVals }
 	) {
-		if (e instanceof CustomApiError) {
-			if (e.requestStatusCode === 401 && opts?.redirectToOn401) {
+		if (e instanceof ApiError) {
+			if (e.statusCode === 401 && opts?.redirectToOn401) {
 				// throw redirect(303, opts.redirectToOn401);
 				return fail(401, { message: "You need to be logged in to perform this action.", values: opts?.values });
 			}
-			if (e.requestStatusCode === 403) {
+			if (e.statusCode === 403) {
 				return fail(403, {
 					message: "You don't have permission to perform this action.",
 					values: opts?.values,
 				});
 			}
 			// preserve user's input on any error
-			return fail(e.requestStatusCode, { message: e.errorText || "Request failed", values: opts?.values });
+			return fail(e.statusCode, { message: e.error || "Request failed", values: opts?.values });
 		}
 		throw e;
 	}
