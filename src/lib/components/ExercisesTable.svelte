@@ -1,15 +1,21 @@
 <script lang="ts">
-	const props: { exercises: ResponseExerciseDTO[] } = $props();
+	import { goto } from "$app/navigation";
+	import Button from "./Button.svelte";
+
+	const props: { exercises: Exercise.ResponseDto[] } = $props();
 </script>
 
 <div class="table-container">
 	<table>
 	<thead>
 		<tr>
-			<th>id</th>
+			<th></th>
+			<!-- <th>id</th> -->
 			<th>question</th>
-			<th>collectionId</th>
-			<th>explanation</th>
+			<th>type</th>
+			<th>answer</th>
+			<!-- <th>collectionId</th> -->
+			<!-- <th>explanation</th> -->
 			<th>createdAt</th>
 			<th>updatedAt</th>
 		</tr>
@@ -17,12 +23,16 @@
 	<tbody>
 				{#each props.exercises as exercise (exercise.id)}
 					<tr>
-						<td>{exercise.id}</td>
+						<!-- update button -->
+						<td><Button text="Edit" size="sm" onclick={() => goto(`/collections/view/${exercise.collectionId}/exercises/edit/${exercise.id}`)}/></td>
+						<!-- <td>{exercise.id}</td> -->
 						<td>{exercise.question}</td>
-						<td>{exercise.collectionId}</td>
-						<td>{exercise.explanation}</td>
-						<td>{exercise.createdAt}</td>
-						<td>{exercise.updatedAt}</td>
+						<td>{exercise.type}</td>
+						<td>{exercise.correctAnswer}</td>
+						<!-- <td>{exercise.collectionId}</td> -->
+						<!-- <td>{exercise.explanation}</td> -->
+						<td>{exercise.createdAt} ago</td>
+						<td>{exercise.updatedAt} ago</td>
 					</tr>
 				{/each}
 	</tbody>

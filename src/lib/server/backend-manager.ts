@@ -134,6 +134,13 @@ export class Backend {
 				const response = await this.request("POST", `/exercises/create`, payload);
 				return response.json();
 			},
+			update: async (id: string, payload: Exercise.UpdateDto | FormData): Promise<Exercise.ResponseDto> => {
+				const response = await this.request("PATCH", `/exercises/update/${id}`, payload);
+				return response.json();
+			},
+			// delete exercise
+			// delete:() => {},
+
 			getDrillQuestion: async (collectionId: string): Promise<Quiz.QuestionDto> => {
 				const response = await this.request("GET", `/exercises/drill/${collectionId}`);
 				return response.json();

@@ -178,6 +178,16 @@
 						text="Force Text Input"
 						onclick={handleForceTextInput}
 					/>
+					<Button
+						type="button"
+						variant="secondary"
+						appearance="ghost"
+						size="sm"
+						text="✎"
+						onclick={() => goto(`/collections/view/${collectionId}/exercises/edit/${currentQuestion.id}`)}
+					>
+						<!-- text="✏️ Edit" -->
+					</Button>
 					<form method="POST" action="?/getNextQuestion" use:enhance={handleGetNextQuestionEnhance}>
 						<Button
 							type="submit"
