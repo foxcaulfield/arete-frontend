@@ -45,12 +45,18 @@ declare global {
 		interface ResponseDto {
 			id: string;
 			question: string;
-			explanation: string | null;
-			collectionId: string;
-			createdAt: Date;
-			updatedAt: Date;
 			audioUrl: string | null;
 			imageUrl: string | null;
+			type: ExerciseType;
+			translation: string | null;
+			explanation: string | null;
+			distractors: string[] | null;
+			collectionId: string;
+			createdAt: string;
+			updatedAt: string;
+			isActive: boolean;
+			additionalCorrectAnswers: string[] | null;
+			correctAnswer: string | null;
 		}
 
 		interface CreateDto {
