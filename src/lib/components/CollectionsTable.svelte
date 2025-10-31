@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
-	let props: { collections: ResponseCollectionDTO[] } = $props();
+	let props: { collections: Collection.ResponseDto[] } = $props();
 
 	function open(id: string) {
 		const query = page.url.search;
