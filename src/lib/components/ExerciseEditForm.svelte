@@ -4,7 +4,6 @@
 	import TextInput from "$lib/components/TextInput.svelte";
 	import type { Snippet } from "svelte";
 
-	
 	interface Props {
 		mode: "create" | "edit";
 		exercise?: Exercise.ResponseDto | null;
@@ -14,7 +13,7 @@
 		formAction: string;
 		headerSnippet?: Snippet;
 	}
-	
+
 	const modeToTitleMap: Record<Props["mode"], { title: string; submitButton: string }> = {
 		create: {
 			title: "Create New Exercise",
@@ -35,6 +34,17 @@
 		formAction,
 		headerSnippet,
 	}: Props = $props();
+
+	// let selectedImageFile = $state<File | null>(null);
+	// let selectedAudioFile = $state<File | null>(null);
+
+	// function handleImageSelect(file: File | null) {
+	// 	selectedImageFile = file;
+	// }
+
+	// function handleAudioSelect(file: File | null) {
+	// 	selectedAudioFile = file;
+	// }
 
 	// State for dynamic fields
 	let additionalCorrectAnswers = $state<Array<{ id: number; value: string }>>([]);
@@ -235,10 +245,11 @@
 				</div>
 
 				<!-- Media Files -->
+				<!-- NEW CODE - ADD THIS -->
 				<div class="form-group">
 					<label class="label">Media Files</label>
 					<p class="muted" style="font-size:0.875rem;margin-bottom:0.5rem">
-						Optional image or audio to accompany question
+						Add images or audio to help with the question
 					</p>
 
 					<div style="display:flex;flex-direction:column;gap:0.75rem">
@@ -276,12 +287,12 @@
 					</div>
 				</div>
 			</div>
-		</div>
 
-		<!-- Form Actions -->
-		<div class="form-actions">
-			<Button text={formText.submitButton} type="submit" />
-			<Button text="Cancel" type="button" variant="secondary" onclick={onCancel} />
+			<!-- Form Actions -->
+			<div class="form-actions">
+				<Button text={formText.submitButton} type="submit" />
+				<Button text="Cancel" type="button" variant="secondary" onclick={onCancel} />
+			</div>
 		</div>
 	</form>
 </div>
@@ -308,5 +319,12 @@
 		.two-columns {
 			grid-template-columns: 1fr;
 		}
+	}
+
+	.media-section {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+		margin-top: 0.5rem;
 	}
 </style>
