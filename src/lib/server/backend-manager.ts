@@ -130,16 +130,20 @@ export class Backend {
 				return response.json();
 			},
 
-			create: async (payload: Exercise.CreateDto | FormData): Promise<Exercise.ResponseDto> => {
+			create: async (payload: FormData): Promise<Exercise.ResponseDto> => {
 				const response = await this.request("POST", `/exercises/create`, payload);
 				return response.json();
 			},
-			update: async (id: string, payload: Exercise.UpdateDto | FormData): Promise<Exercise.ResponseDto> => {
+
+			update: async (id: string, payload: FormData): Promise<Exercise.ResponseDto> => {
 				const response = await this.request("PATCH", `/exercises/update/${id}`, payload);
 				return response.json();
 			},
-			// delete exercise
-			// delete:() => {},
+
+			delete: async (id: string): Promise<Exercise.ResponseDto> => {
+				const response = await this.request("DELETE", `/exercises/${id}`);
+				return response.json();
+			},
 
 			getDrillQuestion: async (collectionId: string): Promise<Quiz.QuestionDto> => {
 				const response = await this.request("GET", `/exercises/drill/${collectionId}`);
@@ -156,10 +160,21 @@ export class Backend {
 				});
 				return response.json();
 			},
-			getListByCollectionId: async (collectionId: string): Promise<PaginatedResponse<Exercise.ResponseDto>> => {
-				const response = await this.request("GET", `/exercises/by_collection/${collectionId}`);
+			getListByCollectionId: async (
+				collectionId: string,
+				page: number = 1,
+				limit: number = 20
+			): Promise<PaginatedResponse<Exercise.ResponseDto>> => {
+				const response = await this.request(
+					"GET",
+					`/exercises/by_collection/${collectionId}?page=${page}&limit=${limit}`
+				);
 				return response.json();
 			},
+			// getListByCollectionId: async (collectionId: string): Promise<PaginatedResponse<Exercise.ResponseDto>> => {
+			// 	const response = await this.request("GET", `/exercises/by_collection/${collectionId}`);
+			// 	return response.json();
+			// },
 			getFile: async (fileType: string, filename: string): Promise<Response> => {
 				const safeType = encodeURIComponent(fileType);
 				const safeName = encodeURIComponent(filename);
