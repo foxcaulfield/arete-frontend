@@ -12,16 +12,44 @@
 	import type { PageProps } from "./$types";
 	import ExercisesTable from "$lib/components/ExercisesTable.svelte";
 	import Button from "$lib/components/Button.svelte";
+	import Pagination from "$lib/components/Pagination.svelte";
 
 	let props: PageProps = $props();
 
 	let serverData = $derived(props.data?.serverData || {});
 	let paginatedExercises = $derived(serverData.paginatedExercises);
+	let pagination = $derived(paginatedExercises?.pagination);
+
 	let currentCollection = $derived(serverData.collection);
 	let flags = $derived(props.data?.flags || {});
 	let userName = $derived(currentCollection?.user?.name || "Unnamed User");
 	let userId = $derived(currentCollection?.user?.id || "Unknown ID");
 	let hasExercises = $derived(Boolean(paginatedExercises && paginatedExercises?.data?.length > 0));
+
+	let hasNextPage = $derived(Boolean(pagination?.hasNextPage));
+	let hasPreviousPage = $derived(Boolean(pagination?.hasPreviousPage));
+
+	let totalPages = $derived(pagination?.totalPages ?? 0);
+	let totalItems = $derived(pagination?.totalItems ?? 0);
+
+	const searchParams = $derived(page.url.searchParams);
+	let currentPage = $derived(parseInt(searchParams.get("page") ?? pagination?.page?.toString() ?? "1", 10));
+	let limit = $derived(searchParams.get("limit") ?? pagination?.limit?.toString() ?? "5");
+
+	async function goToPage(newPage: number) {
+		const params = new URLSearchParams(page.url.search);
+		params.set("page", Math.max(1, newPage).toString());
+		await goto(`?${params.toString()}`, { keepFocus: true, noScroll: true });
+		// No invalidateAll needed; navigation re-runs [+page.server.ts]
+	}
+
+	async function goToNextPage() {
+		await goToPage(currentPage + 1);
+	}
+
+	async function goToPreviousPage() {
+		await goToPage(currentPage - 1);
+	}
 
 	// let isDeleting = $state(false);
 	function confirmDelete(e: Event) {
@@ -54,6 +82,21 @@
 		});
 	}
 
+	// async function handleLimitChange(e: Event) {
+	// 	const newLimit = parseInt((e.currentTarget as HTMLSelectElement).value, 10) || 10;
+	// 	const params = new URLSearchParams(page.url.search);
+	// 	params.set("limit", newLimit.toString());
+	// 	params.set("page", "1");
+	// 	await goto(`?${params.toString()}`, { keepFocus: true, noScroll: true });
+	// }
+
+	async function onLimitChange(limit: number) {
+		const params = new URLSearchParams(page.url.search);
+		params.set("limit", limit.toString());
+		params.set("page", "1");
+		await goto(`?${params.toString()}`, { keepFocus: true, noScroll: true });
+	}
+
 	onMount(() => {
 		const searchParams = new URLSearchParams(page.url.search);
 		let changed = false;
@@ -83,6 +126,14 @@
 		if (changed) {
 			const queryString = searchParams.toString();
 			goto(`${page.url.pathname}${queryString ? `?${queryString}` : ""}`, { replaceState: true, noScroll: true });
+		}
+	});
+
+	onMount(() => {
+		const updated = page.url.searchParams.get("exerciseUpdated");
+		if (updated === "1") {
+			toast.push("Exercise updated successfully!");
+			goto(page.url.pathname, { replaceState: true, noScroll: true });
 		}
 	});
 </script>
@@ -121,16 +172,27 @@
 		<div class="exercises-block">
 			<h2>Exercises</h2>
 			{#if paginatedExercises && hasExercises}
-				<div class="table-container">
-					<ExercisesTable exercises={paginatedExercises.data} />
-				</div>
-			{:else}
-				<div class="empty-state">
-					<p>No exercises found in this collection.</p>
-				</div>
+				<!-- Pagination controls -->
+				<Pagination
+					{currentPage}
+					{totalPages}
+					{totalItems}
+					{hasNextPage}
+					{hasPreviousPage}
+					limit={parseInt(limit)}
+					onPageChange={goToPage}
+					{onLimitChange}
+				/>
+
+				<!-- Table -->
+				<ExercisesTable exercises={paginatedExercises.data} />
+
+				<!-- Bottom pagination (for multi-page) -->
+				<!-- {#if props.data.serverData.paginatedExercises?.pagination.totalPages > 1}
+					<Pagination ... showLimitSelector={false} />
+				{/if} -->
 			{/if}
 		</div>
-		<div class="delete-row">
-		</div>
+		<div class="delete-row"></div>
 	</div>
 {/if}
