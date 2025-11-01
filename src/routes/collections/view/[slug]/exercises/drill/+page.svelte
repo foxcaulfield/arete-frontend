@@ -3,17 +3,18 @@
 	import { enhance } from "$app/forms";
 	import { goto, invalidateAll } from "$app/navigation";
 	import Button from "$lib/components/Button.svelte";
-	import QuestionText from "$lib/components/drill/QuestionText.svelte";
+	import QuestionText from "$lib/components/quiz/QuestionText.svelte";
 	import type { SubmitFunction } from "@sveltejs/kit";
 	import { onMount, tick } from "svelte";
 	import type { PageProps } from "./$types";
 	// import FormGroupTextInput from "$lib/components/FormGroupTextInput.svelte";
-	import ChoiceSingleExercise from "$lib/components/drill/ChoiceSingleExercise.svelte";
-	import ExerciseImage from "$lib/components/drill/ExerciseImage.svelte";
-	import ExerciseTypeBadge from "$lib/components/drill/ExerciseTypeBadge.svelte";
-	import ExplanationText from "$lib/components/drill/ExplanationText.svelte";
-	import FillInExercise from "$lib/components/drill/FillInExercise.svelte";
-	import TranslationText from "$lib/components/drill/TranslationText.svelte";
+	import ChoiceSingleExercise from "$lib/components/quiz/ChoiceSingleExercise.svelte";
+	import ExerciseImage from "$lib/components/quiz/ExerciseImage.svelte";
+	import ExerciseTypeBadge from "$lib/components/quiz/ExerciseTypeBadge.svelte";
+	import ExplanationText from "$lib/components/quiz/ExplanationText.svelte";
+	import FillInExercise from "$lib/components/quiz/FillInExercise.svelte";
+	import TranslationText from "$lib/components/quiz/TranslationText.svelte";
+	import QuizControls from "$lib/components/quiz/QuizControls.svelte";
 
 	const props: PageProps = $props();
 
@@ -167,39 +168,14 @@
 					></audio>
 				{/if}
 
-				<!-- Buttons row at top right -->
-				<div class="button-controls">
-					<Button
-						disabled={showResult}
-						type="button"
-						variant="secondary"
-						appearance="ghost"
-						size="sm"
-						text="Force Text Input"
-						onclick={handleForceTextInput}
-					/>
-					<Button
-						type="button"
-						variant="secondary"
-						appearance="ghost"
-						size="sm"
-						text="✎"
-						onclick={() => goto(`/collections/view/${collectionId}/exercises/edit/${currentQuestion.id}`)}
-					>
-						<!-- text="✏️ Edit" -->
-					</Button>
-					<form method="POST" action="?/getNextQuestion" use:enhance={handleGetNextQuestionEnhance}>
-						<Button
-							type="submit"
-							bind:buttonElement={nextButtonElement}
-							variant="secondary"
-							appearance="ghost"
-							size="sm"
-							text={`⟳`}
-						/>
-					</form>
-				</div>
-
+			<!-- Buttons row at top right -->
+			<QuizControls
+			handleGoToEditPage={() => goto(`/collections/view/${collectionId}/exercises/edit/${currentQuestion.id}`)}
+			{showResult}
+			handleForceTextInput={handleForceTextInput}
+			{nextButtonElement}
+			handleGetNextQuestionEnhance={handleGetNextQuestionEnhance}
+			/>
 				<QuestionText questionText={currentQuestion.question} isAnswered={showResult} />
 
 				{#if currentQuestion.translation}
@@ -306,13 +282,6 @@
 
 	.question-container {
 		position: relative;
-	}
-
-	.button-controls {
-		display: flex;
-		gap: 0.5rem;
-		justify-content: flex-end;
-		margin-bottom: 1rem;
 	}
 
 	.media-row {

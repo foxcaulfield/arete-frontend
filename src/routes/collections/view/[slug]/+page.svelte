@@ -171,18 +171,18 @@
 		</div>
 		<div class="exercises-block">
 			<h2>Exercises</h2>
+			<Pagination
+				{currentPage}
+				{totalPages}
+				{totalItems}
+				{hasNextPage}
+				{hasPreviousPage}
+				limit={parseInt(limit)}
+				onPageChange={goToPage}
+				{onLimitChange}
+			/>
 			{#if paginatedExercises && hasExercises}
 				<!-- Pagination controls -->
-				<Pagination
-					{currentPage}
-					{totalPages}
-					{totalItems}
-					{hasNextPage}
-					{hasPreviousPage}
-					limit={parseInt(limit)}
-					onPageChange={goToPage}
-					{onLimitChange}
-				/>
 
 				<!-- Table -->
 				<ExercisesTable exercises={paginatedExercises.data} />
