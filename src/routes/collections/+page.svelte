@@ -71,7 +71,12 @@
 				<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 					<div class="flex items-center gap-2">
 						<label for="page-limit" class="text-xs font-medium opacity-60">Show</label>
-						<select id="page-limit" class="select w-fit text-xs" value={String(limit)} onchange={handleLimitChange}>
+						<select
+							id="page-limit"
+							class="select w-fit text-xs"
+							value={String(limit)}
+							onchange={handleLimitChange}
+						>
 							<option value="5">5</option>
 							<option value="10">10</option>
 							<option value="20">20</option>
@@ -79,29 +84,29 @@
 						<span class="text-xs opacity-60">per page</span>
 					</div>
 					{#if totalPages > 1}
-					<div class="flex items-center justify-center gap-1 flex-wrap">
-						<Pagination
-							count={totalItems}
-							pageSize={Number(limit)}
-							page={currentPage}
-							onPageChange={(event) => goToPage(event.page)}
-						>
-							<Pagination.Context>
-								{#snippet children(pagination)}
-									{#each pagination().pages as page, index (page)}
-										{#if page.type === "page"}
-											<Pagination.Item {...page}>
-												{page.value}
-											</Pagination.Item>
-										{:else}
-											<Pagination.Ellipsis {index}>&#8230;</Pagination.Ellipsis>
-										{/if}
-									{/each}
-								{/snippet}
-							</Pagination.Context>
-						</Pagination>
-					</div>
-				{/if}
+						<div class="flex items-center justify-center gap-1 flex-wrap">
+							<Pagination
+								count={totalItems}
+								pageSize={Number(limit)}
+								page={currentPage}
+								onPageChange={(event) => goToPage(event.page)}
+							>
+								<Pagination.Context>
+									{#snippet children(pagination)}
+										{#each pagination().pages as page, index (page)}
+											{#if page.type === "page"}
+												<Pagination.Item {...page}>
+													{page.value}
+												</Pagination.Item>
+											{:else}
+												<Pagination.Ellipsis {index}>&#8230;</Pagination.Ellipsis>
+											{/if}
+										{/each}
+									{/snippet}
+								</Pagination.Context>
+							</Pagination>
+						</div>
+					{/if}
 					<div class="flex flex-col sm:flex-row sm:items-center gap-2">
 						<div class="flex items-center gap-2">
 							<Button
@@ -113,7 +118,10 @@
 							/>
 							<span class="text-xs opacity-60">
 								{#if totalItems > 0}
-									{((currentPage - 1) * Number(limit)) + 1}–{Math.min(currentPage * Number(limit), totalItems)} of {totalItems}
+									{(currentPage - 1) * Number(limit) + 1}–{Math.min(
+										currentPage * Number(limit),
+										totalItems
+									)} of {totalItems}
 								{:else}
 									No items
 								{/if}
@@ -126,7 +134,7 @@
 								size="sm"
 							/>
 						</div>
-						
+
 						<!-- <div class="text-xs opacity-60 sm:ml-2">
 							Page <span class="font-medium">{currentPage}</span> of <span class="font-medium">{totalPages || 1}</span>
 						</div> -->
