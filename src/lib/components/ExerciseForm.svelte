@@ -337,15 +337,6 @@
 					</p>
 
 					<div class="media-section">
-						<!-- Image Upload -->
-						<!-- <div class="media-card"> -->
-						<!-- <div class="media-header">
-								<div class="media-icon image-icon">🖼️</div>
-								<div class="media-title-group">
-									<h4 class="media-title">Image</h4>
-									<p class="media-subtitle">Visual aid for the question</p>
-								</div>
-							</div> -->
 						<div class="file-input-wrapper">
 							<label class="file-label" for="image">Upload Image</label>
 							<input
@@ -358,51 +349,7 @@
 								title="Image"
 								autocomplete="off"
 							/>
-							<!-- <label for="image" class="file-label">
-									<svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-										<path
-											d="M12 2v20M2 12h20M7 7l5-5 5 5M7 17l5 5 5-5"
-											stroke-width="2"
-											stroke-linecap="round"
-										/>
-									</svg>
-									<span>Click to upload or drag & drop</span>
-									<span class="file-hint">PNG, JPG, GIF up to 10MB</span>
-								</label> -->
 						</div>
-						<!-- 
-							{#if imageStatus === "existing"}
-								<div class="status-badge existing-badge">
-									<span class="badge-icon">✓</span>
-									<div class="badge-content">
-										<span class="badge-label">Saved</span>
-										<span class="badge-filename">{imageFileName}</span>
-									</div>
-									{#if imageStatus === "existing"}
-										<button type="button" class="badge-action" onclick={clearImage}>Replace</button>
-									{/if}
-								</div>
-							{:else if imageStatus === "new"}
-								<div class="status-badge new-badge">
-									<span class="badge-icon">★</span>
-									<div class="badge-content">
-										<span class="badge-label">Ready to Upload</span>
-										<span class="badge-filename">{imageFileName}</span>
-									</div>
-									<button type="button" class="badge-action" onclick={clearImage}>Clear</button>
-								</div>
-							{/if} -->
-						<!-- </div> -->
-
-						<!-- Audio Upload -->
-						<!-- <div class="media-card"> -->
-						<!-- <div class="media-header">
-								<div class="media-icon audio-icon">🎵</div>
-								<div class="media-title-group">
-									<h4 class="media-title">Audio</h4>
-									<p class="media-subtitle">Pronunciation or explanation</p>
-								</div>
-							</div> -->
 						<div class="file-input-wrapper">
 							<label class="file-label" for="audio">Upload Audio</label>
 							<input
@@ -414,41 +361,7 @@
 								class="file-input"
 								autocomplete="off"
 							/>
-							<!-- <label for="audio" class="file-label">
-									<svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-										<path
-											d="M12 2v20M2 12h20M7 7l5-5 5 5M7 17l5 5 5-5"
-											stroke-width="2"
-											stroke-linecap="round"
-										/>
-									</svg>
-									<span>Click to upload or drag & drop</span>
-									<span class="file-hint">MP3, WAV, M4A up to 20MB</span>
-								</label> -->
 						</div>
-
-						<!-- {#if audioStatus === "existing"}
-								<div class="status-badge existing-badge">
-									<span class="badge-icon">✓</span>
-									<div class="badge-content">
-										<span class="badge-label">Saved</span>
-										<span class="badge-filename">{audioFileName}</span>
-									</div>
-									{#if audioStatus === "existing"}
-										<button type="button" class="badge-action" onclick={clearAudio}>Replace</button>
-									{/if}
-								</div>
-							{:else if audioStatus === "new"}
-								<div class="status-badge new-badge">
-									<span class="badge-icon">★</span>
-									<div class="badge-content">
-										<span class="badge-label">Ready to Upload</span>
-										<span class="badge-filename">{audioFileName}</span>
-									</div>
-									<button type="button" class="badge-action" onclick={clearAudio}>Clear</button>
-								</div>
-							{/if} -->
-						<!-- </div> -->
 					</div>
 				</div>
 			</div>
@@ -495,10 +408,6 @@
 		margin-top: 0.75rem;
 	}
 
-	.alt-answer-row > :first-child {
-		flex: 1;
-	}
-
 	.two-columns {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
@@ -509,57 +418,6 @@
 		.two-columns {
 			grid-template-columns: 1fr;
 		}
-	}
-
-	/* Media Section Styling */
-
-	.media-card {
-		border: 1.5px solid #e5e7eb;
-		border-radius: 12px;
-		padding: 1.5rem;
-		background: linear-gradient(135deg, #fafbfc 0%, #f3f4f6 100%);
-		transition: all 0.3s ease;
-	}
-
-	.media-card:hover {
-		border-color: #d1d5db;
-		background: linear-gradient(135deg, #f8fafb 0%, #f1f3f5 100%);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-	}
-
-	.media-header {
-		display: flex;
-		gap: 1rem;
-		align-items: flex-start;
-		margin-bottom: 1.25rem;
-	}
-
-	.media-icon {
-		font-size: 2rem;
-		flex-shrink: 0;
-	}
-
-	.media-title-group {
-		flex: 1;
-	}
-
-	.media-title {
-		font-size: 1rem;
-		font-weight: 600;
-		margin: 0;
-		color: #1f2937;
-		letter-spacing: -0.01em;
-	}
-
-	.media-subtitle {
-		font-size: 0.8rem;
-		color: #6b7280;
-		margin: 0.25rem 0 0 0;
-	}
-
-	.file-input-wrapper {
-		/* position: relative; */
-		/* margin-bottom: 1rem; */
 	}
 
 	.file-input {
@@ -588,104 +446,6 @@
 
 	.file-label:active {
 		transform: scale(0.98);
-	}
-
-	.upload-icon {
-		width: 28px;
-		height: 28px;
-		color: #9ca3af;
-		transition: color 0.2s ease;
-	}
-
-	.file-label:hover .upload-icon {
-		color: #0066cc;
-	}
-
-	.file-label span:first-of-type {
-		font-weight: 500;
-		color: #374151;
-		font-size: 0.95rem;
-	}
-
-	.file-hint {
-		font-size: 0.8rem;
-		color: #9ca3af;
-	}
-
-	/* Status Badges */
-	.status-badge {
-		display: flex;
-		align-items: center;
-		gap: 0.875rem;
-		padding: 0.875rem 1rem;
-		border-radius: 10px;
-		font-size: 0.875rem;
-		border: 1.5px solid;
-		transition: all 0.2s ease;
-	}
-
-	.existing-badge {
-		background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-		border-color: #7dd3fc;
-		color: #0369a1;
-	}
-
-	.new-badge {
-		background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-		border-color: #fcd34d;
-		color: #92400e;
-	}
-
-	.badge-icon {
-		font-weight: bold;
-		font-size: 1.1rem;
-		flex-shrink: 0;
-	}
-
-	.existing-badge .badge-icon {
-		color: #0891b2;
-	}
-
-	.new-badge .badge-icon {
-		color: #f59e0b;
-	}
-
-	.badge-content {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		gap: 0.2rem;
-	}
-
-	.badge-label {
-		font-weight: 600;
-		font-size: 0.85rem;
-		letter-spacing: 0.5px;
-		text-transform: uppercase;
-	}
-
-	.badge-filename {
-		font-size: 0.8rem;
-		opacity: 0.8;
-		word-break: break-word;
-	}
-
-	.badge-action {
-		flex-shrink: 0;
-		padding: 0.4rem 0.8rem;
-		background: rgba(255, 255, 255, 0.7);
-		border: 1px solid rgba(255, 255, 255, 0.5);
-		border-radius: 6px;
-		font-size: 0.8rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		color: inherit;
-	}
-
-	.badge-action:hover {
-		background: rgba(255, 255, 255, 0.9);
-		transform: translateY(-1px);
 	}
 
 	/* Preview Section */
