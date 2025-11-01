@@ -10,9 +10,9 @@
 	import Unauthorized from "$lib/components/Unauthorized.svelte";
 
 	import type { PageProps } from "./$types";
-	import ExercisesTable from "$lib/components/ExercisesTable.svelte";
+	import ExercisesTable from "$lib/components/exercises/ExercisesTable.svelte";
 	import Button from "$lib/components/common/Button.svelte";
-	import Pagination from "$lib/components/Pagination.svelte";
+	import { Pagination } from "@skeletonlabs/skeleton-svelte";
 
 	let props: PageProps = $props();
 
@@ -43,15 +43,6 @@
 		// No invalidateAll needed; navigation re-runs [+page.server.ts]
 	}
 
-	// async function goToNextPage() {
-	// 	await goToPage(currentPage + 1);
-	// }
-
-	// async function goToPreviousPage() {
-	// 	await goToPage(currentPage - 1);
-	// }
-
-	// let isDeleting = $state(false);
 	function confirmDelete(e: Event) {
 		if (!confirm("Delete this collection? This cannot be undone.")) {
 			e.preventDefault();
@@ -82,17 +73,10 @@
 		});
 	}
 
-	// async function handleLimitChange(e: Event) {
-	// 	const newLimit = parseInt((e.currentTarget as HTMLSelectElement).value, 10) || 10;
-	// 	const params = new URLSearchParams(page.url.search);
-	// 	params.set("limit", newLimit.toString());
-	// 	params.set("page", "1");
-	// 	await goto(`?${params.toString()}`, { keepFocus: true, noScroll: true });
-	// }
-
-	async function onLimitChange(limit: number) {
+	async function handleLimitChange(e: Event) {
+		const newLimit = parseInt((e.currentTarget as HTMLSelectElement).value, 10) || 10;
 		const params = new URLSearchParams(page.url.search);
-		params.set("limit", limit.toString());
+		params.set("limit", newLimit.toString());
 		params.set("page", "1");
 		await goto(`?${params.toString()}`, { keepFocus: true, noScroll: true });
 	}
@@ -104,6 +88,7 @@
 		const isUpdated = searchParams.get("updated") === "1";
 		const isCreated = searchParams.get("created") === "1";
 		const isExerciseCreated = searchParams.get("exerciseCreated") === "1";
+		const isExerciseUpdated = searchParams.get("exerciseUpdated") === "1";
 
 		if (isUpdated) {
 			toast.push("Collection updated successfully!");
@@ -123,17 +108,13 @@
 			changed = true;
 		}
 
+		if (isExerciseUpdated) {
+			toast.push("Exercise updated successfully!");
+		}
+
 		if (changed) {
 			const queryString = searchParams.toString();
 			goto(`${page.url.pathname}${queryString ? `?${queryString}` : ""}`, { replaceState: true, noScroll: true });
-		}
-	});
-
-	onMount(() => {
-		const updated = page.url.searchParams.get("exerciseUpdated");
-		if (updated === "1") {
-			toast.push("Exercise updated successfully!");
-			goto(page.url.pathname, { replaceState: true, noScroll: true });
 		}
 	});
 </script>
@@ -152,7 +133,7 @@
 				<h1 class="h3 mb-0.5 truncate">{currentCollection?.name}</h1>
 				<p class="text-xs opacity-60 line-clamp-2">{currentCollection?.description}</p>
 			</div>
-			<div class="flex gap-1 flex-shrink-0">
+			<div class="flex gap-1 shrink-0">
 				<Button text="Back" onclick={backToCollections} preset="ghost" size="sm" />
 				<Button text="Edit" onclick={goToEditCollection} color="secondary" size="sm" />
 			</div>
@@ -220,16 +201,81 @@
 					</div>
 
 					<!-- Pagination Controls -->
-					<Pagination
-						{currentPage}
-						{totalPages}
-						{totalItems}
-						{hasNextPage}
-						{hasPreviousPage}
-						limit={parseInt(limit)}
-						onPageChange={goToPage}
-						{onLimitChange}
-					/>
+					<!-- Controls Bar -->
+					<div class="flex flex-col gap-3 pb-3 border-b border-opacity-20">
+						<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+							<div class="flex items-center gap-2">
+								<label for="page-limit" class="text-xs font-medium opacity-60">Show</label>
+								<select
+									id="page-limit"
+									class="select w-fit text-xs"
+									value={String(limit)}
+									onchange={handleLimitChange}
+								>
+									<option value="5">5</option>
+									<option value="10">10</option>
+									<option value="20">20</option>
+								</select>
+								<span class="text-xs opacity-60">per page</span>
+							</div>
+							{#if totalPages > 1}
+								<div class="flex items-center justify-center gap-1 flex-wrap">
+									<Pagination
+										count={totalItems}
+										pageSize={Number(limit)}
+										page={currentPage}
+										onPageChange={(event) => goToPage(event.page)}
+									>
+										<Pagination.Context>
+											{#snippet children(pagination)}
+												{#each pagination().pages as page, index (page)}
+													{#if page.type === "page"}
+														<Pagination.Item {...page}>
+															{page.value}
+														</Pagination.Item>
+													{:else}
+														<Pagination.Ellipsis {index}>&#8230;</Pagination.Ellipsis>
+													{/if}
+												{/each}
+											{/snippet}
+										</Pagination.Context>
+									</Pagination>
+								</div>
+							{/if}
+							<div class="flex flex-col sm:flex-row sm:items-center gap-2">
+								<div class="flex items-center gap-2">
+									<Button
+										text="Previous"
+										onclick={() => goToPage(currentPage - 1)}
+										disabled={!hasPreviousPage}
+										preset="ghost"
+										size="sm"
+									/>
+									<span class="text-xs opacity-60">
+										{#if totalItems > 0}
+											{(currentPage - 1) * Number(limit) + 1}–{Math.min(
+												currentPage * Number(limit),
+												totalItems
+											)} of {totalItems}
+										{:else}
+											No items
+										{/if}
+									</span>
+									<Button
+										text="Next"
+										onclick={() => goToPage(currentPage + 1)}
+										disabled={!hasNextPage}
+										preset="ghost"
+										size="sm"
+									/>
+								</div>
+
+								<!-- <div class="text-xs opacity-60 sm:ml-2">
+							Page <span class="font-medium">{currentPage}</span> of <span class="font-medium">{totalPages || 1}</span>
+						</div> -->
+							</div>
+						</div>
+					</div>
 
 					<!-- Exercises Table or Empty State -->
 					{#if paginatedExercises && hasExercises}
