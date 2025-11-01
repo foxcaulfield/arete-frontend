@@ -35,16 +35,65 @@
 		headerSnippet,
 	}: Props = $props();
 
-	// let selectedImageFile = $state<File | null>(null);
-	// let selectedAudioFile = $state<File | null>(null);
+	let imageSrc = $state("");
+	let showImage = $state(false);
+	let imageFileName = $state("");
 
-	// function handleImageSelect(file: File | null) {
-	// 	selectedImageFile = file;
-	// }
+	let audioSrc = $state("");
+	let showAudio = $state(false);
+	let audioFileName = $state("");
 
-	// function handleAudioSelect(file: File | null) {
-	// 	selectedAudioFile = file;
-	// }
+	function handleImageFileChange(event: Event) {
+		const file = (event.target as HTMLInputElement).files?.[0];
+
+		if (file) {
+			showImage = true;
+			imageFileName = file.name;
+			const reader = new FileReader();
+			reader.addEventListener("load", function () {
+				imageSrc = reader.result as string;
+			});
+			reader.readAsDataURL(file);
+		} else {
+			showImage = false;
+			imageSrc = "";
+			imageFileName = "";
+		}
+	}
+
+	function handleAudioFileChange(event: Event) {
+		const file = (event.target as HTMLInputElement).files?.[0];
+
+		if (file) {
+			showAudio = true;
+			audioFileName = file.name;
+			const reader = new FileReader();
+			reader.addEventListener("load", function () {
+				audioSrc = reader.result as string;
+			});
+			reader.readAsDataURL(file);
+		} else {
+			showAudio = false;
+			audioSrc = "";
+			audioFileName = "";
+		}
+	}
+
+	// Load media from existing exercise
+	$effect(() => {
+		if (mode === "edit" && exercise) {
+			if (exercise.imageUrl) {
+				imageSrc = `/api/files?type=image&name=${exercise.imageUrl}`;
+				imageFileName = exercise.imageUrl;
+				showImage = true;
+			}
+			if (exercise.audioUrl) {
+				audioSrc = `/api/files?type=audio&name=${exercise.audioUrl}`;
+				audioFileName = exercise.audioUrl;
+				showAudio = true;
+			}
+		}
+	});
 
 	// State for dynamic fields
 	let additionalCorrectAnswers = $state<Array<{ id: number; value: string }>>([]);
@@ -245,40 +294,39 @@
 				</div>
 
 				<!-- Media Files -->
-				<!-- NEW CODE - ADD THIS -->
 				<div class="form-group">
 					<label class="label">Media Files</label>
 					<p class="muted" style="font-size:0.875rem;margin-bottom:0.5rem">
 						Add images or audio to help with the question
 					</p>
 
-					<div style="display:flex;flex-direction:column;gap:0.75rem">
+					<div style="display:flex;flex-direction:column;gap:1rem">
+						<!-- Image Section -->
 						<div>
-							<label
-								for="image"
-								class="muted"
-								style="font-size:0.875rem;display:block;margin-bottom:0.25rem"
-							>
-								Image
-							</label>
-							<input id="image" type="file" name="image" accept="image/*" />
-							{#if exercise?.imageUrl}
+							<label class="label" style="font-size:0.9rem;margin-bottom:0.5rem">Image</label>
+							<div>
+								<label for="image" class="muted" style="font-size:0.875rem;display:block;margin-bottom:0.25rem">
+									Upload Image File
+								</label>
+								<input id="image" type="file" name="image" accept="image/*" onchange={handleImageFileChange} />
+							</div>
+							{#if exercise?.imageUrl && !imageSrc}
 								<span class="muted" style="font-size:0.75rem;display:block;margin-top:0.25rem">
 									Current: {exercise.imageUrl}
 								</span>
 							{/if}
 						</div>
 
+						<!-- Audio Section -->
 						<div>
-							<label
-								for="audio"
-								class="muted"
-								style="font-size:0.875rem;display:block;margin-bottom:0.25rem"
-							>
-								Audio
-							</label>
-							<input id="audio" type="file" name="audio" accept="audio/*" />
-							{#if exercise?.audioUrl}
+							<label class="label" style="font-size:0.9rem;margin-bottom:0.5rem">Audio</label>
+							<div>
+								<label for="audio" class="muted" style="font-size:0.875rem;display:block;margin-bottom:0.25rem">
+									Upload Audio File
+								</label>
+								<input id="audio" type="file" name="audio" accept="audio/*" onchange={handleAudioFileChange} />
+							</div>
+							{#if exercise?.audioUrl && !audioSrc}
 								<span class="muted" style="font-size:0.75rem;display:block;margin-top:0.25rem">
 									Current: {exercise.audioUrl}
 								</span>
@@ -286,6 +334,32 @@
 						</div>
 					</div>
 				</div>
+			</div>
+
+			<!-- Media Previews -->
+			<div class="two-columns">
+				<!-- Image Preview -->
+				{#if showImage}
+					<div class="preview-container">
+						<label class="label" style="font-size:0.9rem">Image Preview</label>
+						<div class="preview">
+							<img src={imageSrc} alt="Preview" />
+						</div>
+					</div>
+				{/if}
+
+				<!-- Audio Preview -->
+				{#if showAudio}
+					<div class="preview-container">
+						<label class="label" style="font-size:0.9rem">Audio Preview</label>
+						<div class="preview audio-preview">
+							<audio controls style="width:100%">
+								<source src={audioSrc} />
+								Your browser does not support the audio element.
+							</audio>
+						</div>
+					</div>
+				{/if}
 			</div>
 
 			<!-- Form Actions -->
@@ -321,10 +395,77 @@
 		}
 	}
 
-	.media-section {
+	.media-input-group {
+		display: grid;
+		grid-template-columns: 1fr auto 1fr;
+		gap: 1rem;
+		align-items: flex-end;
+		padding: 0.75rem;
+		background: #f9f9f9;
+		border-radius: 6px;
+		border: 1px solid #e0e0e0;
+	}
+
+	.media-input-wrapper {
 		display: flex;
 		flex-direction: column;
-		gap: 1.5rem;
-		margin-top: 0.5rem;
+	}
+
+	.media-input-wrapper input {
+		padding: 0.5rem;
+		border: 1px solid #ddd;
+		border-radius: 4px;
+		font-size: 0.875rem;
+	}
+
+	.media-input-wrapper input:focus {
+		outline: none;
+		border-color: #0066cc;
+		box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+	}
+
+	.media-divider {
+		text-align: center;
+		color: #999;
+		font-size: 0.85rem;
+		font-weight: 600;
+	}
+
+	.preview-container {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.preview {
+		width: 100%;
+		min-height: 150px;
+		border: 2px solid #ddd;
+		border-radius: 8px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: #fafafa;
+		overflow: hidden;
+	}
+
+	.preview img {
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+	}
+
+	.audio-preview {
+		padding: 1rem;
+	}
+
+	@media (max-width: 768px) {
+		.media-input-group {
+			grid-template-columns: 1fr;
+		}
+
+		.media-divider {
+			display: none;
+		}
 	}
 </style>

@@ -2,13 +2,25 @@ import { Backend } from "$lib/server/backend-manager";
 import { fail, isRedirect, redirect, type Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { ApiError } from "$lib/server/errors";
+import { processExerciseFormData, validateParams } from "$lib/server/form-utils";
 
 export const load: PageServerLoad = async ({ params, fetch, parent }) => {
-	const { id: exerciseId, slug: collectionId } = params;
+	const { id: exerciseId } = params;
 	const { user } = await parent();
 
 	if (!user) {
-		return { serverData: null, flags: { unauthorized: true }, collectionId };
+		return {
+			exercise: null,
+			flags: { unauthorized: true },
+		};
+	}
+
+	// Validate params
+	if (!exerciseId) {
+		return {
+			exercise: null,
+			flags: { notFound: true, errorText: "Exercise ID is required" },
+		};
 	}
 
 	try {
@@ -18,98 +30,62 @@ export const load: PageServerLoad = async ({ params, fetch, parent }) => {
 		return { exercise };
 	} catch (e) {
 		const flags = Backend.extractApiErrorFlags(e);
-		return { exercise: null, collectionId, flags }; // Handle error if needed
+		return { exercise: null, flags };
 	}
 };
 
 export const actions = {
 	update: async ({ request, fetch, params }) => {
-		if (!params.slug) {
+		// Validate required params
+		const paramError = validateParams(params, ["slug", "id"]);
+		if (paramError) {
 			return fail(400, {
-				errorText: "Missing collection ID",
-				errors: {} as Record<string, string>,
+				errorText: paramError,
+				errors: {},
 				values: undefined,
-			});
-		}
-		if (!params.id) {
-			return fail(400, {
-				errorText: "Missing exercise ID",
-				errors: {} as Record<string, string>,
-				values: undefined,
-			});
-		}
-
-		const formData = await request.formData();
-		formData.append("collectionId", params.slug);
-		formData.forEach((value, key) => {
-			if (typeof value === "string" && value.trim().length === 0) {
-				formData.delete(key);
-			}
-			if (value instanceof File && value.size === 0) {
-				formData.delete(key);
-			}
-		});
-
-		const arrayKeys = ["additionalCorrectAnswers", "distractors"] as const;
-		// Collect array fields
-		const arrayFields: Record<(typeof arrayKeys)[number], string[]> = {
-			additionalCorrectAnswers: [],
-			distractors: [],
-		};
-
-		const keyIsArrayField = (key: string): key is (typeof arrayKeys)[number] =>
-			arrayKeys.includes(key as (typeof arrayKeys)[number]);
-
-		// Extract array fields
-		for (const [key, value] of [...formData.entries()]) {
-			if (keyIsArrayField(key)) {
-				if (typeof value === "string" && value.trim().length > 0) {
-					arrayFields[key].push(value);
-				}
-				formData.delete(key);
-			}
-		}
-
-		for (const key of arrayKeys) {
-			arrayFields[key].forEach((value) => {
-				formData.append(`${key}[]`, value);
 			});
 		}
 
 		try {
+			// Get and process form data
+			const rawFormData = await request.formData();
+			const formData = processExerciseFormData(rawFormData);
+
+			// Submit to backend
 			const backend = new Backend(fetch);
-			// console.log(Object.keys(backend.api.exercises).join("")	);
-			await backend.api.exercises.update(params.id, formData);
+			await backend.api.exercises.update(params.id!, formData);
+
+			// Redirect on success
 			throw redirect(303, `/collections/view/${params.slug}?exerciseUpdated=1`);
 		} catch (error) {
+			// Handle redirect (not an error)
 			if (isRedirect(error)) {
 				throw error;
 			}
 
-			if (error instanceof ApiError && typeof error === "object" && "statusCode" in error) {
-				const apiError = error;
-
-				// NestJS validation error with fields
-				if (apiError.statusCode === 400 && apiError.fields) {
+			// Handle API errors
+			if (error instanceof ApiError) {
+				// Validation error with field-specific messages
+				if (error.statusCode === 400 && error.fields) {
 					return fail(400, {
-						errors: apiError.fields as Record<string, string[]>,
+						errors: error.fields,
 						values: {},
-						errorText: apiError.message || "Validation failed",
+						errorText: error.message || "Validation failed",
 					});
 				}
 
-				// Other API errors
-				return fail(apiError.statusCode || 500, {
-					errors: {} as Record<string, string>,
+				// Other API errors (403, 404, etc.)
+				return fail(error.statusCode, {
+					errors: {},
 					values: {},
-					errorText: apiError.message || "An error occurred",
+					errorText: error.message || "An error occurred",
 				});
 			}
 
-			// Network or other errors
-			console.error("Unexpected error:", error);
+			// Unexpected errors
+			console.error("Unexpected error during exercise update:", error);
 			return fail(500, {
-				errors: {} as Record<string, string>,
+				errors: {},
 				values: {},
 				errorText: error instanceof Error ? error.message : "An unexpected error occurred",
 			});
