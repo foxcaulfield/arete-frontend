@@ -122,8 +122,7 @@ a:hover {
 
 /* inputs */
 input,
-textarea,
-select {
+textarea {
 	background: var(--input-bg);
 	color: var(--text);
 	border: 1px solid var(--input-border);
@@ -134,8 +133,7 @@ select {
 }
 
 input:focus,
-textarea:focus,
-select:focus {
+textarea:focus{
 	box-shadow: 0 0 0 4px rgba(255, 60, 0, 0.08);
 	border-color: var(--accent)
 }
@@ -179,34 +177,7 @@ label {
 	border-radius: 14px
 }
 
-/* tables */
-.table-container {
-	background: var(--surface);
-	border-radius: 10px;
-	padding: .75rem;
-	overflow: auto;
-	box-shadow: var(--shadow-2)
-}
 
-table {
-	width: 100%;
-	border-collapse: collapse;
-	color: var(--text);
-	font-size: .98rem
-}
-
-th,
-td {
-	padding: .65rem .9rem;
-	text-align: left;
-	border-bottom: 1px solid var(--border-color)
-}
-
-th {
-	background: transparent;
-	color: var(--accent);
-	font-weight: 700
-}
 
 tr:nth-child(even) {
 	background: rgba(255, 255, 255, 0.01)
@@ -214,33 +185,6 @@ tr:nth-child(even) {
 
 tr:hover {
 	background: rgba(255, 255, 255, 0.02)
-}
-
-/* nav */
-nav {
-	background: var(--bg-alt);
-	border-bottom: 1px solid var(--border-color);
-	box-shadow: 0 6px 30px rgba(0, 0, 0, 0.35)
-}
-
-nav ul {
-	display: flex;
-	gap: .75rem;
-	align-items: center;
-	padding: .5rem 1rem;
-	margin: 0;
-	list-style: none
-}
-
-nav a {
-	padding: .45rem .75rem;
-	border-radius: 6px;
-	color: var(--text)
-}
-
-nav a:hover {
-	background: linear-gradient(90deg, rgba(255, 60, 0, 0.12), rgba(255, 94, 26, 0.08));
-	color: #fff
 }
 
 /* utility classes */
@@ -409,8 +353,7 @@ nav a:hover {
 	font-size: .95rem
 }
 
-.compact-form .text-input,
-.compact-form select {
+.compact-form .text-input {
 	padding: .45rem .6rem
 }
 
@@ -521,8 +464,7 @@ nav a:hover {
 
 /* disabled state */
 input:disabled,
-textarea:disabled,
-select:disabled {
+textarea:disabled{
 	opacity: 0.5;
 	background: rgba(20, 20, 20, 0.5);
 	border-color: rgba(51, 51, 51, 0.5);
@@ -531,8 +473,7 @@ select:disabled {
 }
 
 input:disabled:focus,
-textarea:disabled:focus,
-select:disabled:focus {
+textarea:disabled:focus {
 	box-shadow: none;
 	border-color: rgba(51, 51, 51, 0.5);
 }

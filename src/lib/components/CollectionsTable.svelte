@@ -9,35 +9,33 @@
 	}
 </script>
 
-<div class="table-container">
-	<table>
-		<thead>
-			<tr>
-				<th>Name</th>
-				<th>Description</th>
-				<th>User name</th>
-				<th>Created At</th>
-				<th>Updated At</th>
+<table class="table table-auto">
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th>Description</th>
+			<th>User name</th>
+			<th>Created At</th>
+			<th>Updated At</th>
+		</tr>
+	</thead>
+	<tbody>
+		{#each props.collections as collection (collection.id)}
+		<!-- class="clickable-row" -->
+			<tr
+				role="button"
+				tabindex="0"
+				onclick={() => open(collection.id)}
+				onkeydown={(e) => {
+					if (e.key === "Enter" || e.key === " ") open(collection.id);
+				}}
+			>
+				<td>{collection.name}</td>
+				<td>{collection.description}</td>
+				<td>{collection.user?.name}</td>
+				<td>{collection.createdAt}</td>
+				<td>{collection.updatedAt}</td>
 			</tr>
-		</thead>
-		<tbody>
-			{#each props.collections as collection (collection.id)}
-				<tr
-					class="clickable-row"
-					role="button"
-					tabindex="0"
-					onclick={() => open(collection.id)}
-					onkeydown={(e) => {
-						if (e.key === "Enter" || e.key === " ") open(collection.id);
-					}}
-				>
-					<td>{collection.name}</td>
-					<td>{collection.description}</td>
-					<td>{collection.user?.name}</td>
-					<td>{collection.createdAt}</td>
-					<td>{collection.updatedAt}</td>
-				</tr>
-			{/each}
-		</tbody>
-	</table>
-</div>
+		{/each}
+	</tbody>
+</table>
