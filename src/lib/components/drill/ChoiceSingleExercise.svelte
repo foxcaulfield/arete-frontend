@@ -4,17 +4,21 @@
 	interface Props {
 		distractors: string[];
 		showResult: boolean;
-		lastResult: UserAnswerFeedbackDto | null;
+		lastResult: Quiz.UserAnswerFeedbackDto | null;
 		lastUserAnswer: string;
 	}
 	const { distractors, showResult, lastResult, lastUserAnswer }: Props = $props();
 	let choiceButtons = $state<HTMLButtonElement[]>([]);
 
 	const KEYBOARD_MAP: Record<string, number> = {
-		"4": 0,
-		"5": 1,
-		"1": 2,
-		"2": 3,
+		"5": 0,
+		"6": 1,
+		"2": 2,
+		"3": 3,
+		"q": 0,
+		"w": 1,
+		"a": 2,
+		"s": 3,
 	};
 
 	function handleKeyDown(e: KeyboardEvent) {
