@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Button from "$lib/components/Button.svelte";
+	import Button from "$lib/components/common/Button.svelte";
 	import TextInput from "$lib/components/TextInput.svelte";
 
 	interface FieldItem {
@@ -33,7 +33,7 @@
 	<p class="muted" style="font-size:0.875rem;margin-bottom:0.5rem">
 		{description}
 	</p>
-	<Button text="Add Item" type="button" variant="secondary" onclick={onAdd} />
+	<Button text="Add Item" type="button" color="secondary" onclick={onAdd} />
 
 	{#each items as item (item.id)}
 		<div class="dynamic-field-row">
