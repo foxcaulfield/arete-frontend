@@ -164,6 +164,7 @@
 				<!-- Additional Correct Answers -->
 				<DynamicFieldsSection
 					label="Additional Correct Answers"
+					name="additionalCorrectAnswers"
 					description="Optional alternative correct answers (case-insensitive)"
 					items={additionalCorrectAnswers}
 					placeholder="Additional correct answer"
@@ -176,6 +177,7 @@
 				<!-- Distractors -->
 				<DynamicFieldsSection
 					label="Distractors"
+					name="distractors"
 					description={currentType === "CHOICE_SINGLE"
 						? "Required for single-choice questions (minimum 5)"
 						: "Optional incorrect answer choices"}

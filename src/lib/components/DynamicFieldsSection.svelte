@@ -9,6 +9,7 @@
 
 	interface Props {
 		label: string;
+        name: string;
 		description: string;
 		items: FieldItem[];
 		placeholder: string;
@@ -18,7 +19,7 @@
 		minMax?: [number, number];
 	}
 
-	let { label, description, items = [], placeholder, onAdd, onRemove, errors, minMax }: Props =
+	let { label, name, description, items = [], placeholder, onAdd, onRemove, errors, minMax }: Props =
 		$props();
 
 	function getErrorMessage(fieldErrors: string | string[] | undefined): string | undefined {
@@ -38,7 +39,7 @@
 		<div class="dynamic-field-row">
 			<TextInput
 				{errors}
-				name={label.toLowerCase().replace(/\s+/g, "-")}
+				name={name}
 				id={item.id > 0 ? `${label.toLowerCase().replace(/\s+/g, "-")}-${item.id}` : label.toLowerCase().replace(/\s+/g, "-")}
 				value={item.value}
 				{placeholder}
