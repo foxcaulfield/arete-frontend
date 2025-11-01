@@ -2,7 +2,7 @@
 	import { getTypeDesc, getTypeIcon, getTypeLabel } from "$lib/utils/exercise-type.utils";
 
 	interface Props {
-		exerciseType: ExerciseType;
+		exerciseType: Exercise.ExerciseType;
 	}
 	let { exerciseType }: Props = $props();
 </script>
