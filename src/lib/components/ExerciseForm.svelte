@@ -5,6 +5,7 @@
 	import MediaField from "$lib/components/MediaField.svelte";
 	import DynamicFieldsSection from "$lib/components/DynamicFieldsSection.svelte";
 	import type { Snippet } from "svelte";
+	import { toast } from "@zerodevx/svelte-toast";
 
 	interface Props {
 		mode: "create" | "edit";
@@ -139,15 +140,40 @@
 			</div>
 
 			<!-- Question Input -->
-			<TextInput
-				errors={getErrorMessage(formErrors?.question)}
-				name="question"
-				value={exercise?.question}
-				label="Question *"
-				placeholder="Enter the question"
-				minMax={[5, 300]}
-				aria-describedby="question-error"
-			/>
+			<div class="form-group">
+				<TextInput
+					errors={getErrorMessage(formErrors?.question)}
+					name="question"
+					value={exercise?.question}
+					label="Question *"
+					placeholder="Enter the question"
+					minMax={[5, 300]}
+					aria-describedby="question-error"
+				/>
+				{#if mode === "edit"}
+					<Button
+						text="Copy Question"
+						type="button"
+						size="sm"
+						variant="secondary"
+						appearance="ghost"
+						style="margin-top:0.5rem"
+						onclick={() => {
+							// replace all {{[^}]+}} with empty string, but keep the rest of the text
+							navigator.clipboard.writeText(
+								(exercise?.question || "").replace(/{/g, "").replace(/}/g, "")
+							);
+							toast.push("Question text copied to clipboard!", {
+								theme: {
+									"--toastBackground": "var(--accent)",
+									"--toastColor": "var(--text)",
+									"--toastBarBackground": "var(--primary)",
+								},
+							});
+						}}
+					/>
+				{/if}
+			</div>
 
 			<!-- Correct Answer Input -->
 			<TextInput
@@ -211,10 +237,7 @@
 				</div>
 
 				<!-- Media Files -->
-				<MediaField
-					imageUrl={exercise?.imageUrl}
-					audioUrl={exercise?.audioUrl}
-				/>
+				<MediaField imageUrl={exercise?.imageUrl} audioUrl={exercise?.audioUrl} />
 			</div>
 
 			<!-- Form Actions -->

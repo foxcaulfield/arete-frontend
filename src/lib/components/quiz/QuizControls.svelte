@@ -2,6 +2,7 @@
 	import { enhance } from "$app/forms";
 	import type { SubmitFunction } from "@sveltejs/kit";
 	import Button from "../Button.svelte";
+    import { toast } from "@zerodevx/svelte-toast";
 
 	interface Props {
 		showResult: boolean;
@@ -9,6 +10,7 @@
 		handleForceTextInput: () => void;
 		nextButtonElement?: HTMLButtonElement;
 		handleGetNextQuestionEnhance: SubmitFunction;
+		handleCopyToClipboard: () => void;
 	}
 
 	let {
@@ -17,10 +19,19 @@
 		handleForceTextInput,
 		nextButtonElement = $bindable(),
 		handleGetNextQuestionEnhance,
+        handleCopyToClipboard
 	}: Props = $props();
 </script>
 
 <div class="button-controls">
+	<Button
+		type="button"
+		variant="secondary"
+		appearance="ghost"
+		size="sm"
+		text="copy"
+		onclick={handleCopyToClipboard}
+	/>
 	<Button
 		disabled={showResult}
 		type="button"

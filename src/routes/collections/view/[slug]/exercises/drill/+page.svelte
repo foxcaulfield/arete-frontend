@@ -15,6 +15,7 @@
 	import FillInExercise from "$lib/components/quiz/FillInExercise.svelte";
 	import TranslationText from "$lib/components/quiz/TranslationText.svelte";
 	import QuizControls from "$lib/components/quiz/QuizControls.svelte";
+	import { toast } from "@zerodevx/svelte-toast";
 
 	const props: PageProps = $props();
 
@@ -170,6 +171,18 @@
 
 			<!-- Buttons row at top right -->
 			<QuizControls
+			handleCopyToClipboard={() => {
+				// replace all {{[^}]+}} with empty string, but keep the rest of the text
+				navigator.clipboard.writeText(currentQuestion.question.replace(/{/g, "").replace(/}/g, ""));
+				toast.push('Question text copied to clipboard!', {
+					theme: {
+						'--toastBackground': 'var(--accent)',
+						'--toastColor': 'var(--text)',
+						'--toastBarBackground': 'var(--primary)'
+					}
+				});
+				// Optionally, you can add a toast notification here to inform the user
+			}}
 			handleGoToEditPage={() => goto(`/collections/view/${collectionId}/exercises/edit/${currentQuestion.id}`)}
 			{showResult}
 			handleForceTextInput={handleForceTextInput}
