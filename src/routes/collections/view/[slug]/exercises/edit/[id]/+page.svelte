@@ -6,7 +6,7 @@
 	import { goto } from "$app/navigation";
 	import { toast } from "@zerodevx/svelte-toast";
 	// import { enhance } from "$app/forms";
-	import ExerciseForm from "$lib/components/ExerciseEditForm.svelte";
+	import ExerciseForm from "$lib/components/ExerciseForm.svelte";
 	import type { PageProps } from "./$types";
 
 	const props: PageProps = $props();
