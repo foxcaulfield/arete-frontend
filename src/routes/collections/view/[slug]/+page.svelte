@@ -11,7 +11,7 @@
 
 	import type { PageProps } from "./$types";
 	import ExercisesTable from "$lib/components/ExercisesTable.svelte";
-	import Button from "$lib/components/Button.svelte";
+	import Button from "$lib/components/common/Button.svelte";
 	import Pagination from "$lib/components/Pagination.svelte";
 
 	let props: PageProps = $props();
@@ -43,13 +43,13 @@
 		// No invalidateAll needed; navigation re-runs [+page.server.ts]
 	}
 
-	async function goToNextPage() {
-		await goToPage(currentPage + 1);
-	}
+	// async function goToNextPage() {
+	// 	await goToPage(currentPage + 1);
+	// }
 
-	async function goToPreviousPage() {
-		await goToPage(currentPage - 1);
-	}
+	// async function goToPreviousPage() {
+	// 	await goToPage(currentPage - 1);
+	// }
 
 	// let isDeleting = $state(false);
 	function confirmDelete(e: Event) {
@@ -145,54 +145,105 @@
 {:else if flags?.notFound}
 	<NotFound />
 {:else}
-	<div class="collection-page">
-		<div class="actions-row">
-			<Button text="Back to Collections" onclick={backToCollections} />
-			<Button text="Edit collection" onclick={goToEditCollection} />
-			<Button text="Create new exercise" onclick={goToCreateExercise} />
-			<Button text="Go drill" onclick={goToDrill} />
-			<Button withAction={true} action="?/delete" onsubmit={confirmDelete} text="Delete collection" />
+	<div class="space-y-4 p-4">
+		<!-- Main Header - Minimal -->
+		<div class="flex items-start justify-between">
+			<div class="flex-1 min-w-0">
+				<h1 class="h3 mb-0.5 truncate">{currentCollection?.name}</h1>
+				<p class="text-xs opacity-60 line-clamp-2">{currentCollection?.description}</p>
+			</div>
+			<div class="flex gap-1 flex-shrink-0">
+				<Button text="Back" onclick={backToCollections} preset="ghost" size="sm" />
+				<Button text="Edit" onclick={goToEditCollection} color="secondary" size="sm" />
+			</div>
 		</div>
-		<div class="info-card">
-			<h1>{currentCollection?.name}</h1>
-			<div class="info-sections">
-				<div class="info-section">
-					<h2>Details</h2>
-					<p><strong>Description:</strong> {currentCollection?.description}</p>
-					<p><strong>ID:</strong> {currentCollection?.id}</p>
+
+		<!-- Two Column Layout -->
+		<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+			<!-- Left: Info Sidebar -->
+			<div class="lg:col-span-1 space-y-3 text-xs">
+				<div class="card preset-filled-surface-100-900 p-3 space-y-3">
+					<!-- Owner Block -->
+					<div>
+						<span class="font-medium opacity-60 block mb-1">Owner</span>
+						<div class="bg-black/10 rounded p-2">
+							<p class="font-medium">{userName}</p>
+							<code class="text-xs opacity-75 break-all block">{userId}</code>
+						</div>
+					</div>
+
+					<!-- Dates Block -->
+					<div>
+						<span class="font-medium opacity-60 block mb-1">Timeline</span>
+						<div class="space-y-1">
+							<div class="bg-black/10 rounded p-2">
+								<span class="text-xs opacity-75">Created</span>
+								<time class="block font-mono text-xs">{currentCollection?.createdAt}</time>
+							</div>
+							<div class="bg-black/10 rounded p-2">
+								<span class="text-xs opacity-75">Updated</span>
+								<time class="block font-mono text-xs">{currentCollection?.updatedAt}</time>
+							</div>
+						</div>
+					</div>
+
+					<!-- ID Block -->
+					<div>
+						<span class="font-medium opacity-60 block mb-1">Collection ID</span>
+						<code class="text-xs bg-black/10 p-2 rounded block break-all">{currentCollection?.id}</code>
+					</div>
 				</div>
-				<div class="info-section">
-					<h2>Owner & Dates</h2>
-					<p><strong>User:</strong> {userName} <span class="user-id">({userId})</span></p>
-					<p><strong>Created:</strong> {currentCollection?.createdAt}</p>
-					<p><strong>Updated:</strong> {currentCollection?.updatedAt}</p>
+
+				<!-- Quick Actions Card -->
+				<div class="card preset-filled-surface-100-900 p-3 space-y-2">
+					<span class="font-medium opacity-60 text-xs block">Actions</span>
+					<Button text="Create Exercise" onclick={goToCreateExercise} fullWidth={true} size="sm" />
+					<Button text="Start Drill" onclick={goToDrill} color="secondary" fullWidth={true} size="sm" />
+					<Button
+						withAction={true}
+						action="?/delete"
+						onsubmit={confirmDelete}
+						text="Delete Collection"
+						color="error"
+						fullWidth={true}
+						size="sm"
+					/>
+				</div>
+			</div>
+
+			<!-- Right: Exercises Main Content -->
+			<div class="lg:col-span-2">
+				<div class="card preset-filled-surface-100-900 p-4 space-y-3">
+					<div class="flex items-center justify-between mb-2">
+						<h2 class="text-base font-semibold">Exercises</h2>
+						<span class="text-xs opacity-60 font-medium">{totalItems} total</span>
+					</div>
+
+					<!-- Pagination Controls -->
+					<Pagination
+						{currentPage}
+						{totalPages}
+						{totalItems}
+						{hasNextPage}
+						{hasPreviousPage}
+						limit={parseInt(limit)}
+						onPageChange={goToPage}
+						{onLimitChange}
+					/>
+
+					<!-- Exercises Table or Empty State -->
+					{#if paginatedExercises && hasExercises}
+						<div class="overflow-x-auto">
+							<ExercisesTable exercises={paginatedExercises.data} />
+						</div>
+					{:else}
+						<div class="text-center py-12 opacity-40">
+							<p class="text-sm mb-2">No exercises yet</p>
+							<p class="text-xs opacity-75">Create one from the Actions panel to get started</p>
+						</div>
+					{/if}
 				</div>
 			</div>
 		</div>
-		<div class="exercises-block">
-			<h2>Exercises</h2>
-			<Pagination
-				{currentPage}
-				{totalPages}
-				{totalItems}
-				{hasNextPage}
-				{hasPreviousPage}
-				limit={parseInt(limit)}
-				onPageChange={goToPage}
-				{onLimitChange}
-			/>
-			{#if paginatedExercises && hasExercises}
-				<!-- Pagination controls -->
-
-				<!-- Table -->
-				<ExercisesTable exercises={paginatedExercises.data} />
-
-				<!-- Bottom pagination (for multi-page) -->
-				<!-- {#if props.data.serverData.paginatedExercises?.pagination.totalPages > 1}
-					<Pagination ... showLimitSelector={false} />
-				{/if} -->
-			{/if}
-		</div>
-		<div class="delete-row"></div>
 	</div>
 {/if}
