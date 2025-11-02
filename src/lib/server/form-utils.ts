@@ -23,13 +23,20 @@ export function processExerciseFormData(formData: FormData): FormData {
 	};
 
 	// Optional fields that should be set to null when empty (not skipped)
-	const optionalNullableFields: string[] = ["explanation", "translation"]  satisfies (keyof Exercise.ResponseDto)[];
+	const optionalNullableFields: string[] = ["explanation", "translation"] satisfies (keyof Exercise.ResponseDto)[];
 
 	// Process all form entries
 	for (const [key, value] of formData.entries()) {
 		// Handle explicit NULL marker
 		if (typeof value === "string" && value === "NULL") {
 			processed.append(key, "NULL");
+			continue;
+		}
+
+		// Handle empty array marker
+		if (typeof value === "string" && value === "EMPTY_ARRAY") {
+			// Don't add to processed, but mark that we saw this field
+			// The array will naturally be empty since we won't collect any values
 			continue;
 		}
 
@@ -61,9 +68,14 @@ export function processExerciseFormData(formData: FormData): FormData {
 
 	// Append array fields with proper syntax
 	for (const key of arrayKeys) {
-		arrayFields[key].forEach((value) => {
-			processed.append(`${key}[]`, value);
-		});
+		// If array is empty, send empty array marker
+		if (arrayFields[key].length === 0) {
+			processed.append(`${key}[]`, "");
+		} else {
+			arrayFields[key].forEach((value) => {
+				processed.append(`${key}[]`, value);
+			});
+		}
 	}
 
 	return processed;

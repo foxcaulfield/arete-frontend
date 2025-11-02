@@ -44,11 +44,13 @@
 	let translationText = $state(exercise?.translation ?? "");
 	let correctAnswerText = $state(exercise?.correctAnswer ?? "");
 	let explanationText = $state(exercise?.explanation ?? "");
-	
-	// Track if explanation should be explicitly set to null
+
+	// Track if fields should be explicitly set to null
 	let clearExplanation = $state(false);
 	let clearTranslation = $state(false);
-	
+	let clearAdditionalAnswers = $state(false);
+	let clearDistractors = $state(false);
+
 	let additionalCorrectAnswers = $state<Array<{ id: number; value: string }>>(
 		(exercise?.additionalCorrectAnswers || []).map((ans) => ({ id: randomId(), value: ans }))
 	);
@@ -117,22 +119,42 @@
 			method="POST"
 			enctype="multipart/form-data"
 			use:enhance={async ({ formData }) => {
-				distractors?.forEach((distractor) => {
-					formData.append(`distractors`, distractor.value);
-				});
-				
-				additionalCorrectAnswers?.forEach((answer, index) => {
-					formData.append(`additionalCorrectAnswers`, answer.value);
-				});
-				
-				// Handle explicit null for explanation
+				// Handle distractors array
+				// distractors?.forEach((distractor) => {
+				// 	formData.append(`distractors`, distractor.value);
+				// });
+
+				// Handle additional correct answers array
+				// Always send values (empty array if none, which will be handled as empty on backend)
+				if (clearAdditionalAnswers || additionalCorrectAnswers.length === 0) {
+					// Send empty array marker so backend knows to set it to []
+					formData.append("additionalCorrectAnswers", "EMPTY_ARRAY");
+				} else {
+					const uniqueAnswers = [...new Set(additionalCorrectAnswers.map(a => a.value))];
+
+					uniqueAnswers.forEach((answer) => {
+						formData.append(`additionalCorrectAnswers`, answer);
+					});
+				}
+
+				if (clearDistractors || distractors.length === 0) {
+					// Send empty array marker so backend knows to set it to []
+					formData.append("distractors", "EMPTY_ARRAY");
+				} else {
+					const uniqueDistractors = [...new Set(distractors.map(d => d.value))];
+
+					uniqueDistractors.forEach((dist) => {
+						formData.append(`distractors`, dist);
+					});
+				}
+
+				// Handle explicit null for text fields
 				if (clearExplanation || explanationText.trim().length === 0) {
-					formData.set('explanation', 'NULL');
+					formData.set("explanation", "NULL");
 				}
 				if (clearTranslation || translationText.trim().length === 0) {
-					formData.set('translation', 'NULL');
+					formData.set("translation", "NULL");
 				}
-				
 				return async ({ update }) => {
 					await update();
 				};
@@ -258,60 +280,65 @@
 								</label>
 								<span class="text-xs text-surface-500">{translationLength}/{translationMaxLength}</span>
 							</div>
-								<div class="relative">
-									<textarea
+							<div class="relative">
+								<textarea
 									disabled={clearTranslation}
-										id="translation"
-										name="translation"
-										bind:value={translationText}
-										autocomplete="off"
-										placeholder="translation"
-										maxlength={translationMaxLength}
-										rows="2"
-										class="w-full resize-none rounded border border-surface-600 bg-surface-800 px-3 py-2 text-sm text-surface-100 placeholder-surface-500 focus:border-transparent focus:ring-2 focus:ring-primary-500 focus:outline-none"
-									></textarea>
-									{#if translationText || (mode === "edit" && exercise?.translation)}
-										<button
+									id="translation"
+									name="translation"
+									bind:value={translationText}
+									autocomplete="off"
+									placeholder="translation"
+									maxlength={translationMaxLength}
+									rows="2"
+									class="w-full resize-none rounded border border-surface-600 bg-surface-800 px-3 py-2 text-sm text-surface-100 placeholder-surface-500 focus:border-transparent focus:ring-2 focus:ring-primary-500 focus:outline-none"
+								></textarea>
+								{#if translationText || (mode === "edit" && exercise?.translation)}
+									<button
 										disabled={clearTranslation}
-											type="button"
-											onclick={() => {
-												translationText = "";
-												clearTranslation = true;
-												toast.push("Translation will be removed", {
-													theme: {
-														"--toastBackground": "var(--color-warning-500)",
-														"--toastColor": "white",
-														"--toastBarBackground": "var(--color-warning-700)",
-													},
-												});
-											}}
-											class="absolute right-2 top-2 rounded p-1 text-surface-400 transition-colors hover:bg-surface-700 hover:text-surface-200 disabled:hover:bg-transparent disabled:text-surface-500"
-											title="Clear translation (set to null)"
-										>
-											<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-											</svg>
-										</button>
-									{/if}
-								</div>
-								{#if clearTranslation}
-									<p class="mt-1 text-xs text-warning-500">
-										Translation will be removed
-										<button
-											type="button"
-											onclick={() => {
-												clearTranslation = false;
-												translationText = exercise?.translation ?? "";
-											}}
-											class="ml-2 underline hover:text-warning-400"
-										>
-											Undo
-										</button>
-									</p>
+										type="button"
+										onclick={() => {
+											translationText = "";
+											clearTranslation = true;
+											toast.push("Translation will be removed", {
+												theme: {
+													"--toastBackground": "var(--color-warning-500)",
+													"--toastColor": "white",
+													"--toastBarBackground": "var(--color-warning-700)",
+												},
+											});
+										}}
+										class="absolute top-2 right-2 rounded p-1 text-surface-400 transition-colors hover:bg-surface-700 hover:text-surface-200 disabled:text-surface-500 disabled:hover:bg-transparent"
+										title="Clear translation (set to null)"
+									>
+										<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M6 18L18 6M6 6l12 12"
+											/>
+										</svg>
+									</button>
 								{/if}
-								{#if formErrors?.translation}
-									<p class="mt-1 text-xs text-error-500">{getErrorMessage(formErrors.translation)}</p>
-								{/if}
+							</div>
+							{#if clearTranslation}
+								<p class="mt-1 text-xs text-warning-500">
+									Translation will be removed
+									<button
+										type="button"
+										onclick={() => {
+											clearTranslation = false;
+											translationText = exercise?.translation ?? "";
+										}}
+										class="ml-2 underline hover:text-warning-400"
+									>
+										Undo
+									</button>
+								</p>
+							{/if}
+							{#if formErrors?.translation}
+								<p class="mt-1 text-xs text-error-500">{getErrorMessage(formErrors.translation)}</p>
+							{/if}
 							<!-- </div> -->
 						</div>
 					</div>
@@ -352,18 +379,67 @@
 			<div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
 				<!-- Alternative/Additional Correct Answers -->
 				<div class="lg:col-span-1">
-					<label
-						for="alternatives-input"
-						class="mb-2 block text-xs font-semibold tracking-wide text-surface-300 uppercase"
-					>
-						Alternatives (Optional)
-					</label>
+					<div class="mb-2 flex items-center justify-between">
+						<label
+							for="alternatives-input"
+							class="block text-xs font-semibold tracking-wide text-surface-300 uppercase"
+						>
+							Alternatives (Optional)
+						</label>
+						{#if additionalCorrectAnswers.length > 0 || (mode === "edit" && exercise?.additionalCorrectAnswers?.length)}
+							<button
+								type="button"
+								onclick={() => {
+									additionalCorrectAnswers = [];
+									clearAdditionalAnswers = true;
+									toast.push("Alternatives will be removed", {
+										theme: {
+											"--toastBackground": "var(--color-warning-500)",
+											"--toastColor": "white",
+											"--toastBarBackground": "var(--color-warning-700)",
+										},
+									});
+								}}
+								class="text-xs text-error-500 hover:text-error-400"
+								title="Clear all alternatives"
+							>
+								Clear all
+							</button>
+						{/if}
+					</div>
 					<TagsInput
+						validate={({ value, inputValue }) => {
+							if (value.includes(inputValue)) {
+								toast.push("Duplicate additional answer value", {
+									theme: {
+										"--toastBackground": "var(--color-warning-500)",
+										"--toastColor": "white",
+										"--toastBarBackground": "var(--color-warning-700)",
+									},
+								});
+								return false;
+							}
+							return true;
+						}}
 						onValueChange={({ value }) => {
-							additionalCorrectAnswers = value.map((val) => ({
+							const uniqueValues = [...new Set(value)];
+							if (uniqueValues.length < value.length) {
+								toast.push("Duplicate values removed", {
+									theme: {
+										"--toastBackground": "var(--color-warning-500)",
+										"--toastColor": "white",
+										"--toastBarBackground": "var(--color-warning-700)",
+									},
+								});
+							}
+							additionalCorrectAnswers = uniqueValues.map((val) => ({
 								id: randomId(),
 								value: val,
 							}));
+							// Reset clear flag when user adds new values
+							if (value.length > 0) {
+								clearAdditionalAnswers = false;
+							}
 						}}
 						value={additionalCorrectAnswers.map((d) => d.value)}
 					>
@@ -397,23 +473,88 @@
 						</TagsInput.Control>
 						<TagsInput.HiddenInput />
 					</TagsInput>
-					<p class="mt-1 text-xs text-surface-400">{additionalCorrectAnswers.length} added</p>
+					{#if clearAdditionalAnswers}
+						<p class="mt-1 text-xs text-warning-500">
+							All alternatives will be removed when you save
+							<button
+								type="button"
+								onclick={() => {
+									clearAdditionalAnswers = false;
+									additionalCorrectAnswers = (exercise?.additionalCorrectAnswers || []).map(
+										(ans) => ({
+											id: randomId(),
+											value: ans,
+										})
+									);
+								}}
+								class="ml-2 underline hover:text-warning-400"
+							>
+								Undo
+							</button>
+						</p>
+					{:else}
+						<p class="mt-1 text-xs text-surface-400">{additionalCorrectAnswers.length} added</p>
+					{/if}
 				</div>
 
 				<!-- Row 3: Wrong Answers (Always Visible) -->
 				<div class="lg:col-span-2">
-					<label
-						for="distractors-input"
-						class="mb-2 block text-xs font-semibold tracking-wide text-surface-300 uppercase"
-					>
-						Wrong Answers
-					</label>
+					<div class="mb-2 flex items-center justify-between">
+						<label
+							for="distractors-input"
+							class="block text-xs font-semibold tracking-wide text-surface-300 uppercase"
+						>
+							Wrong Answers
+						</label>
+						{#if distractors.length > 0 || (mode === "edit" && exercise?.distractors?.length)}
+							<button
+								type="button"
+								onclick={() => {
+									distractors = [];
+									clearDistractors = true;
+									toast.push("Distractors will be removed", {
+										theme: {
+											"--toastBackground": "var(--color-warning-500)",
+											"--toastColor": "white",
+											"--toastBarBackground": "var(--color-warning-700)",
+										},
+									});
+								}}
+								class="text-xs text-error-500 hover:text-error-400"
+								title="Clear all distractors"
+							>
+								Clear all
+							</button>
+						{/if}
+					</div>
+
 					<TagsInput
+						validate={({ value, inputValue }) => {
+							if (value.includes(inputValue)) {
+								toast.push("Duplicate distractor value", {
+									theme: {
+										"--toastBackground": "var(--color-warning-500)",
+										"--toastColor": "white",
+										"--toastBarBackground": "var(--color-warning-700)",
+									},
+								});
+								return false;
+							}
+							return true;
+						}}
 						onValueChange={({ value }) => {
-							distractors = value.map((val) => ({
+							// debugger;
+							const newValues = [...new Set(value)];
+							console.log(newValues);
+							distractors = [... new Set(value)].map((val) => ({
 								id: randomId(),
 								value: val,
 							}));
+
+							// Reset clear flag when user adds new values
+							if (value.length > 0) {
+								clearDistractors = false;
+							}
 						}}
 						value={distractors.map((d) => d.value)}
 					>
@@ -422,7 +563,7 @@
 								{#snippet children(tagsInput)}
 									<div class="mb-2 flex flex-wrap gap-1">
 										{#each tagsInput().value as value, index (index)}
-											<TagsInput.Item {value} {index}>
+											<TagsInput.Item {value} {index} id={value + index}>
 												<TagsInput.ItemPreview>
 													<div
 														class="flex items-center gap-1 rounded border border-error-700 bg-error-900 px-1.5 py-0.5"
@@ -447,7 +588,27 @@
 						</TagsInput.Control>
 						<TagsInput.HiddenInput />
 					</TagsInput>
-					<p class="mt-1 text-xs text-surface-400">{distractors.length}/4 added</p>
+					{#if clearDistractors}
+						<p class="mt-1 text-xs text-warning-500">
+							All distractors will be removed when you save
+							<button
+								type="button"
+								onclick={() => {
+									clearDistractors = false;
+									distractors = (exercise?.distractors || []).map((ans) => ({
+										id: randomId(),
+										value: ans,
+									}));
+								}}
+								class="ml-2 underline hover:text-warning-400"
+							>
+								Undo
+							</button>
+						</p>
+					{:else}
+						<p class="mt-1 text-xs text-surface-400">{distractors.length} added</p>
+					{/if}
+					<!-- <p class="mt-1 text-xs text-surface-400">{distractors.length}/4 added</p> -->
 				</div>
 			</div>
 
@@ -471,7 +632,7 @@
 						></textarea>
 						{#if explanationText || (mode === "edit" && exercise?.explanation)}
 							<button
-							disabled={clearExplanation}
+								disabled={clearExplanation}
 								type="button"
 								onclick={() => {
 									explanationText = "";
@@ -484,11 +645,16 @@
 										},
 									});
 								}}
-								class="absolute right-2 top-2 rounded p-1 text-surface-400 transition-colors hover:bg-surface-700 hover:text-surface-200 disabled:hover:bg-transparent disabled:text-surface-500"
+								class="absolute top-2 right-2 rounded p-1 text-surface-400 transition-colors hover:bg-surface-700 hover:text-surface-200 disabled:text-surface-500 disabled:hover:bg-transparent"
 								title="Clear explanation (set to null)"
 							>
 								<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M6 18L18 6M6 6l12 12"
+									/>
 								</svg>
 							</button>
 						{/if}
@@ -543,8 +709,7 @@
 						type="submit"
 						color="primary"
 						size="sm"
-						disabled={
-							questionLength < questionMinLength}
+						disabled={questionLength < questionMinLength}
 					/>
 					<Button
 						text="Cancel"
