@@ -121,12 +121,14 @@
 		<div>
 			<!-- Exercise Type Selection -->
 			<div>
-				<label for="type" class="label">Exercise Type</label>
-				<select id="type" name="type" value={exercise?.type ?? "FILL_IN_THE_BLANK"}>
-					{#each exerciseTypes as type}
+				<label for="type" class="label">
+					<span class="label-text">Exercise Type</span>
+					<select class="select" id="type" name="type" value={exercise?.type ?? "FILL_IN_THE_BLANK"}>
+						{#each exerciseTypes as type}
 						<option value={type}>{formatExerciseType(type)}</option>
-					{/each}
-				</select>
+						{/each}
+					</select>
+				</label>
 				{#if formErrors?.type}
 					<span>{getErrorMessage(formErrors.type)}</span>
 				{/if}
