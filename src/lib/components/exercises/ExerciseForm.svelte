@@ -35,16 +35,30 @@
 	// Exercise types
 	const exerciseTypes: Exercise.ExerciseType[] = ["FILL_IN_THE_BLANK", "CHOICE_SINGLE"];
 
-	// Dynamic fields management
-	let additionalCorrectAnswers = $state<Array<{ id: number; value: string }>>([]);
-	let distractors = $state<Array<{ id: number; value: string }>>([]);
-
-	// UI State
-	let questionLength = $derived(exercise?.question?.length ?? 0);
-	let translationLength = $derived(exercise?.translation?.length ?? 0);
-
 	// Utility functions
 	const randomId = () => Math.floor(Math.random() * 1_000_000);
+
+	// Form state - initialize once from props
+	let selectedType = $state<Exercise.ExerciseType | undefined>(exercise?.type);
+	let questionText = $state(exercise?.question ?? "");
+	let translationText = $state(exercise?.translation ?? "");
+	let correctAnswerText = $state(exercise?.correctAnswer ?? "");
+	let explanationText = $state(exercise?.explanation ?? "");
+	
+	// Track if explanation should be explicitly set to null
+	let clearExplanation = $state(false);
+	let clearTranslation = $state(false);
+	
+	let additionalCorrectAnswers = $state<Array<{ id: number; value: string }>>(
+		(exercise?.additionalCorrectAnswers || []).map((ans) => ({ id: randomId(), value: ans }))
+	);
+	let distractors = $state<Array<{ id: number; value: string }>>(
+		(exercise?.distractors || []).map((dist) => ({ id: randomId(), value: dist }))
+	);
+
+	// Derived UI state
+	let questionLength = $derived(questionText.length);
+	let translationLength = $derived(translationText.length);
 
 	function getErrorMessage(fieldErrors: string | string[] | undefined): string | undefined {
 		if (!fieldErrors) return undefined;
@@ -54,21 +68,6 @@
 	function formatExerciseType(type: string): string {
 		return type.replaceAll("_", " ").toLowerCase();
 	}
-
-	// Initialize form data from existing exercise (edit mode)
-	$effect(() => {
-		if (mode === "edit" && exercise) {
-			additionalCorrectAnswers = (exercise.additionalCorrectAnswers || []).map((ans) => ({
-				id: randomId(),
-				value: ans,
-			}));
-			distractors = (exercise.distractors || []).map((dist) => ({
-				id: randomId(),
-				value: dist,
-			}));
-			questionLength = exercise.question?.length ?? 0;
-		}
-	});
 
 	// Validation helpers
 	const hasQuestionError = $derived(!!formErrors?.question);
@@ -121,9 +120,19 @@
 				distractors?.forEach((distractor) => {
 					formData.append(`distractors`, distractor.value);
 				});
+				
 				additionalCorrectAnswers?.forEach((answer, index) => {
 					formData.append(`additionalCorrectAnswers`, answer.value);
 				});
+				
+				// Handle explicit null for explanation
+				if (clearExplanation || explanationText.trim().length === 0) {
+					formData.set('explanation', 'NULL');
+				}
+				if (clearTranslation || translationText.trim().length === 0) {
+					formData.set('translation', 'NULL');
+				}
+				
 				return async ({ update }) => {
 					await update();
 				};
@@ -151,7 +160,7 @@
 									type="radio"
 									name="type"
 									value={type}
-									checked={exercise?.type === type}
+									bind:group={selectedType}
 									class="h-4 w-4"
 								/>
 								<span class="ml-2 text-sm text-surface-100">{formatExerciseType(type)}</span>
@@ -192,17 +201,11 @@
 							<textarea
 								id="question"
 								name="question"
-								value={exercise?.question ?? ""}
+								bind:value={questionText}
 								autocomplete="off"
 								placeholder="What is the capital of France?"
 								maxlength={questionMaxLength}
 								rows="2"
-								onchange={(e) => {
-									questionLength = (e.target as HTMLTextAreaElement).value.length;
-								}}
-								oninput={(e) => {
-									questionLength = (e.target as HTMLTextAreaElement).value.length;
-								}}
 								class={`w-full resize-none rounded border bg-surface-800 px-3 py-2 text-sm text-surface-100 placeholder-surface-500 focus:border-transparent focus:ring-2 focus:ring-primary-500 focus:outline-none ${
 									hasQuestionError ? "border-error-600" : "border-surface-600"
 								}`}
@@ -227,7 +230,7 @@
 										class="text-xs text-primary-500 hover:text-primary-400"
 										onclick={() => {
 											navigator.clipboard.writeText(
-												(exercise?.question || "").replace(/{/g, "").replace(/}/g, "")
+												questionText.replace(/{/g, "").replace(/}/g, "")
 											);
 											toast.push("Copied!", {
 												theme: {
@@ -255,22 +258,61 @@
 								</label>
 								<span class="text-xs text-surface-500">{translationLength}/{translationMaxLength}</span>
 							</div>
-							<textarea
-								id="translation"
-								name="translation"
-								value={exercise?.translation ?? ""}
-								autocomplete="off"
-								placeholder="translation"
-								maxlength={translationMaxLength}
-								rows="2"
-								onchange={(e) => {
-									translationLength = (e.target as HTMLTextAreaElement).value.length;
-								}}
-								oninput={(e) => {
-									translationLength = (e.target as HTMLTextAreaElement).value.length;
-								}}
-								class="w-full resize-none rounded border border-surface-600 bg-surface-800 px-3 py-2 text-sm text-surface-100 placeholder-surface-500 focus:border-transparent focus:ring-2 focus:ring-primary-500 focus:outline-none"
-							></textarea>
+								<div class="relative">
+									<textarea
+									disabled={clearTranslation}
+										id="translation"
+										name="translation"
+										bind:value={translationText}
+										autocomplete="off"
+										placeholder="translation"
+										maxlength={translationMaxLength}
+										rows="2"
+										class="w-full resize-none rounded border border-surface-600 bg-surface-800 px-3 py-2 text-sm text-surface-100 placeholder-surface-500 focus:border-transparent focus:ring-2 focus:ring-primary-500 focus:outline-none"
+									></textarea>
+									{#if translationText || (mode === "edit" && exercise?.translation)}
+										<button
+										disabled={clearTranslation}
+											type="button"
+											onclick={() => {
+												translationText = "";
+												clearTranslation = true;
+												toast.push("Translation will be removed", {
+													theme: {
+														"--toastBackground": "var(--color-warning-500)",
+														"--toastColor": "white",
+														"--toastBarBackground": "var(--color-warning-700)",
+													},
+												});
+											}}
+											class="absolute right-2 top-2 rounded p-1 text-surface-400 transition-colors hover:bg-surface-700 hover:text-surface-200 disabled:hover:bg-transparent disabled:text-surface-500"
+											title="Clear translation (set to null)"
+										>
+											<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+											</svg>
+										</button>
+									{/if}
+								</div>
+								{#if clearTranslation}
+									<p class="mt-1 text-xs text-warning-500">
+										Translation will be removed
+										<button
+											type="button"
+											onclick={() => {
+												clearTranslation = false;
+												translationText = exercise?.translation ?? "";
+											}}
+											class="ml-2 underline hover:text-warning-400"
+										>
+											Undo
+										</button>
+									</p>
+								{/if}
+								{#if formErrors?.translation}
+									<p class="mt-1 text-xs text-error-500">{getErrorMessage(formErrors.translation)}</p>
+								{/if}
+							<!-- </div> -->
 						</div>
 					</div>
 
@@ -287,7 +329,7 @@
 							id="correctAnswer"
 							type="text"
 							name="correctAnswer"
-							value={exercise?.correctAnswer ?? ""}
+							bind:value={correctAnswerText}
 							autocomplete="off"
 							placeholder="Paris"
 							maxlength={answerMaxLength}
@@ -417,14 +459,55 @@
 					+ Explanation (Optional)
 				</summary>
 				<div class="mt-3">
-					<textarea
-						id="explanation"
-						name="explanation"
-						value={exercise?.explanation ?? ""}
-						placeholder="Why is this the correct answer?"
-						rows="3"
-						class="w-full resize-none rounded border border-surface-600 bg-surface-800 px-3 py-2 text-sm text-surface-100 placeholder-surface-500 focus:border-transparent focus:ring-2 focus:ring-primary-500 focus:outline-none"
-					></textarea>
+					<div class="relative">
+						<textarea
+							disabled={clearExplanation}
+							id="explanation"
+							name="explanation"
+							bind:value={explanationText}
+							placeholder="Why is this the correct answer?"
+							rows="3"
+							class="w-full resize-none rounded border border-surface-600 bg-surface-800 px-3 py-2 text-sm text-surface-100 placeholder-surface-500 focus:border-transparent focus:ring-2 focus:ring-primary-500 focus:outline-none"
+						></textarea>
+						{#if explanationText || (mode === "edit" && exercise?.explanation)}
+							<button
+							disabled={clearExplanation}
+								type="button"
+								onclick={() => {
+									explanationText = "";
+									clearExplanation = true;
+									toast.push("Explanation will be removed", {
+										theme: {
+											"--toastBackground": "var(--color-warning-500)",
+											"--toastColor": "white",
+											"--toastBarBackground": "var(--color-warning-700)",
+										},
+									});
+								}}
+								class="absolute right-2 top-2 rounded p-1 text-surface-400 transition-colors hover:bg-surface-700 hover:text-surface-200 disabled:hover:bg-transparent disabled:text-surface-500"
+								title="Clear explanation (set to null)"
+							>
+								<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+								</svg>
+							</button>
+						{/if}
+					</div>
+					{#if clearExplanation}
+						<p class="mt-1 text-xs text-warning-500">
+							Explanation will be removed when you save
+							<button
+								type="button"
+								onclick={() => {
+									clearExplanation = false;
+									explanationText = exercise?.explanation ?? "";
+								}}
+								class="ml-2 underline hover:text-warning-400"
+							>
+								Undo
+							</button>
+						</p>
+					{/if}
 					{#if formErrors?.explanation}
 						<p class="mt-1 text-xs text-error-500">{getErrorMessage(formErrors.explanation)}</p>
 					{/if}
@@ -448,7 +531,7 @@
 				<div class="text-xs text-surface-400">
 					{#if hasQuestionError || hasAnswerError || hasTypeError}
 						<span class="font-medium text-error-500">Please fix errors</span>
-					{:else if questionLength >= questionMinLength && exercise?.correctAnswer}
+					{:else if questionLength >= questionMinLength && correctAnswerText}
 						<span class="font-medium text-success-500">Ready ✓</span>
 					{:else}
 						<span>Fill required fields</span>

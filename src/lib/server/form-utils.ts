@@ -5,7 +5,9 @@
 
 /**
  * Processes FormData for exercise creation/update
- * - Removes empty strings and empty files
+ * - Handles NULL marker for explicit null values
+ * - Converts empty strings to NULL for optional fields
+ * - Removes empty files
  * - Converts array fields to proper format (field[] syntax)
  */
 export function processExerciseFormData(formData: FormData): FormData {
@@ -20,10 +22,14 @@ export function processExerciseFormData(formData: FormData): FormData {
 		distractors: [],
 	};
 
+	// Optional fields that should be set to null when empty (not skipped)
+	const optionalNullableFields: string[] = ["explanation", "translation"]  satisfies (keyof Exercise.ResponseDto)[];
+
 	// Process all form entries
 	for (const [key, value] of formData.entries()) {
-		// Skip empty strings
-		if (typeof value === "string" && value.trim().length === 0) {
+		// Handle explicit NULL marker
+		if (typeof value === "string" && value === "NULL") {
+			processed.append(key, "NULL");
 			continue;
 		}
 
@@ -37,6 +43,15 @@ export function processExerciseFormData(formData: FormData): FormData {
 			if (typeof value === "string" && value.trim().length > 0) {
 				arrayFields[key as ArrayKey].push(value.trim());
 			}
+			continue;
+		}
+
+		// Handle empty strings for nullable fields - convert to NULL
+		if (typeof value === "string" && value.trim().length === 0) {
+			if (optionalNullableFields.includes(key)) {
+				processed.append(key, "NULL");
+			}
+			// Skip empty strings for other fields (they're required or don't need null)
 			continue;
 		}
 
