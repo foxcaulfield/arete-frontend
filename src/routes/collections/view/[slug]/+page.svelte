@@ -66,9 +66,9 @@
 		});
 	}
 
-	function goToDrill() {
+	function goToQuiz() {
 		const qs = page.url.search;
-		goto(`/collections/view/${currentCollection?.id}/exercises/drill${qs || ""}`, {
+		goto(`/collections/view/${currentCollection?.id}/exercises/quiz${qs || ""}`, {
 			noScroll: true,
 		});
 	}
@@ -176,7 +176,7 @@
 				<div class="space-y-2 card preset-filled-surface-100-900 p-3">
 					<span class="block text-xs font-medium opacity-60">Actions</span>
 					<Button text="Create Exercise" onclick={goToCreateExercise} fullWidth={true} size="sm" />
-					<Button text="Start Drill" onclick={goToDrill} color="secondary" fullWidth={true} size="sm" />
+					<Button text="Start Quiz" onclick={goToQuiz} color="secondary" fullWidth={true} size="sm" />
 					<!-- <Button
 						withAction={true}
 						action="?/delete"
