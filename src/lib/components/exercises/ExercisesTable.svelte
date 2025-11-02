@@ -15,13 +15,15 @@
 				<th>type</th>
 			</tr>
 		</thead>
-		<tbody class="[&>tr]:hover:preset-tonal-primary">
+		<tbody class="[&>tr]:hover:preset-tonal-surface">
 			{#each props.exercises as exercise (exercise.id)}
 				<tr>
 					<td
 						><Button
 							text="Edit"
 							size="sm"
+							preset="outlined"
+							color="tertiary"
 							onclick={() =>
 								goto(`/collections/view/${exercise.collectionId}/exercises/edit/${exercise.id}`)}
 						/></td
