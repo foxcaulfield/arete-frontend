@@ -38,8 +38,7 @@
 	let distractors = $state<Array<{ id: number; value: string }>>([]);
 
 	// UI State
-	let questionLength = $state(exercise?.question?.length ?? 0);
-	let expandAdvanced = $state(false);
+	let questionLength = $derived(exercise?.question?.length ?? 0);
 
 	// Utility functions
 	const randomId = () => Math.floor(Math.random() * 1_000_000);
@@ -51,14 +50,6 @@
 
 	function formatExerciseType(type: string): string {
 		return type.replaceAll("_", " ").toLowerCase();
-	}
-
-	function getExerciseTypeDescription(type: string): string {
-		const descriptions: Record<string, string> = {
-			FILL_IN_THE_BLANK: "Type the answer",
-			CHOICE_SINGLE: "Select one option",
-		};
-		return descriptions[type] ?? "";
 	}
 
 	// Initialize form data from existing exercise (edit mode)
@@ -84,9 +75,6 @@
 	const questionMaxLength = 300;
 	const answerMaxLength = 50;
 
-	// Derived state for exercise type
-	const currentExerciseType = $derived(exercise?.type ?? "FILL_IN_THE_BLANK");
-	const isChoiceSingle = $derived(currentExerciseType === "CHOICE_SINGLE");
 </script>
 
 <!-- Main Form Container -->
@@ -138,16 +126,17 @@
 			<div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
 				<!-- Exercise Type -->
 				<div class="lg:col-span-1">
-					<label class="mb-2 block text-xs font-semibold tracking-wide text-surface-300 uppercase">
+					<label for="exercise-type-radio-0" class="mb-2 block text-xs font-semibold tracking-wide text-surface-300 uppercase">
 						Type
 						<span class="text-error-600">*</span>
 					</label>
 					<div class="space-y-2">
-						{#each exerciseTypes as type}
+						{#each exerciseTypes as type, i}
 							<label
 								class="flex cursor-pointer items-center rounded border border-surface-600 p-2 transition-colors peer-has-checked:border-primary-500 hover:bg-surface-800"
 							>
 								<input
+									id={"exercise-type-radio-" + i}
 									type="radio"
 									name="type"
 									value={type}
@@ -269,7 +258,7 @@
 			<div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
 				<!-- Alternative/Additional Correct Answers -->
 				<div class="lg:col-span-1">
-					<label class="mb-2 block text-xs font-semibold tracking-wide text-surface-300 uppercase">
+					<label for="alternatives-input" class="mb-2 block text-xs font-semibold tracking-wide text-surface-300 uppercase">
 						Alternatives (Optional)
 					</label>
 					<TagsInput
@@ -304,6 +293,7 @@
 								{/snippet}
 							</TagsInput.Context>
 							<TagsInput.Input
+								id="alternatives-input"
 								placeholder="paris, PARIS, Île de France..."
 								class="w-full rounded border border-surface-600 bg-surface-800 px-3 py-2 text-sm text-surface-100 placeholder-surface-500 focus:border-transparent focus:ring-2 focus:ring-primary-500 focus:outline-none"
 							/>
@@ -315,7 +305,7 @@
 
 				<!-- Row 3: Wrong Answers (Always Visible) -->
 				<div class="lg:col-span-2">
-					<label class="mb-2 block text-xs font-semibold tracking-wide text-surface-300 uppercase">
+					<label for="distractors-input" class="mb-2 block text-xs font-semibold tracking-wide text-surface-300 uppercase">
 						Wrong Answers
 					</label>
 					<TagsInput
@@ -350,6 +340,7 @@
 								{/snippet}
 							</TagsInput.Context>
 							<TagsInput.Input
+								id="distractors-input"
 								placeholder="london, berlin, madrid..."
 								class="w-full rounded border border-surface-600 bg-surface-800 px-3 py-2 text-sm text-surface-100 placeholder-surface-500 focus:border-transparent focus:ring-2 focus:ring-primary-500 focus:outline-none"
 							/>
