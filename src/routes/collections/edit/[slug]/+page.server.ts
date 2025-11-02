@@ -1,8 +1,7 @@
 import { Backend } from "$lib/server/backend-manager";
-// import { handleActionError, mapLoadError, ok } from "$lib/server/error-utils";
-import { fail, redirect } from "@sveltejs/kit";
-import type { Actions } from "./$types";
-import type { PageServerLoad } from "./$types";
+import { fail, isRedirect, redirect } from "@sveltejs/kit";
+import { ApiError } from "$lib/server/errors";
+import type { Actions, PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ params, parent, fetch }) => {
 	const collectionId = params.slug;
@@ -19,7 +18,7 @@ export const load: PageServerLoad = async ({ params, parent, fetch }) => {
 	try {
 		const backend = new Backend(fetch);
 		const collection = await backend.api.collections.getById(collectionId);
-		return { serverData: { collection }, flags: null};
+		return { serverData: { collection }, flags: null };
 	} catch (e) {
 		const flags = Backend.extractApiErrorFlags(e); // may throw for unexpected
 		return { serverData: { collection: null }, flags };
@@ -29,38 +28,68 @@ export const load: PageServerLoad = async ({ params, parent, fetch }) => {
 export const actions = {
 	update: async ({ url, fetch, params, request }) => {
 		const collectionId = params.slug;
+
+		// Get form data once at the start
 		const data = await request.formData();
-		const name = data.get("name")?.toString();
-		const description = data.get("description")?.toString();
+		const name = String(data.get("name") ?? "").trim();
+		const description = (data.get("description")?.toString().trim() || undefined) as string | undefined;
 
-		const values = { name, description };
+		// Preserve values for re-rendering on fail
+		const values = {
+			name: data.get("name")?.toString() ?? "",
+			description: data.get("description")?.toString() ?? "",
+		};
 
+		// Basic client-side validation
 		if (!name) {
 			return fail(400, {
-				message: "Name is required",
-				fieldErrors: { name: "Required" },
+				errorText: "Name is required",
+				fieldErrors: { name: ["Name is required"] },
 				values,
 			});
 		}
 
 		try {
 			const backend = new Backend(fetch);
-			await backend.api.collections.update(collectionId, values);
+			await backend.api.collections.update(collectionId, { name, description });
 
 			const searchParams = new URLSearchParams(url.search);
 			searchParams.set("updated", "1");
 			const queryString = searchParams.toString();
 
 			throw redirect(303, `/collections/view/${params.slug}${queryString ? `?${queryString}` : ""}`);
-		} catch (e) {
-			const result = Backend.handleActionError(e, {
-				// redirectToOn401: `/auth?redirectTo=${encodeURIComponent(url.pathname)}`,
-			});
-
-			if ("data" in result && result.data) {
-				result.data.values = values;
+		} catch (error) {
+			// Handle redirect (not an error)
+			if (isRedirect(error)) {
+				throw error;
 			}
-			return result;
+
+			// Handle API errors
+			if (error instanceof ApiError) {
+				// Validation error with field-specific messages
+				if (error.statusCode === 400 && error.fields) {
+					return fail(400, {
+						errorText: error.message || "Validation failed",
+						fieldErrors: error.fields,
+						values,
+					});
+				}
+
+				// Other API errors (403, 404, etc.)
+				return fail(error.statusCode, {
+					errorText: error.message || "An error occurred",
+					fieldErrors: {},
+					values,
+				});
+			}
+
+			// Unexpected errors
+			console.error("Unexpected error during collection update:", error);
+			return fail(500, {
+				errorText: error instanceof Error ? error.message : "An unexpected error occurred",
+				fieldErrors: {},
+				values,
+			});
 		}
 	},
 } satisfies Actions;
