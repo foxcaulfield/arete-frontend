@@ -184,39 +184,7 @@
 			/>
 
 			<!-- Two Column Layout: Additional Answers & Distractors -->
-			<div class="two-columns">
-				<!-- <div class="form-group">
-					<label class="label" for="additional-correct-answers">Additional Correct Answers</label>
-					<p class="muted" style="font-size:0.875rem;margin-bottom:0.5rem">
-						Optional alternative correct answers (case-insensitive)
-					</p>
-					<Button text="Add Item" type="button" color="secondary" onclick={addAdditionalAnswer} />
-
-					{#each additionalCorrectAnswers as item (item.id)}
-						<div class="dynamic-field-row">
-							<TextInput
-								errors={formErrors?.additionalCorrectAnswers}
-								name="additionalCorrectAnswers"
-								id={item.id > 0
-									? `${"additional-correct-answers"}-${item.id}`
-									: "additional-correct-answers"}
-								value={item.value}
-								placeholder="Additional correct answer"
-								minMax={[1, 50]}
-							/>
-							<Button
-								text="Remove"
-								type="button"
-								preset="outlined"
-								onclick={() => removeAdditionalAnswer(item.id)}
-							/>
-						</div>
-					{/each}
-
-					{#if formErrors?.additionalCorrectAnswers}
-						<span>{getErrorMessage(formErrors.additionalCorrectAnswers)}</span>
-					{/if}
-				</div> -->
+			<div>
 
 				<TagsInput
 					onValueChange={({ value }) => {
