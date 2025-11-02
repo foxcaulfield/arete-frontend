@@ -1,8 +1,8 @@
 <script lang="ts">
 	import favicon from "$lib/assets/favicon.svg";
 	// import "@picocss/pico/css/pico.css";
-	import "$lib/styles/global.scss";
-	import "$lib/styles/app.css";
+	// import "$lib/styles/global.scss";
+	// import "$lib/styles/app.css";
 	import { SvelteToast } from "@zerodevx/svelte-toast";
 	import type { LayoutProps } from "./$types";
 	import { BikeIcon, BookIcon, HouseIcon, TreePalmIcon } from "@lucide/svelte";
@@ -12,12 +12,22 @@
 
 	const links = [
 		{ href: "/", text: "Home", icon: HouseIcon },
-		{ href: "/profile", text: "Profile", icon: TreePalmIcon },
-		{ href: "/collections", text: "Collections", icon: BookIcon },
+		{
+			href: "/profile",
+			text: "Profile",
+			icon: TreePalmIcon,
+		},
+		{
+			href: "/collections",
+			text: "Collections",
+			icon: BookIcon,
+		},
 		{ href: "/auth", text: "Auth", icon: BikeIcon },
 	];
 
-	let anchorBar = 'btn hover:preset-tonal flex-col items-center gap-1';
+	let anchorBar = "btn hover:preset-tonal flex-col items-center gap-1";
+
+	import "../app.css";
 </script>
 
 <svelte:head>
