@@ -3,7 +3,6 @@
 	import Button from "$lib/components/common/Button.svelte";
 	import TextInput from "$lib/components/common/TextInput.svelte";
 	import MediaField from "$lib/components/MediaField.svelte";
-	import DynamicFieldsSection from "$lib/components/DynamicFieldsSection.svelte";
 	import type { Snippet } from "svelte";
 	import { toast } from "@zerodevx/svelte-toast";
 
@@ -180,33 +179,68 @@
 
 			<!-- Two Column Layout: Additional Answers & Distractors -->
 			<div class="two-columns">
-				<!-- Additional Correct Answers -->
-				<DynamicFieldsSection
-					label="Additional Correct Answers"
-					name="additionalCorrectAnswers"
-					description="Optional alternative correct answers (case-insensitive)"
-					items={additionalCorrectAnswers}
-					placeholder="Additional correct answer"
-					onAdd={addAdditionalAnswer}
-					onRemove={removeAdditionalAnswer}
-					errors={formErrors?.additionalCorrectAnswers}
-					minMax={[1, 50]}
-				/>
+				<div class="form-group">
+					<label class="label" for="additional-correct-answers">Additional Correct Answers</label>
+					<p class="muted" style="font-size:0.875rem;margin-bottom:0.5rem">
+						Optional alternative correct answers (case-insensitive)
+					</p>
+					<Button text="Add Item" type="button" color="secondary" onclick={addAdditionalAnswer} />
+
+					{#each additionalCorrectAnswers as item (item.id)}
+						<div class="dynamic-field-row">
+							<TextInput
+								errors={formErrors?.additionalCorrectAnswers}
+								name="additionalCorrectAnswers"
+								id={item.id > 0
+									? `${"additional-correct-answers"}-${item.id}`
+									: "additional-correct-answers"}
+								value={item.value}
+								placeholder="Additional correct answer"
+								minMax={[1, 50]}
+							/>
+							<Button
+								text="Remove"
+								type="button"
+								preset="outlined"
+								onclick={() => removeAdditionalAnswer(item.id)}
+							/>
+						</div>
+					{/each}
+
+					{#if formErrors?.additionalCorrectAnswers}
+						<span>{getErrorMessage(formErrors.additionalCorrectAnswers)}</span>
+					{/if}
+				</div>
 
 				<!-- Distractors -->
-				<DynamicFieldsSection
-					label="Distractors"
-					name="distractors"
-					description={currentType === "CHOICE_SINGLE"
-						? "Required for single-choice questions (minimum 5)"
-						: "Optional incorrect answer choices"}
-					items={distractors}
-					placeholder="Distractor answer"
-					onAdd={addDistractor}
-					onRemove={removeDistractor}
-					errors={formErrors?.distractors}
-					minMax={[1, 50]}
-				/>
+
+				<div class="form-group">
+					<label class="label" for={"distractors"}>{"Distractors"}</label>
+					<p class="muted" style="font-size:0.875rem;margin-bottom:0.5rem">
+						{currentType === "CHOICE_SINGLE"
+							? "Required for single-choice questions (minimum 5)"
+							: "Optional incorrect answer choices"}
+					</p>
+					<Button text="Add Item" type="button" color="secondary" onclick={addDistractor} />
+
+					{#each distractors as item (item.id)}
+						<div class="dynamic-field-row">
+							<TextInput
+								errors={formErrors?.distractors}
+								name="distractors"
+								id={item.id > 0 ? `${"distractors"}-${item.id}` : "distractors"}
+								value={item.value}
+								placeholder="Distractor answer"
+								minMax={[1, 50]}
+							/>
+							<Button text="Remove" type="button" preset="outlined" onclick={() => removeDistractor(item.id)} />
+						</div>
+					{/each}
+
+					{#if formErrors?.distractors}
+						<span class="field-error">{getErrorMessage(formErrors.distractors)}</span>
+					{/if}
+				</div>
 			</div>
 
 			<!-- Two Column Layout: Explanation & Media -->
