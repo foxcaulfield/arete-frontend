@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
 	import Button from "$lib/components/common/Button.svelte";
-	import TextInput from "$lib/components/common/TextInput.svelte";
 	import MediaField from "$lib/components/MediaField.svelte";
 	import type { Snippet } from "svelte";
 	import { toast } from "@zerodevx/svelte-toast";
@@ -70,15 +69,6 @@
 		}
 	});
 
-	// Additional correct answers management
-	function addAdditionalAnswer() {
-		additionalCorrectAnswers.push({ id: randomId(), value: "" });
-		additionalCorrectAnswers = additionalCorrectAnswers; // Trigger reactivity
-	}
-
-	function removeAdditionalAnswer(id: number) {
-		additionalCorrectAnswers = additionalCorrectAnswers.filter((answer) => answer.id !== id);
-	}
 
 	// Form text derived
 	const formText = $derived({
@@ -86,8 +76,8 @@
 		submitButton: modeToTitleMap[mode]?.submitButton || "Submit",
 	});
 
-	// Current exercise type (for conditional rendering)
-	const currentType = $derived(exercise?.type || "FILL_IN_THE_BLANK");
+	// // Current exercise type (for conditional rendering)
+	// const currentType = $derived(exercise?.type || "FILL_IN_THE_BLANK");
 </script>
 
 <div>
@@ -141,15 +131,30 @@
 
 			<!-- Question Input -->
 			<div>
-				<TextInput
-					errors={getErrorMessage(formErrors?.question)}
-					name="question"
-					value={exercise?.question}
-					label="Question *"
-					placeholder="Enter the question"
-					minMax={[5, 300]}
-					aria-describedby="question-error"
-				/>
+				<label for="question" class="label">
+					<span class="label-text">Enter the question</span>
+					<input
+						id="question"
+						class="input"
+						type="text"
+						value={exercise?.question}
+						autocomplete="off"
+						placeholder="Enter the question"
+						name="question"
+						min="5"
+						max="300"
+					/>
+				</label>
+				<!-- {/if} -->
+
+				{#if formErrors?.question}
+					<!-- comma separated list of errors -->
+					{#if Array.isArray(formErrors.question)}
+						<span>{formErrors.question.join(", ")}</span>
+					{:else}
+						<span>{formErrors.question}</span>
+					{/if}
+				{/if}
 				{#if mode === "edit"}
 					<Button
 						text="Copy Question"
@@ -173,19 +178,32 @@
 				{/if}
 			</div>
 
-			<!-- Correct Answer Input -->
-			<TextInput
-				errors={getErrorMessage(formErrors?.correctAnswer)}
-				name="correctAnswer"
-				value={exercise?.correctAnswer ?? undefined}
-				label="Correct Answer *"
-				placeholder="Enter the correct answer"
-				minMax={[1, 50]}
-			/>
+			<label for="correctAnswer" class="label">
+				<span class="label-text">Correct Answer</span>
+				<input
+					class="input"
+					type="text"
+					placeholder="Enter the correct answer"
+					autocomplete="off"
+					value={exercise?.correctAnswer ?? ""}
+					name="correctAnswer"
+					min="1"
+					max="50"
+				/>
+			</label>
+			<!-- {/if} -->
+
+			{#if formErrors?.correctAnswer}
+				<!-- comma separated list of errors -->
+				{#if Array.isArray(formErrors.correctAnswer)}
+					<span>{formErrors.correctAnswer.join(", ")}</span>
+				{:else}
+					<span>{formErrors.correctAnswer}</span>
+				{/if}
+			{/if}
 
 			<!-- Two Column Layout: Additional Answers & Distractors -->
 			<div>
-
 				<TagsInput
 					onValueChange={({ value }) => {
 						additionalCorrectAnswers = value.map((val) => ({ id: randomId(), value: val }));
