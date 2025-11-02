@@ -101,8 +101,8 @@
 	const currentType = $derived(exercise?.type || "FILL_IN_THE_BLANK");
 </script>
 
-<div class="container">
-	<div class="card-lg">
+<div>
+	<div>
 		{#if headerSnippet}
 			{@render headerSnippet()}
 		{:else}
@@ -110,24 +110,17 @@
 		{/if}
 	</div>
 
-	<form
-		action={formAction}
-		method="POST"
-		enctype="multipart/form-data"
-		class="card form-card"
-		style="margin-top:1rem"
-		use:enhance
-	>
+	<form action={formAction} method="POST" enctype="multipart/form-data" use:enhance>
 		<!-- Error message with preserved space to prevent layout shift -->
-		<div class="field-error" style="text-align: end; min-height:1.5rem">
+		<div>
 			{#if generalError}
 				{generalError}
 			{/if}
 		</div>
 
-		<div class="form-grid">
+		<div>
 			<!-- Exercise Type Selection -->
-			<div class="form-group">
+			<div>
 				<label for="type" class="label">Exercise Type</label>
 				<select id="type" name="type" value={exercise?.type ?? "FILL_IN_THE_BLANK"}>
 					{#each exerciseTypes as type}
@@ -135,12 +128,12 @@
 					{/each}
 				</select>
 				{#if formErrors?.type}
-					<span class="field-error">{getErrorMessage(formErrors.type)}</span>
+					<span>{getErrorMessage(formErrors.type)}</span>
 				{/if}
 			</div>
 
 			<!-- Question Input -->
-			<div class="form-group">
+			<div>
 				<TextInput
 					errors={getErrorMessage(formErrors?.question)}
 					name="question"
@@ -215,22 +208,19 @@
 			</div>
 
 			<!-- Two Column Layout: Explanation & Media -->
-			<div class="two-columns">
+			<div>
 				<!-- Explanation -->
-				<div class="form-group">
+				<div>
 					<label for="explanation" class="label">Explanation</label>
-					<p class="muted" style="font-size:0.875rem;margin-bottom:0.5rem">
-						Optional explanation shown after answering
-					</p>
+					<p>Optional explanation shown after answering</p>
 					<textarea
 						id="explanation"
 						name="explanation"
 						placeholder="Explain the answer (optional)"
-						style="display:block;width:100%;height:80px;"
 						value={exercise?.explanation ?? ""}
 					></textarea>
 					{#if formErrors?.explanation}
-						<span class="field-error">{getErrorMessage(formErrors.explanation)}</span>
+						<span>{getErrorMessage(formErrors.explanation)}</span>
 					{/if}
 				</div>
 
@@ -239,30 +229,10 @@
 			</div>
 
 			<!-- Form Actions -->
-			<div class="form-actions">
+			<div>
 				<Button text={formText.submitButton} type="submit" />
 				<Button text="Cancel" type="button" color="secondary" onclick={onCancel} />
 			</div>
 		</div>
 	</form>
 </div>
-
-<style>
-	.two-columns {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 1.5rem;
-	}
-
-	@media (max-width: 768px) {
-		.two-columns {
-			grid-template-columns: 1fr;
-		}
-	}
-
-	.form-actions {
-		display: flex;
-		gap: 0.75rem;
-		margin-top: 2rem;
-	}
-</style>
