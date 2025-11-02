@@ -89,6 +89,7 @@
 		const isCreated = searchParams.get("created") === "1";
 		const isExerciseCreated = searchParams.get("exerciseCreated") === "1";
 		const isExerciseUpdated = searchParams.get("exerciseUpdated") === "1";
+		const isExerciseDeleted = searchParams.get("exerciseDeleted") === "1";
 
 		if (isUpdated) {
 			toast.push("Collection updated successfully!");
@@ -112,6 +113,9 @@
 			toast.push("Exercise updated successfully!");
 		}
 
+		if (isExerciseDeleted) {
+			toast.push("Exercise deleted successfully!");
+		}
 		if (changed) {
 			const queryString = searchParams.toString();
 			goto(`${page.url.pathname}${queryString ? `?${queryString}` : ""}`, { replaceState: true, noScroll: true });

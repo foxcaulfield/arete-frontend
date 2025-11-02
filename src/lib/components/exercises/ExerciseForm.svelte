@@ -14,6 +14,7 @@
 		formErrors?: Record<string, string | string[]>;
 		generalError?: string;
 		onCancel: () => void;
+		handleDelete?: () => void;
 		formAction: string;
 		headerSnippet?: Snippet;
 	}
@@ -24,6 +25,7 @@
 		formErrors = {},
 		generalError = "",
 		onCancel,
+		handleDelete,
 		formAction,
 		headerSnippet,
 		formTitle,
@@ -82,11 +84,16 @@
 <div class="w-full p-4 md:p-6">
 	<div class="mx-auto max-w-4xl">
 		<!-- Header -->
-		<div class="mb-6">
-			{#if headerSnippet}
-				{@render headerSnippet()}
-			{:else}
-				<h1 class="h3 font-bold">{formTitle}</h1>
+		<div class="mb-6 flex items-center justify-between gap-4">
+			<div>
+				{#if headerSnippet}
+					{@render headerSnippet()}
+				{:else}
+					<h1 class="h3 font-bold">{formTitle}</h1>
+				{/if}
+			</div>
+			{#if mode === "edit"}
+				<Button text="Delete" type="button" color="error" preset="outlined" size="sm" onclick={handleDelete} />
 			{/if}
 		</div>
 
@@ -449,22 +456,20 @@
 				</div>
 				<div class="flex gap-2">
 					<Button
+						text={submitButtonText}
+						type="submit"
+						color="primary"
+						size="sm"
+						disabled={
+							questionLength < questionMinLength}
+					/>
+					<Button
 						text="Cancel"
 						type="button"
 						color="secondary"
 						preset="outlined"
 						size="sm"
 						onclick={onCancel}
-					/>
-					<Button
-						text={submitButtonText}
-						type="submit"
-						color="primary"
-						size="sm"
-						disabled={hasQuestionError ||
-							hasAnswerError ||
-							hasTypeError ||
-							questionLength < questionMinLength}
 					/>
 				</div>
 			</div>

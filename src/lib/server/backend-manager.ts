@@ -141,7 +141,7 @@ export class Backend {
 			},
 
 			delete: async (id: string): Promise<Exercise.ResponseDto> => {
-				const response = await this.request("DELETE", `/exercises/${id}`);
+				const response = await this.request("DELETE", `/exercises/delete/${id}`);
 				return response.json();
 			},
 
