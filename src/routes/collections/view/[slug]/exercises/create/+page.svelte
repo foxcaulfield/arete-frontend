@@ -27,6 +27,8 @@
 </script>
 
 <ExerciseForm
+	formTitle="Create New Exercise"
+	submitButtonText="Create Exercise"
 	mode="create"
 	formErrors={formErrors}
 	generalError={generalFormError}

@@ -8,6 +8,8 @@
 
 	interface Props {
 		mode: "create" | "edit";
+		formTitle: string;
+		submitButtonText: string;
 		exercise?: Exercise.ResponseDto | null;
 		formErrors?: Record<string, string | string[]>;
 		generalError?: string;
@@ -15,17 +17,6 @@
 		formAction: string;
 		headerSnippet?: Snippet;
 	}
-
-	const modeToTitleMap: Record<Props["mode"], { title: string; submitButton: string }> = {
-		create: {
-			title: "Create New Exercise",
-			submitButton: "Create Exercise",
-		},
-		edit: {
-			title: "Edit Exercise",
-			submitButton: "Update Exercise",
-		},
-	};
 
 	let {
 		mode,
@@ -35,6 +26,8 @@
 		onCancel,
 		formAction,
 		headerSnippet,
+		formTitle,
+		submitButtonText,
 	}: Props = $props();
 
 	// Exercise types
@@ -83,12 +76,6 @@
 		}
 	});
 
-	// Form text derived
-	const formText = $derived({
-		title: modeToTitleMap[mode]?.title || "Unknown Mode",
-		submitButton: modeToTitleMap[mode]?.submitButton || "Submit",
-	});
-
 	// Validation helpers
 	const hasQuestionError = $derived(!!formErrors?.question);
 	const hasAnswerError = $derived(!!formErrors?.correctAnswer);
@@ -110,7 +97,7 @@
 			{#if headerSnippet}
 				{@render headerSnippet()}
 			{:else}
-				<h1 class="h3 font-bold">{formText.title}</h1>
+				<h1 class="h3 font-bold">{formTitle}</h1>
 			{/if}
 		</div>
 
@@ -428,7 +415,7 @@
 						onclick={onCancel}
 					/>
 					<Button
-						text={formText.submitButton}
+						text={submitButtonText}
 						type="submit"
 						color="primary"
 						size="sm"

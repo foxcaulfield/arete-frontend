@@ -32,6 +32,8 @@
 
 {#if exercise}
 	<ExerciseForm
+		formTitle="Edit Exercise"
+		submitButtonText="Update Exercise"
 		mode="edit"
 		{exercise}
 		formErrors={formErrors}
