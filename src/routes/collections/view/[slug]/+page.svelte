@@ -13,7 +13,7 @@
 	import ExercisesTable from "$lib/components/exercises/ExercisesTable.svelte";
 	import Button from "$lib/components/common/Button.svelte";
 	import { Pagination } from "@skeletonlabs/skeleton-svelte";
-
+	import { Dialog, Portal } from "@skeletonlabs/skeleton-svelte";
 	let props: PageProps = $props();
 
 	let serverData = $derived(props.data?.serverData || {});
@@ -180,7 +180,7 @@
 					<span class="font-medium opacity-60 text-xs block">Actions</span>
 					<Button text="Create Exercise" onclick={goToCreateExercise} fullWidth={true} size="sm" />
 					<Button text="Start Drill" onclick={goToDrill} color="secondary" fullWidth={true} size="sm" />
-					<Button
+					<!-- <Button
 						withAction={true}
 						action="?/delete"
 						onsubmit={confirmDelete}
@@ -188,7 +188,34 @@
 						color="error"
 						fullWidth={true}
 						size="sm"
-					/>
+					/> -->
+					<Dialog>
+						<Dialog.Trigger class="btn preset-ghost">Delete Collection</Dialog.Trigger>
+						<Portal>
+							<Dialog.Backdrop class="fixed inset-0 z-50 bg-surface-50-950/50" />
+							<Dialog.Positioner class="fixed inset-0 z-50 flex justify-center items-center">
+								<Dialog.Content class="card bg-surface-100-900 w-md p-4 space-y-2 shadow-xl">
+									<header class="flex justify-between items-center">
+
+										<Dialog.Title class="text-2xl font-bold">Delete this Collection?</Dialog.Title>
+										<Dialog.CloseTrigger class="btn-icon hover:preset-tonal">&times</Dialog.CloseTrigger>
+									</header>
+									<Dialog.Description>This action cannot be undone.</Dialog.Description>
+									<Button
+										withAction={true}
+										action="?/delete"
+										onsubmit={confirmDelete}
+										text="Delete Collection"
+										preset="tonal"
+										color="error"
+										fullWidth={true}
+										size="sm"
+									/>
+									<!-- <Dialog.CloseTrigger class="btn preset-tonal">Cancel</Dialog.CloseTrigger> -->
+								</Dialog.Content>
+							</Dialog.Positioner>
+						</Portal>
+					</Dialog>
 				</div>
 			</div>
 
