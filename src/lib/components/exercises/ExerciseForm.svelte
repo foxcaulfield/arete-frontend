@@ -5,7 +5,7 @@
 	import MediaField from "$lib/components/MediaField.svelte";
 	import type { Snippet } from "svelte";
 	import { toast } from "@zerodevx/svelte-toast";
-
+	import { TagsInput } from "@skeletonlabs/skeleton-svelte";
 	interface Props {
 		mode: "create" | "edit";
 		exercise?: Exercise.ResponseDto | null;
@@ -80,16 +80,6 @@
 		additionalCorrectAnswers = additionalCorrectAnswers.filter((answer) => answer.id !== id);
 	}
 
-	// Distractors management
-	function addDistractor() {
-		distractors.push({ id: randomId(), value: "" });
-		distractors = distractors; // Trigger reactivity
-	}
-
-	function removeDistractor(id: number) {
-		distractors = distractors.filter((distractor) => distractor.id !== id);
-	}
-
 	// Form text derived
 	const formText = $derived({
 		title: modeToTitleMap[mode]?.title || "Unknown Mode",
@@ -109,7 +99,23 @@
 		{/if}
 	</div>
 
-	<form action={formAction} method="POST" enctype="multipart/form-data" use:enhance>
+	<form
+		action={formAction}
+		method="POST"
+		enctype="multipart/form-data"
+		use:enhance={async ({ formData }) => {
+			distractors?.forEach((distractor) => {
+				formData.append(`distractors`, distractor.value);
+			});
+			additionalCorrectAnswers?.forEach((answer, index) => {
+				formData.append(`additionalCorrectAnswers`, answer.value);
+			});
+			return async ({ update }) => {
+				await update();
+			};
+			// Custom enhancement logic can go here
+		}}
+	>
 		<!-- Error message with preserved space to prevent layout shift -->
 		<div>
 			{#if generalError}
@@ -179,7 +185,7 @@
 
 			<!-- Two Column Layout: Additional Answers & Distractors -->
 			<div class="two-columns">
-				<div class="form-group">
+				<!-- <div class="form-group">
 					<label class="label" for="additional-correct-answers">Additional Correct Answers</label>
 					<p class="muted" style="font-size:0.875rem;margin-bottom:0.5rem">
 						Optional alternative correct answers (case-insensitive)
@@ -210,37 +216,65 @@
 					{#if formErrors?.additionalCorrectAnswers}
 						<span>{getErrorMessage(formErrors.additionalCorrectAnswers)}</span>
 					{/if}
-				</div>
+				</div> -->
+
+				<TagsInput
+					onValueChange={({ value }) => {
+						additionalCorrectAnswers = value.map((val) => ({ id: randomId(), value: val }));
+						console.log("Selected tags:", value);
+					}}
+					value={additionalCorrectAnswers.map((d) => d.value)}
+				>
+					<TagsInput.Label>Alternative Correct Answers</TagsInput.Label>
+					<TagsInput.Control>
+						<TagsInput.Context>
+							{#snippet children(tagsInput)}
+								{#each tagsInput().value as value, index (index)}
+									<TagsInput.Item {value} {index}>
+										<TagsInput.ItemPreview>
+											<TagsInput.ItemText>{value}</TagsInput.ItemText>
+											<TagsInput.ItemDeleteTrigger />
+										</TagsInput.ItemPreview>
+										<TagsInput.ItemInput />
+									</TagsInput.Item>
+								{/each}
+							{/snippet}
+						</TagsInput.Context>
+						<TagsInput.Input placeholder="Alt answers..." />
+					</TagsInput.Control>
+					<TagsInput.ClearTrigger>Clear All</TagsInput.ClearTrigger>
+					<TagsInput.HiddenInput />
+				</TagsInput>
 
 				<!-- Distractors -->
 
-				<div class="form-group">
-					<label class="label" for={"distractors"}>{"Distractors"}</label>
-					<p class="muted" style="font-size:0.875rem;margin-bottom:0.5rem">
-						{currentType === "CHOICE_SINGLE"
-							? "Required for single-choice questions (minimum 5)"
-							: "Optional incorrect answer choices"}
-					</p>
-					<Button text="Add Item" type="button" color="secondary" onclick={addDistractor} />
-
-					{#each distractors as item (item.id)}
-						<div class="dynamic-field-row">
-							<TextInput
-								errors={formErrors?.distractors}
-								name="distractors"
-								id={item.id > 0 ? `${"distractors"}-${item.id}` : "distractors"}
-								value={item.value}
-								placeholder="Distractor answer"
-								minMax={[1, 50]}
-							/>
-							<Button text="Remove" type="button" preset="outlined" onclick={() => removeDistractor(item.id)} />
-						</div>
-					{/each}
-
-					{#if formErrors?.distractors}
-						<span class="field-error">{getErrorMessage(formErrors.distractors)}</span>
-					{/if}
-				</div>
+				<TagsInput
+					onValueChange={({ value }) => {
+						distractors = value.map((val) => ({ id: randomId(), value: val }));
+						console.log("Selected tags:", value);
+					}}
+					value={distractors.map((d) => d.value)}
+				>
+					<TagsInput.Label>Distractors</TagsInput.Label>
+					<TagsInput.Control>
+						<TagsInput.Context>
+							{#snippet children(tagsInput)}
+								{#each tagsInput().value as value, index (index)}
+									<TagsInput.Item {value} {index}>
+										<TagsInput.ItemPreview>
+											<TagsInput.ItemText>{value}</TagsInput.ItemText>
+											<TagsInput.ItemDeleteTrigger />
+										</TagsInput.ItemPreview>
+										<TagsInput.ItemInput />
+									</TagsInput.Item>
+								{/each}
+							{/snippet}
+						</TagsInput.Context>
+						<TagsInput.Input placeholder="Distractors..." />
+					</TagsInput.Control>
+					<TagsInput.ClearTrigger>Clear All</TagsInput.ClearTrigger>
+					<TagsInput.HiddenInput />
+				</TagsInput>
 			</div>
 
 			<!-- Two Column Layout: Explanation & Media -->
