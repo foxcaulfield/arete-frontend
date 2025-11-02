@@ -121,6 +121,13 @@ declare global {
 		name: string | null;
 	}
 
+	namespace StyleProps {
+		type Color = "primary" | "secondary" | "tertiary" | "success" | "warning" | "error" | "surface";
+		type Shade = 50 | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900 | 950;
+		type Preset = "filled" | "tonal" | "outlined";
+		type Size = "sm" | "base" | "lg";
+	}
+
 	namespace App {
 		// interface Error {}
 		interface Locals {
