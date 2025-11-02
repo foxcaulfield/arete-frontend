@@ -1,21 +1,22 @@
 <script lang="ts">
-	//  import type { SubmitFunction } from '$app/forms';
 	import { enhance } from "$app/forms";
 	import { goto, invalidateAll } from "$app/navigation";
 	import Button from "$lib/components/common/Button.svelte";
-	import QuestionText from "$lib/components/quiz/QuestionText.svelte";
-	import type { SubmitFunction } from "@sveltejs/kit";
-	import { onMount, tick } from "svelte";
-	import type { PageProps } from "./$types";
-	// import FormGroupTextInput from "$lib/components/FormGroupTextInput.svelte";
 	import ChoiceSingleExercise from "$lib/components/quiz/ChoiceSingleExercise.svelte";
 	import ExerciseImage from "$lib/components/quiz/ExerciseImage.svelte";
 	import ExerciseTypeBadge from "$lib/components/quiz/ExerciseTypeBadge.svelte";
 	import ExplanationText from "$lib/components/quiz/ExplanationText.svelte";
 	import FillInExercise from "$lib/components/quiz/FillInExercise.svelte";
 	import TranslationText from "$lib/components/quiz/TranslationText.svelte";
-	import QuizControls from "$lib/components/quiz/QuizControls.svelte";
+	import type { SubmitFunction } from "@sveltejs/kit";
 	import { toast } from "@zerodevx/svelte-toast";
+	import { onMount, tick } from "svelte";
+	import type { PageProps } from "./$types";
+
+	interface TextPart {
+		text: string;
+		isAnswer: boolean;
+	}
 
 	const props: PageProps = $props();
 
@@ -44,6 +45,23 @@
 	let isForceTextInput = $derived.by(() =>
 		typeof props.data?.forceTextInput === "boolean" ? props.data?.forceTextInput : true
 	);
+
+	// Parse question text into parts (text + hidden answers)
+	const questionParts = $derived.by(() => {
+		if (!currentQuestion?.question) return [];
+		const result: TextPart[] = [];
+		const regEx = /{{(.*?)}}|([^{}]+)/g;
+		let match: RegExpExecArray | null;
+
+		while ((match = regEx.exec(currentQuestion.question)) !== null) {
+			if (match[1]) {
+				result.push({ text: match[1].trim(), isAnswer: true });
+			} else if (match[2]) {
+				result.push({ text: match[2].trim(), isAnswer: false });
+			}
+		}
+		return result;
+	});
 
 	async function handleForceTextInput() {
 		isForceTextInput = !isForceTextInput;
@@ -138,29 +156,35 @@
 	});
 </script>
 
-<div class="container drill">
-	<div class="header-row">
-		<div class="card-lg">
-			<Button text="Exit Drill" onclick={exitDrill} color="secondary" />
+<div class="w-full p-4 md:p-6">
+	<div class="mx-auto max-w-4xl">
+		<!-- Header -->
+		<div class="mb-6 flex items-center justify-between gap-4">
+			<Button text="Exit" onclick={exitDrill} color="secondary" preset="outlined" size="sm" />
+			{#if currentQuestion?.type}
+				<ExerciseTypeBadge exerciseType={currentQuestion.type} />
+			{/if}
 		</div>
-		{#if currentQuestion?.type}
-			<ExerciseTypeBadge exerciseType={currentQuestion.type} />
-		{/if}
-	</div>
 
-	<div
-		class="card form-card compact-form with-border"
-		class:failed={showResult && lastResult && !lastResult.isCorrect}
-		class:success={showResult && lastResult && lastResult.isCorrect}
-	>
+		<!-- Error Alert -->
 		{#if error}
-			<div class="field-error">{error}</div>
+			<div
+				class="mb-4 flex items-start gap-2 rounded-lg border border-error-800 bg-error-900 p-3 text-sm text-error-400"
+			>
+				<svg class="mt-0.5 h-4 w-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+					<path
+						fill-rule="evenodd"
+						d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+						clip-rule="evenodd"
+					/>
+				</svg>
+				<div>{error}</div>
+			</div>
 		{/if}
 
 		{#if currentQuestion}
-			<div class="question-container">
+			<div class="space-y-4">
 				{#if currentQuestion.audioUrl}
-					<!-- keep audio element mounted even when we show result so we can autoplay on success -->
 					<audio
 						bind:this={audioElement}
 						src={"/api/files?type=audio&name=" + currentQuestion.audioUrl}
@@ -169,146 +193,201 @@
 					></audio>
 				{/if}
 
-			<!-- Buttons row at top right -->
-			<QuizControls
-			handleCopyToClipboard={() => {
-				// replace all {{[^}]+}} with empty string, but keep the rest of the text
-				navigator.clipboard.writeText(currentQuestion.question.replace(/{/g, "").replace(/}/g, ""));
-				toast.push('Question text copied to clipboard!', {
-					theme: {
-						'--toastBackground': 'var(--accent)',
-						'--toastColor': 'var(--text)',
-						'--toastBarBackground': 'var(--primary)'
-					}
-				});
-				// Optionally, you can add a toast notification here to inform the user
-			}}
-			handleGoToEditPage={() => goto(`/collections/view/${collectionId}/exercises/edit/${currentQuestion.id}`)}
-			{showResult}
-			handleForceTextInput={handleForceTextInput}
-			{nextButtonElement}
-			handleGetNextQuestionEnhance={handleGetNextQuestionEnhance}
-			/>
-				<QuestionText questionText={currentQuestion.question} isAnswered={showResult} />
+				<!-- Question Card -->
+				<div class="rounded-lg border border-surface-700 bg-surface-900 p-4 md:p-6">
+					<!-- Question Header with Controls -->
+					<div
+						class="mb-6 flex flex-col gap-4 border-b border-surface-700 pb-4 md:flex-row md:items-start md:justify-between"
+					>
+						<div class="min-w-0 flex-1">
+							<!-- Question Text with Hidden Answers -->
+							<div class="text-xl leading-relaxed font-semibold text-surface-100 md:text-2xl">
+								{#each questionParts as part, i (i)}
+									{@const shouldReveal = part.isAnswer && showResult}
+									{@const shouldHide = part.isAnswer && !showResult}
+									<span
+										class="rounded px-1"
+										class:text-success-400={shouldReveal}
+										class:bg-primary-500={shouldHide}
+										class:text-primary-500={shouldHide}
+									>
+										{part.text}
+									</span>
+									{#if i < questionParts.length - 1 && !questionParts[i + 1].isAnswer && !part.isAnswer}
+										<span> </span>
+									{/if}
+								{/each}
+							</div>
+						</div>
+						<div class="flex flex-shrink-0 gap-1">
+							<button
+								type="button"
+								class="rounded px-2 py-1 text-xs text-primary-500 transition-colors hover:bg-surface-800 hover:text-primary-400"
+								onclick={() => {
+									navigator.clipboard.writeText(
+										currentQuestion.question.replace(/{/g, "").replace(/}/g, "")
+									);
+									toast.push("Copied!", {
+										theme: {
+											"--toastBackground": "var(--color-success-500)",
+											"--toastColor": "white",
+											"--toastBarBackground": "var(--color-success-700)",
+										},
+									});
+								}}
+								title="Copy question"
+							>
+								Copy
+							</button>
+							<button
+								type="button"
+								class="rounded px-2 py-1 text-xs text-primary-500 transition-colors hover:bg-surface-800 hover:text-primary-400"
+								onclick={() =>
+									goto(`/collections/view/${collectionId}/exercises/edit/${currentQuestion.id}`)}
+								title="Edit exercise"
+							>
+								Edit
+							</button>
+							<button
+								type="button"
+								class="rounded px-2 py-1 text-xs text-primary-500 transition-colors hover:bg-surface-800 hover:text-primary-400"
+								onclick={handleForceTextInput}
+								title={isForceTextInput ? "Switch to choice" : "Switch to text"}
+							>
+								{isForceTextInput ? "Text" : "Choice"}
+							</button>
 
-				{#if currentQuestion.translation}
-					<TranslationText translationText={currentQuestion.translation} />
-				{/if}
+							<form method="POST" action="?/getNextQuestion" use:enhance={handleGetNextQuestionEnhance}>
+								<Button
+									type="submit"
+									bind:buttonElement={nextButtonElement}
+									color="surface"
+									preset="outlined"
+									size="sm"
+									text={`⟳`}
+								/>
+							</form>
+						</div>
+					</div>
 
-				<!-- {#if !showResult} -->
-				<form action="?/handleSubmitAnswer" method="POST" use:enhance={handleFormEnhance}>
-					<input type="hidden" name="exerciseId" value={currentQuestion.id} />
-					{#if currentQuestion.type === "FILL_IN_THE_BLANK" || isForceTextInput}
-						<FillInExercise {showResult} bind:userAnswer bind:inputElement />
-					{:else if currentQuestion.type === "CHOICE_SINGLE"}
-						<ChoiceSingleExercise
-							distractors={currentQuestion.distractors || []}
-							{lastResult}
-							{lastUserAnswer}
-							{showResult}
-						/>
+					<!-- Translation (if available) -->
+					{#if currentQuestion.translation}
+						<div class="mb-4">
+							<TranslationText translationText={currentQuestion.translation} />
+						</div>
 					{/if}
-				</form>
-				<div class="media-row">
-					{#if showResult}
-						<form method="POST" action="?/getNextQuestion" use:enhance={handleGetNextQuestionEnhance}>
-							<Button
-								type="submit"
-								bind:buttonElement={nextButtonElement}
-								color="secondary"
-								preset="outlined"
-								size="sm"
-								text="Next Question"
+
+					<!-- Answer Input/Selection -->
+					<form action="?/handleSubmitAnswer" method="POST" use:enhance={handleFormEnhance} class="mb-4">
+						<input type="hidden" name="exerciseId" value={currentQuestion.id} />
+						{#if currentQuestion.type === "FILL_IN_THE_BLANK" || isForceTextInput}
+							<FillInExercise {showResult} bind:userAnswer bind:inputElement />
+						{:else if currentQuestion.type === "CHOICE_SINGLE"}
+							<ChoiceSingleExercise
+								distractors={currentQuestion.distractors || []}
+								{lastResult}
+								{lastUserAnswer}
+								{showResult}
 							/>
-						</form>
+						{/if}
+					</form>
+
+					<!-- Result Feedback -->
+					{#if showResult && lastResult}
+						<div class="mb-4 border-t border-surface-700 pt-4">
+							{#if lastResult.isCorrect}
+								<div
+									class="rounded border border-success-700 bg-success-900 p-3 text-xs text-success-400"
+								>
+									<span class="font-semibold">✓ Correct!</span>
+									<!-- {#if lastResult?.feedback}
+										<p class="mt-1">{lastResult.feedback}</p>
+									{/if} -->
+								</div>
+							{:else}
+								<div class="rounded border border-error-700 bg-error-900 p-3 text-xs text-error-400">
+									<span class="font-semibold">✗ Not quite right</span>
+									<!-- {#if lastResult.feedback}
+										<p class="mt-1">{lastResult.feedback}</p>
+									{/if} -->
+									{#if lastResult.correctAnswer}
+										<p class="mt-2 text-success-400">
+											Correct: <span class="font-semibold">{lastResult.correctAnswer}</span>
+										</p>
+									{/if}
+								</div>
+							{/if}
+						</div>
 					{/if}
-					{#if currentQuestion.imageUrl}
-						<Button
-							type="button"
-							color="secondary"
-							preset="tonal"
-							size="sm"
-							text="Show image"
-							onclick={handleShowImage}
-						/>
-					{/if}
-					{#if currentQuestion.audioUrl}
-						<Button
-							type="button"
-							color="secondary"
-							preset="tonal"
-							size="sm"
-							text="Play audio"
-							onclick={handlePlayAudio}
-						/>
-					{/if}
-					{#if currentQuestion.explanation}
-						<Button
-							type="button"
-							color="secondary"
-							preset="tonal"
-							size="sm"
-							text="Show explanation"
-							onclick={handleShowExplanation}
-						/>
-					{/if}
+
+					<!-- Action Buttons -->
+					<div class="flex flex-wrap gap-2 border-t border-surface-700 pt-4">
+						{#if showResult}
+							<form
+								method="POST"
+								action="?/getNextQuestion"
+								use:enhance={handleGetNextQuestionEnhance}
+								class="inline"
+							>
+								<Button
+									type="submit"
+									bind:buttonElement={nextButtonElement}
+									color="primary"
+									size="sm"
+									text="Next"
+								/>
+							</form>
+						{/if}
+						{#if currentQuestion.imageUrl}
+							<button
+								type="button"
+								class="rounded border border-surface-600 px-3 py-2 text-xs text-surface-300 transition-colors hover:bg-surface-800 hover:text-surface-200"
+								onclick={handleShowImage}
+							>
+								{showImage ? "Hide Image" : "Image"}
+							</button>
+						{/if}
+						{#if currentQuestion.audioUrl}
+							<button
+								type="button"
+								class="rounded border border-surface-600 px-3 py-2 text-xs text-surface-300 transition-colors hover:bg-surface-800 hover:text-surface-200"
+								onclick={handlePlayAudio}
+							>
+								Audio
+							</button>
+						{/if}
+						{#if currentQuestion.explanation}
+							<button
+								type="button"
+								class="rounded border border-surface-600 px-3 py-2 text-xs text-surface-300 transition-colors hover:bg-surface-800 hover:text-surface-200"
+								onclick={handleShowExplanation}
+							>
+								{showExplanation ? "Hide Explanation" : "Explanation"}
+							</button>
+						{/if}
+					</div>
 				</div>
+
+				<!-- Image (if shown) -->
 				{#if showImage && currentQuestion.imageUrl}
-					<ExerciseImage bind:imageElement imageUrl={currentQuestion.imageUrl} />
+					<div class="rounded-lg border border-surface-700 bg-surface-900 p-4 md:p-6">
+						<ExerciseImage bind:imageElement imageUrl={currentQuestion.imageUrl} />
+					</div>
 				{/if}
+
+				<!-- Explanation (if shown) -->
 				{#if showExplanation && currentQuestion.explanation}
-					<ExplanationText bind:explanationEl={explanationElement} text={currentQuestion.explanation} />
+					<div class="rounded-lg border border-surface-700 bg-surface-900 p-4 md:p-6">
+						<ExplanationText bind:explanationEl={explanationElement} text={currentQuestion.explanation} />
+					</div>
 				{/if}
 			</div>
 		{:else}
-			<div>No exercises found in this collection.</div>
+			<div
+				class="rounded-lg border border-surface-700 bg-surface-900 p-4 text-center text-sm text-surface-400 md:p-6"
+			>
+				No exercises found in this collection.
+			</div>
 		{/if}
 	</div>
 </div>
-
-<style>
-	.drill .header-row {
-		display: flex;
-		flex-direction: row;
-		align-items: stretch;
-		justify-content: space-between;
-		gap: 0.6rem;
-	}
-
-	.with-border {
-		border: var(--default-border);
-	}
-
-	.failed {
-		background-color: rgba(239, 68, 68, 0.1);
-		border-color: #ef4444;
-	}
-
-	.success {
-		background-color: rgba(34, 197, 94, 0.05);
-		border-color: #22c55e;
-	}
-
-	.drill .form-card {
-		max-width: 760px;
-	}
-
-	.question-container {
-		position: relative;
-	}
-
-	.media-row {
-		margin-top: 0.6rem;
-		display: flex;
-		gap: 0.6rem;
-		align-items: center;
-		justify-content: center;
-		margin-top: 0.5rem;
-		gap: 0.5rem;
-		margin-left: auto;
-	}
-
-	.hidden {
-		display: none !important;
-	}
-</style>
