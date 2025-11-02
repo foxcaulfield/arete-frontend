@@ -1,6 +1,5 @@
 <script lang="ts">
 	import Button from "$lib/components/common/Button.svelte";
-	import { AlertCircleIcon } from "@lucide/svelte";
 
 	interface Props {
 		mode: "create" | "edit";
@@ -20,111 +19,103 @@
 		return Array.isArray(error) ? error : [error];
 	};
 
-	const hasErrors = $derived(Object.keys(formErrors).length > 0);
+	const hasNameError = $derived(getFieldErrors("name").length > 0);
+	const hasDescriptionError = $derived(getFieldErrors("description").length > 0);
+	const hasAnyError = $derived(hasNameError || hasDescriptionError);
 	const title = $derived(mode === "create" ? "New Collection" : "Edit Collection");
-	const subtitle = $derived(
-		mode === "create"
-			? "Create a new collection to organize your exercises and drills."
-			: "Update details for this collection."
-	);
-	const submitText = $derived(mode === "create" ? "Create" : "Save");
+	const submitText = $derived(mode === "create" ? "Create Collection" : "Update Collection");
 </script>
 
-<div class="space-y-4 p-4">
-	<!-- Header Section -->
-	<div class="flex items-start justify-between">
-		<div class="flex-1 min-w-0">
-			<h1 class="h3 mb-1">{title}</h1>
-			<p class="text-xs opacity-60">{subtitle}</p>
+<!-- Main Form Container -->
+<div class="w-full p-4 md:p-6">
+	<div class="mx-auto max-w-4xl">
+		<!-- Header -->
+		<div class="mb-6">
+			<h1 class="h3 font-bold">{title}</h1>
 		</div>
-		<Button text="Cancel" onclick={onCancel} preset="ghost" size="sm" />
-	</div>
 
-	<!-- Form Card -->
-	<div class="card preset-filled-surface-100-900 p-4">
-		<!-- General Error Alert -->
+		<!-- Error Alert -->
 		{#if generalError}
-			<div class="mb-4 bg-red-500/10 border-l-4 border-red-500 rounded p-3 flex gap-3">
-				<AlertCircleIcon class="size-5 text-red-500 flex-shrink-0 mt-0.5" />
-				<div class="flex-1 min-w-0">
-					<p class="text-sm font-semibold text-red-600">Unable to {mode} collection</p>
-					<p class="text-xs text-red-600 opacity-90">{generalError}</p>
-				</div>
+			<div
+				class="mb-4 flex items-start gap-2 rounded-lg border border-error-800 bg-error-900 p-3 text-sm text-error-400"
+			>
+				<svg class="mt-0.5 h-4 w-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+					<path
+						fill-rule="evenodd"
+						d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+						clip-rule="evenodd"
+					/>
+				</svg>
+				<div>{generalError}</div>
 			</div>
 		{/if}
 
-		<form method="POST" action={formAction} class="space-y-4">
-			<!-- Form Fields -->
-			<div class="space-y-4">
-				<!-- Name Field -->
-				<div class="space-y-1.5">
-					<div class="flex items-center justify-between">
-						<label for="name" class="text-sm font-semibold">Title</label>
-						<span class="text-xs opacity-50 font-medium">Required</span>
-					</div>
-					<input
-						id="name"
-						name="name"
-						type="text"
-						placeholder="e.g., Spanish Vocabulary Level 1"
-						required
-						value={initialValues?.name ?? ""}
-						class={`input ${getFieldErrors("name").length > 0 ? "border-red-500 focus:ring-red-500" : ""}`}
-					/>
-					{#if getFieldErrors("name").length === 0}
-						<!-- <p class="text-xs opacity-50">Choose a clear, descriptive name for your collection.</p> -->
-					{:else}
-						<div class="space-y-1">
-							{#each getFieldErrors("name") as error (error)}
-								<div class="flex gap-2 items-start">
-									<AlertCircleIcon class="size-3.5 text-red-500 flex-shrink-0 mt-0.5" />
-									<span class="text-xs text-red-500 font-medium">{error}</span>
-								</div>
-							{/each}
-						</div>
-					{/if}
-				</div>
-
-				<!-- Description Field -->
-				<div class="space-y-1.5">
-					<div class="flex items-center justify-between">
-						<label for="description" class="text-sm font-semibold">Description</label>
-						<span class="text-xs opacity-50 font-medium">Optional</span>
-					</div>
-					<textarea
-						id="description"
-						name="description"
-						placeholder="Add details about this collection... What topics does it cover? Who is it for?"
-						rows={4}
-						class={`textarea resize-none ${getFieldErrors("description").length > 0 ? "border-red-500 focus:ring-red-500" : ""}`}
-					>{initialValues?.description ?? ""}</textarea>
-					{#if getFieldErrors("description").length === 0}
-						<!-- <p class="text-xs opacity-50">Help others understand the purpose and content of this collection.</p> -->
-					{:else}
-						<div class="space-y-1">
-							{#each getFieldErrors("description") as error (error)}
-								<div class="flex gap-2 items-start">
-									<AlertCircleIcon class="size-3.5 text-red-500 flex-shrink-0 mt-0.5" />
-									<span class="text-xs text-red-500 font-medium">{error}</span>
-								</div>
-							{/each}
-						</div>
-					{/if}
-				</div>
+		<form action={formAction} method="POST" class="space-y-4">
+			<!-- Title Field -->
+			<div>
+				<label for="name" class="mb-2 block text-xs font-semibold tracking-wide text-surface-300 uppercase">
+					Title <span class="text-error-600">*</span>
+				</label>
+				<input
+					id="name"
+					type="text"
+					name="name"
+					value={initialValues?.name ?? ""}
+					autocomplete="off"
+					placeholder="e.g., Spanish Vocabulary Level 1"
+					required
+					class={`w-full rounded border bg-surface-800 px-3 py-2 text-sm text-surface-100 placeholder-surface-500 focus:border-transparent focus:ring-2 focus:ring-primary-500 focus:outline-none ${
+						hasNameError ? "border-error-600" : "border-surface-600"
+					}`}
+				/>
+				{#if hasNameError}
+					<p class="mt-1 text-xs text-error-500">{getFieldErrors("name")[0]}</p>
+				{/if}
 			</div>
 
-			<!-- Form Status -->
-			{#if hasErrors}
-				<div class="bg-orange-500/10 border border-orange-500/30 rounded p-3 flex gap-2">
-					<AlertCircleIcon class="size-4 text-orange-600 flex-shrink-0 mt-0.5" />
-					<p class="text-xs text-orange-600">Please fix the errors above and try again.</p>
-				</div>
-			{/if}
+			<!-- Description Field -->
+			<div>
+				<label
+					for="description"
+					class="mb-2 block text-xs font-semibold tracking-wide text-surface-300 uppercase"
+				>
+					Description <span class="text-xs font-normal text-surface-400">(Optional)</span>
+				</label>
+				<textarea
+					id="description"
+					name="description"
+					value={initialValues?.description ?? ""}
+					placeholder="Add details about this collection... What topics does it cover? Who is it for?"
+					rows="4"
+					class={`w-full resize-none rounded border bg-surface-800 px-3 py-2 text-sm text-surface-100 placeholder-surface-500 focus:border-transparent focus:ring-2 focus:ring-primary-500 focus:outline-none ${
+						hasDescriptionError ? "border-error-600" : "border-surface-600"
+					}`}
+				></textarea>
+				{#if hasDescriptionError}
+					<p class="mt-1 text-xs text-error-500">{getFieldErrors("description")[0]}</p>
+				{/if}
+			</div>
 
-			<!-- Actions -->
-			<div class="flex gap-2 pt-3 border-t border-opacity-20">
-				<Button text={submitText} type="submit" fullWidth={true} />
-				<Button text="Cancel" type="button" color="secondary" fullWidth={true} onclick={onCancel} />
+			<!-- Form Actions -->
+			<div class="mt-6 flex items-center justify-between gap-2 border-t border-surface-700 pt-4">
+				<div class="text-xs text-surface-400">
+					{#if hasAnyError}
+						<span class="font-medium text-error-500">Please fix errors</span>
+					{:else}
+						<span>Ready to submit</span>
+					{/if}
+				</div>
+				<div class="flex gap-2">
+					<Button
+						text="Cancel"
+						type="button"
+						color="secondary"
+						preset="outlined"
+						size="sm"
+						onclick={onCancel}
+					/>
+					<Button text={submitText} type="submit" color="primary" size="sm" />
+				</div>
 			</div>
 		</form>
 	</div>
