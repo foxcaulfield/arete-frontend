@@ -129,39 +129,36 @@
 	<div class="space-y-4 p-4">
 		<!-- Main Header - Minimal -->
 		<div class="flex items-start justify-between">
-			<div class="flex-1 min-w-0">
-				<h1 class="h3 mb-0.5 truncate">{currentCollection?.name}</h1>
-				<p class="text-xs opacity-60 line-clamp-2">{currentCollection?.description}</p>
+			<div class="min-w-0 flex-1">
+				<h1 class="mb-0.5 truncate h3">{currentCollection?.name}</h1>
+				<p class="line-clamp-2 text-xs opacity-60">{currentCollection?.description}</p>
 			</div>
-			<div class="flex gap-1 shrink-0">
-				<Button text="Back" onclick={backToCollections} preset="tonal" size="sm" />
-				<Button text="Edit" onclick={goToEditCollection} color="secondary" size="sm" />
-			</div>
+			<div class="flex shrink-0 gap-1"></div>
 		</div>
 
 		<!-- Two Column Layout -->
-		<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+		<div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
 			<!-- Left: Info Sidebar -->
-			<div class="lg:col-span-1 space-y-3 text-xs">
-				<div class="card preset-filled-surface-100-900 p-3 space-y-3">
+			<div class="space-y-3 text-xs lg:col-span-1">
+				<div class="space-y-3 card preset-filled-surface-100-900 p-3">
 					<!-- Owner Block -->
 					<div>
-						<span class="font-medium opacity-60 block mb-1">Owner</span>
-						<div class="bg-black/10 rounded p-2">
+						<span class="mb-1 block font-medium opacity-60">Owner</span>
+						<div class="rounded bg-black/10 p-2">
 							<p class="font-medium">{userName}</p>
-							<code class="text-xs opacity-75 break-all block">{userId}</code>
+							<code class="block text-xs break-all opacity-75">{userId}</code>
 						</div>
 					</div>
 
 					<!-- Dates Block -->
 					<div>
-						<span class="font-medium opacity-60 block mb-1">Timeline</span>
+						<span class="mb-1 block font-medium opacity-60">Timeline</span>
 						<div class="space-y-1">
-							<div class="bg-black/10 rounded p-2">
+							<div class="rounded bg-black/10 p-2">
 								<span class="text-xs opacity-75">Created</span>
 								<time class="block font-mono text-xs">{currentCollection?.createdAt}</time>
 							</div>
-							<div class="bg-black/10 rounded p-2">
+							<div class="rounded bg-black/10 p-2">
 								<span class="text-xs opacity-75">Updated</span>
 								<time class="block font-mono text-xs">{currentCollection?.updatedAt}</time>
 							</div>
@@ -170,14 +167,14 @@
 
 					<!-- ID Block -->
 					<div>
-						<span class="font-medium opacity-60 block mb-1">Collection ID</span>
-						<code class="text-xs bg-black/10 p-2 rounded block break-all">{currentCollection?.id}</code>
+						<span class="mb-1 block font-medium opacity-60">Collection ID</span>
+						<code class="block rounded bg-black/10 p-2 text-xs break-all">{currentCollection?.id}</code>
 					</div>
 				</div>
 
 				<!-- Quick Actions Card -->
-				<div class="card preset-filled-surface-100-900 p-3 space-y-2">
-					<span class="font-medium opacity-60 text-xs block">Actions</span>
+				<div class="space-y-2 card preset-filled-surface-100-900 p-3">
+					<span class="block text-xs font-medium opacity-60">Actions</span>
 					<Button text="Create Exercise" onclick={goToCreateExercise} fullWidth={true} size="sm" />
 					<Button text="Start Drill" onclick={goToDrill} color="secondary" fullWidth={true} size="sm" />
 					<!-- <Button
@@ -189,16 +186,19 @@
 						fullWidth={true}
 						size="sm"
 					/> -->
+					<Button text="Back" onclick={backToCollections} preset="tonal" size="sm" />
+					<Button text="Edit" onclick={goToEditCollection} color="secondary" size="sm" />
 					<Dialog>
-						<Dialog.Trigger class="btn preset-ghost">Delete Collection</Dialog.Trigger>
+						<Dialog.Trigger class="preset-ghost btn">Delete Collection</Dialog.Trigger>
 						<Portal>
 							<Dialog.Backdrop class="fixed inset-0 z-50 bg-surface-50-950/50" />
-							<Dialog.Positioner class="fixed inset-0 z-50 flex justify-center items-center">
-								<Dialog.Content class="card bg-surface-100-900 w-md p-4 space-y-2 shadow-xl">
-									<header class="flex justify-between items-center">
-
+							<Dialog.Positioner class="fixed inset-0 z-50 flex items-center justify-center">
+								<Dialog.Content class="w-md space-y-2 card bg-surface-100-900 p-4 shadow-xl">
+									<header class="flex items-center justify-between">
 										<Dialog.Title class="text-2xl font-bold">Delete this Collection?</Dialog.Title>
-										<Dialog.CloseTrigger class="btn-icon hover:preset-tonal">&times</Dialog.CloseTrigger>
+										<Dialog.CloseTrigger class="btn-icon hover:preset-tonal"
+											>&times</Dialog.CloseTrigger
+										>
 									</header>
 									<Dialog.Description>This action cannot be undone.</Dialog.Description>
 									<Button
@@ -221,16 +221,16 @@
 
 			<!-- Right: Exercises Main Content -->
 			<div class="lg:col-span-2">
-				<div class="card preset-filled-surface-100-900 p-4 space-y-3">
-					<div class="flex items-center justify-between mb-2">
+				<div class="space-y-3 card preset-filled-surface-100-900 p-4">
+					<div class="mb-2 flex items-center justify-between">
 						<h2 class="text-base font-semibold">Exercises</h2>
-						<span class="text-xs opacity-60 font-medium">{totalItems} total</span>
+						<span class="text-xs font-medium opacity-60">{totalItems} total</span>
 					</div>
 
 					<!-- Pagination Controls -->
 					<!-- Controls Bar -->
-					<div class="flex flex-col gap-3 pb-3 border-b border-opacity-20">
-						<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+					<div class="border-opacity-20 flex flex-col gap-3 border-b pb-3">
+						<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 							<div class="flex items-center gap-2">
 								<label for="page-limit" class="text-xs font-medium opacity-60">Show</label>
 								<select
@@ -246,7 +246,7 @@
 								<span class="text-xs opacity-60">per page</span>
 							</div>
 							{#if totalPages > 1}
-								<div class="flex items-center justify-center gap-1 flex-wrap">
+								<div class="flex flex-wrap items-center justify-center gap-1">
 									<Pagination
 										count={totalItems}
 										pageSize={Number(limit)}
@@ -269,7 +269,7 @@
 									</Pagination>
 								</div>
 							{/if}
-							<div class="flex flex-col sm:flex-row sm:items-center gap-2">
+							<div class="flex flex-col gap-2 sm:flex-row sm:items-center">
 								<div class="flex items-center gap-2">
 									<Button
 										text="Previous"
@@ -310,8 +310,8 @@
 							<ExercisesTable exercises={paginatedExercises.data} />
 						</div>
 					{:else}
-						<div class="text-center py-12 opacity-40">
-							<p class="text-sm mb-2">No exercises yet</p>
+						<div class="py-12 text-center opacity-40">
+							<p class="mb-2 text-sm">No exercises yet</p>
 							<p class="text-xs opacity-75">Create one from the Actions panel to get started</p>
 						</div>
 					{/if}
