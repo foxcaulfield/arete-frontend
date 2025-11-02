@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
 	import Button from "$lib/components/common/Button.svelte";
-	import TextInput from "$lib/components/TextInput.svelte";
+	import TextInput from "$lib/components/common/TextInput.svelte";
 	import MediaField from "$lib/components/MediaField.svelte";
 	import DynamicFieldsSection from "$lib/components/DynamicFieldsSection.svelte";
 	import type { Snippet } from "svelte";
@@ -125,7 +125,7 @@
 					<span class="label-text">Exercise Type</span>
 					<select class="select" id="type" name="type" value={exercise?.type ?? "FILL_IN_THE_BLANK"}>
 						{#each exerciseTypes as type}
-						<option value={type}>{formatExerciseType(type)}</option>
+							<option value={type}>{formatExerciseType(type)}</option>
 						{/each}
 					</select>
 				</label>
@@ -213,14 +213,16 @@
 			<div>
 				<!-- Explanation -->
 				<div>
-					<label for="explanation" class="label">Explanation</label>
-					<p>Optional explanation shown after answering</p>
-					<textarea
-						id="explanation"
-						name="explanation"
-						placeholder="Explain the answer (optional)"
-						value={exercise?.explanation ?? ""}
-					></textarea>
+					<label for="explanation" class="label">
+						<p>Optional explanation shown after answering</p>
+						<textarea
+							class="textarea"
+							id="explanation"
+							name="explanation"
+							placeholder="Explain the answer (optional)"
+							value={exercise?.explanation ?? ""}
+						></textarea>
+					</label>
 					{#if formErrors?.explanation}
 						<span>{getErrorMessage(formErrors.explanation)}</span>
 					{/if}
