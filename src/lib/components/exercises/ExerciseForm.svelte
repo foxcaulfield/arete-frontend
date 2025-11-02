@@ -39,6 +39,7 @@
 
 	// UI State
 	let questionLength = $derived(exercise?.question?.length ?? 0);
+	let translationLength = $derived(exercise?.translation?.length ?? 0);
 
 	// Utility functions
 	const randomId = () => Math.floor(Math.random() * 1_000_000);
@@ -74,7 +75,7 @@
 	const questionMinLength = 5;
 	const questionMaxLength = 300;
 	const answerMaxLength = 50;
-
+	const translationMaxLength = 300;
 </script>
 
 <!-- Main Form Container -->
@@ -126,7 +127,10 @@
 			<div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
 				<!-- Exercise Type -->
 				<div class="lg:col-span-1">
-					<label for="exercise-type-radio-0" class="mb-2 block text-xs font-semibold tracking-wide text-surface-300 uppercase">
+					<label
+						for="exercise-type-radio-0"
+						class="mb-2 block text-xs font-semibold tracking-wide text-surface-300 uppercase"
+					>
 						Type
 						<span class="text-error-600">*</span>
 					</label>
@@ -147,10 +151,16 @@
 							</label>
 						{/each}
 						<label
-							class="flex pointer-events-none opacity-50 items-center rounded border border-surface-600 p-2 transition-colors peer-has-checked:border-primary-500 hover:bg-surface-800"
+							class="pointer-events-none flex items-center rounded border border-surface-600 p-2 opacity-20 transition-colors peer-has-checked:border-primary-500 hover:bg-surface-800"
 						>
 							<input disabled type="radio" />
-							<span class="ml-2 text-sm text-surface-100">Rearrange</span>
+							<span class="ml-2 text-sm text-surface-100">arrange</span>
+						</label>
+						<label
+							class="pointer-events-none flex items-center rounded border border-surface-600 p-2 opacity-20 transition-colors peer-has-checked:border-primary-500 hover:bg-surface-800"
+						>
+							<input disabled type="radio" />
+							<span class="ml-2 text-sm text-surface-100">match pairs</span>
 						</label>
 					</div>
 					{#if formErrors?.type}
@@ -160,68 +170,103 @@
 
 				<!-- Question -->
 				<div class="lg:col-span-2">
-					<div class="mb-2 flex items-center justify-between">
-						<label
-							for="question"
-							class="block text-xs font-semibold tracking-wide text-surface-300 uppercase"
-						>
-							Question <span class="text-error-600">*</span>
-						</label>
-						<span class="text-xs text-surface-500">{questionLength}/{questionMaxLength}</span>
-					</div>
-					<textarea
-						id="question"
-						name="question"
-						value={exercise?.question ?? ""}
-						autocomplete="off"
-						placeholder="What is the capital of France?"
-						maxlength={questionMaxLength}
-						rows="2"
-						onchange={(e) => {
-							questionLength = (e.target as HTMLTextAreaElement).value.length;
-						}}
-						oninput={(e) => {
-							questionLength = (e.target as HTMLTextAreaElement).value.length;
-						}}
-						class={`w-full resize-none rounded border bg-surface-800 px-3 py-2 text-sm text-surface-100 placeholder-surface-500 focus:border-transparent focus:ring-2 focus:ring-primary-500 focus:outline-none ${
-							hasQuestionError ? "border-error-600" : "border-surface-600"
-						}`}
-					></textarea>
-					<div class="mt-1 flex items-center justify-between">
+					<div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+						<!-- Question -->
 						<div>
-							{#if hasQuestionError}
-								<p class="text-xs text-error-500">
-									{Array.isArray(formErrors.question)
-										? formErrors.question.join(", ")
-										: formErrors.question}
-								</p>
-							{:else if questionLength < questionMinLength}
-								<p class="text-xs text-surface-400">Min {questionMinLength} chars</p>
-							{:else}
-								<p class="text-xs text-success-500">✓</p>
-							{/if}
-						</div>
-						{#if mode === "edit"}
-							<button
-								type="button"
-								class="text-xs text-primary-500 hover:text-primary-400"
-								onclick={() => {
-									navigator.clipboard.writeText(
-										(exercise?.question || "").replace(/{/g, "").replace(/}/g, "")
-									);
-									toast.push("Copied!", {
-										theme: {
-											"--toastBackground": "var(--color-success-500)",
-											"--toastColor": "white",
-											"--toastBarBackground": "var(--color-success-700)",
-										},
-									});
+							<div class="mb-2 flex items-center justify-between">
+								<label
+									for="question"
+									class="block text-xs font-semibold tracking-wide text-surface-300 uppercase"
+								>
+									Question <span class="text-error-600">*</span>
+								</label>
+								<span class="text-xs text-surface-500">{questionLength}/{questionMaxLength}</span>
+							</div>
+							<textarea
+								id="question"
+								name="question"
+								value={exercise?.question ?? ""}
+								autocomplete="off"
+								placeholder="What is the capital of France?"
+								maxlength={questionMaxLength}
+								rows="2"
+								onchange={(e) => {
+									questionLength = (e.target as HTMLTextAreaElement).value.length;
 								}}
-							>
-								Copy
-							</button>
-						{/if}
+								oninput={(e) => {
+									questionLength = (e.target as HTMLTextAreaElement).value.length;
+								}}
+								class={`w-full resize-none rounded border bg-surface-800 px-3 py-2 text-sm text-surface-100 placeholder-surface-500 focus:border-transparent focus:ring-2 focus:ring-primary-500 focus:outline-none ${
+									hasQuestionError ? "border-error-600" : "border-surface-600"
+								}`}
+							></textarea>
+							<div class="mt-1 flex items-center justify-between">
+								<div>
+									{#if hasQuestionError}
+										<p class="text-xs text-error-500">
+											{Array.isArray(formErrors.question)
+												? formErrors.question.join(", ")
+												: formErrors.question}
+										</p>
+									{:else if questionLength < questionMinLength}
+										<p class="text-xs text-surface-400">Min {questionMinLength} chars</p>
+									{:else}
+										<p class="text-xs text-success-500">✓</p>
+									{/if}
+								</div>
+								{#if mode === "edit"}
+									<button
+										type="button"
+										class="text-xs text-primary-500 hover:text-primary-400"
+										onclick={() => {
+											navigator.clipboard.writeText(
+												(exercise?.question || "").replace(/{/g, "").replace(/}/g, "")
+											);
+											toast.push("Copied!", {
+												theme: {
+													"--toastBackground": "var(--color-success-500)",
+													"--toastColor": "white",
+													"--toastBarBackground": "var(--color-success-700)",
+												},
+											});
+										}}
+									>
+										Copy
+									</button>
+								{/if}
+							</div>
+						</div>
+
+						<!-- Translation -->
+						<div>
+							<div class="mb-2 flex items-center justify-between">
+								<label
+									for="translation"
+									class="block text-xs font-semibold tracking-wide text-surface-300 uppercase"
+								>
+									Question Translation <span class="text-error-600">*</span>
+								</label>
+								<span class="text-xs text-surface-500">{translationLength}/{translationMaxLength}</span>
+							</div>
+							<textarea
+								id="translation"
+								name="translation"
+								value={exercise?.translation ?? ""}
+								autocomplete="off"
+								placeholder="translation"
+								maxlength={translationMaxLength}
+								rows="2"
+								onchange={(e) => {
+									translationLength = (e.target as HTMLTextAreaElement).value.length;
+								}}
+								oninput={(e) => {
+									translationLength = (e.target as HTMLTextAreaElement).value.length;
+								}}
+								class="w-full resize-none rounded border border-surface-600 bg-surface-800 px-3 py-2 text-sm text-surface-100 placeholder-surface-500 focus:border-transparent focus:ring-2 focus:ring-primary-500 focus:outline-none"
+							></textarea>
+						</div>
 					</div>
+
 					<hr class="my-4 border-surface-600" />
 					<!-- Correct Answer -->
 					<div>
@@ -258,7 +303,10 @@
 			<div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
 				<!-- Alternative/Additional Correct Answers -->
 				<div class="lg:col-span-1">
-					<label for="alternatives-input" class="mb-2 block text-xs font-semibold tracking-wide text-surface-300 uppercase">
+					<label
+						for="alternatives-input"
+						class="mb-2 block text-xs font-semibold tracking-wide text-surface-300 uppercase"
+					>
 						Alternatives (Optional)
 					</label>
 					<TagsInput
@@ -305,7 +353,10 @@
 
 				<!-- Row 3: Wrong Answers (Always Visible) -->
 				<div class="lg:col-span-2">
-					<label for="distractors-input" class="mb-2 block text-xs font-semibold tracking-wide text-surface-300 uppercase">
+					<label
+						for="distractors-input"
+						class="mb-2 block text-xs font-semibold tracking-wide text-surface-300 uppercase"
+					>
 						Wrong Answers
 					</label>
 					<TagsInput
