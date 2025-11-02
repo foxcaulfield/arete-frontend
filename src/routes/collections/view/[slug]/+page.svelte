@@ -44,9 +44,9 @@
 	}
 
 	function confirmDelete(e: Event) {
-		if (!confirm("Delete this collection? This cannot be undone.")) {
-			e.preventDefault();
-		}
+		// if (!confirm("Delete this collection? This cannot be undone.")) {
+		// 	e.preventDefault();
+		// }
 	}
 
 	function backToCollections() {
@@ -134,7 +134,7 @@
 				<p class="text-xs opacity-60 line-clamp-2">{currentCollection?.description}</p>
 			</div>
 			<div class="flex gap-1 shrink-0">
-				<Button text="Back" onclick={backToCollections} preset="ghost" size="sm" />
+				<Button text="Back" onclick={backToCollections} preset="tonal" size="sm" />
 				<Button text="Edit" onclick={goToEditCollection} color="secondary" size="sm" />
 			</div>
 		</div>
@@ -206,7 +206,7 @@
 										action="?/delete"
 										onsubmit={confirmDelete}
 										text="Delete Collection"
-										preset="tonal"
+										preset="filled"
 										color="error"
 										fullWidth={true}
 										size="sm"
@@ -275,7 +275,7 @@
 										text="Previous"
 										onclick={() => goToPage(currentPage - 1)}
 										disabled={!hasPreviousPage}
-										preset="ghost"
+										preset="tonal"
 										size="sm"
 									/>
 									<span class="text-xs opacity-60">
@@ -292,7 +292,7 @@
 										text="Next"
 										onclick={() => goToPage(currentPage + 1)}
 										disabled={!hasNextPage}
-										preset="ghost"
+										preset="tonal"
 										size="sm"
 									/>
 								</div>

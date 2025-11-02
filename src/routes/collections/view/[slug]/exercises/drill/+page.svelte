@@ -2,7 +2,7 @@
 	//  import type { SubmitFunction } from '$app/forms';
 	import { enhance } from "$app/forms";
 	import { goto, invalidateAll } from "$app/navigation";
-	import Button from "$lib/components/Button.svelte";
+	import Button from "$lib/components/common/Button.svelte";
 	import QuestionText from "$lib/components/quiz/QuestionText.svelte";
 	import type { SubmitFunction } from "@sveltejs/kit";
 	import { onMount, tick } from "svelte";
@@ -141,7 +141,7 @@
 <div class="container drill">
 	<div class="header-row">
 		<div class="card-lg">
-			<Button text="Exit Drill" onclick={exitDrill} variant="secondary" appearance="ghost" />
+			<Button text="Exit Drill" onclick={exitDrill} color="secondary" />
 		</div>
 		{#if currentQuestion?.type}
 			<ExerciseTypeBadge exerciseType={currentQuestion.type} />
@@ -215,8 +215,8 @@
 							<Button
 								type="submit"
 								bind:buttonElement={nextButtonElement}
-								variant="secondary"
-								appearance="outline"
+								color="secondary"
+								preset="outlined"
 								size="sm"
 								text="Next Question"
 							/>
@@ -225,8 +225,8 @@
 					{#if currentQuestion.imageUrl}
 						<Button
 							type="button"
-							variant="secondary"
-							appearance="ghost"
+							color="secondary"
+							preset="tonal"
 							size="sm"
 							text="Show image"
 							onclick={handleShowImage}
@@ -235,8 +235,8 @@
 					{#if currentQuestion.audioUrl}
 						<Button
 							type="button"
-							variant="secondary"
-							appearance="ghost"
+							color="secondary"
+							preset="tonal"
 							size="sm"
 							text="Play audio"
 							onclick={handlePlayAudio}
@@ -245,8 +245,8 @@
 					{#if currentQuestion.explanation}
 						<Button
 							type="button"
-							variant="secondary"
-							appearance="ghost"
+							color="secondary"
+							preset="tonal"
 							size="sm"
 							text="Show explanation"
 							onclick={handleShowExplanation}

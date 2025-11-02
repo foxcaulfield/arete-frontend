@@ -113,7 +113,6 @@
 								text="Previous"
 								onclick={() => goToPage(currentPage - 1)}
 								disabled={!hasPreviousPage}
-								preset="ghost"
 								size="sm"
 							/>
 							<span class="text-xs opacity-60">
@@ -130,7 +129,6 @@
 								text="Next"
 								onclick={() => goToPage(currentPage + 1)}
 								disabled={!hasNextPage}
-								preset="ghost"
 								size="sm"
 							/>
 						</div>

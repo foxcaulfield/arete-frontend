@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Button from "$lib/components/Button.svelte";
+	import Button from "$lib/components/common/Button.svelte";
 
 	interface Props {
 		currentPage: number;
@@ -70,7 +70,7 @@
 	{/if}
 
 	<div class="pagination-controls">
-		<Button text="Previous" onclick={handlePreviousPage} disabled={!hasPreviousPage} variant="secondary" />
+		<Button text="Previous" onclick={handlePreviousPage} disabled={!hasPreviousPage} color="secondary" />
 
 		{#if showPageInfo}
 			<div class="page-info">
@@ -87,7 +87,7 @@
 			</div>
 		{/if}
 
-		<Button text="Next" onclick={handleNextPage} disabled={!hasNextPage} variant="secondary" />
+		<Button text="Next" onclick={handleNextPage} disabled={!hasNextPage} color="secondary" />
 	</div>
 </div>
 

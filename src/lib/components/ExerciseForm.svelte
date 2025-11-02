@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
-	import Button from "$lib/components/Button.svelte";
+	import Button from "$lib/components/common/Button.svelte";
 	import TextInput from "$lib/components/TextInput.svelte";
 	import MediaField from "$lib/components/MediaField.svelte";
 	import DynamicFieldsSection from "$lib/components/DynamicFieldsSection.svelte";
@@ -155,9 +155,7 @@
 						text="Copy Question"
 						type="button"
 						size="sm"
-						variant="secondary"
-						appearance="ghost"
-						style="margin-top:0.5rem"
+						color="secondary"
 						onclick={() => {
 							// replace all {{[^}]+}} with empty string, but keep the rest of the text
 							navigator.clipboard.writeText(
@@ -243,7 +241,7 @@
 			<!-- Form Actions -->
 			<div class="form-actions">
 				<Button text={formText.submitButton} type="submit" />
-				<Button text="Cancel" type="button" variant="secondary" onclick={onCancel} />
+				<Button text="Cancel" type="button" color="secondary" onclick={onCancel} />
 			</div>
 		</div>
 	</form>

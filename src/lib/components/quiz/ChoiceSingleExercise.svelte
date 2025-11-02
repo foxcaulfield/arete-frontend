@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Button from "../Button.svelte";
+	import Button from "../common/Button.svelte";
 
 	interface Props {
 		distractors: string[];
@@ -43,18 +43,18 @@
 			bind:buttonElement={choiceButtons[index]}
 			disabled={showResult}
 			type="submit"
-			variant={showResult
+			color={showResult
 				? lastResult?.isCorrect
 					? distractor === lastResult?.correctAnswer
 						? "success"
 						: "secondary"
 					: distractor === lastUserAnswer
-						? "danger"
+						? "error"
 						: distractor === lastResult?.correctAnswer
 							? "success"
 							: "secondary"
 				: "secondary"}
-			appearance={showResult && distractor === lastUserAnswer ? "filled" : "outline"}
+			preset={showResult && distractor === lastResult?.correctAnswer ? "filled" : "outlined"}
 			name="userAnswer"
 			value={distractor}
 			text={distractor}

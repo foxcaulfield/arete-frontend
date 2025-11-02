@@ -4,6 +4,9 @@
 	type CommonProps = {
 		text: string;
 		type?: "button" | "submit" | "reset";
+		name?: string;
+		value?: string;
+		title?: string;
 		preset?: StyleProps.Preset;
 		color?: StyleProps.Color;
 		size?: StyleProps.Size;
@@ -13,6 +16,9 @@
 		buttonElement?: HTMLButtonElement | undefined;
 		class?: ClassValue;
 		fullWidth?: boolean;
+		action?: string;
+		onsubmit?: (e: Event) => void;
+		onclick?: (e: Event) => void;
 		[rest: string]: any;
 	};
 
@@ -23,6 +29,9 @@
 	let {
 		text,
 		type,
+		name,
+		value,
+		title,
 		preset = "filled",
 		color = "primary",
 		size = "base",
@@ -56,6 +65,9 @@
 	style:display={withAction ? "inline" : "inline-block"}
 >
 	<button
+		name={name}
+		value={value}
+		title={title}
 		bind:this={buttonElement}
 		type={type ?? (withAction ? "submit" : "button")}
 		{disabled}
@@ -68,7 +80,7 @@
 		]
 			.filter(Boolean)
 			.join(" ")}
-		{...rest}
+	{...rest}
 	>
 		{#if loading}
 			<span class="spinner"></span>

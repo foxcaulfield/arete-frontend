@@ -48,7 +48,7 @@
 			<Button
 				text="Remove"
 				type="button"
-				appearance="ghost"
+				preset="outlined"
 				onclick={() => onRemove(item.id)}
 			/>
 		</div>

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
 	import type { SubmitFunction } from "@sveltejs/kit";
-	import Button from "../Button.svelte";
-    import { toast } from "@zerodevx/svelte-toast";
+	import Button from "../common/Button.svelte";
+	import { toast } from "@zerodevx/svelte-toast";
 
 	interface Props {
 		showResult: boolean;
@@ -19,37 +19,28 @@
 		handleForceTextInput,
 		nextButtonElement = $bindable(),
 		handleGetNextQuestionEnhance,
-        handleCopyToClipboard
+		handleCopyToClipboard,
 	}: Props = $props();
 </script>
 
 <div class="button-controls">
-	<Button
-		type="button"
-		variant="secondary"
-		appearance="ghost"
-		size="sm"
-		text="copy"
-		onclick={handleCopyToClipboard}
-	/>
+	<Button type="button" preset="outlined" color="secondary" size="sm" text="copy" onclick={handleCopyToClipboard} />
 	<Button
 		disabled={showResult}
 		type="button"
-		variant="secondary"
-		appearance="ghost"
+		color="secondary"
 		size="sm"
 		text="Force Text Input"
 		onclick={handleForceTextInput}
 	/>
-	<Button type="button" variant="secondary" appearance="ghost" size="sm" text="✎" onclick={handleGoToEditPage}>
+	<Button type="button" color="secondary" size="sm" text="✎" onclick={handleGoToEditPage}>
 		<!-- text="✏️ Edit" -->
 	</Button>
 	<form method="POST" action="?/getNextQuestion" use:enhance={handleGetNextQuestionEnhance}>
 		<Button
 			type="submit"
 			bind:buttonElement={nextButtonElement}
-			variant="secondary"
-			appearance="ghost"
+			color="secondary"
 			size="sm"
 			text={`⟳`}
 		/>

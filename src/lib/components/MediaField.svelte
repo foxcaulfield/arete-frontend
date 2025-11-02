@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Button from "$lib/components/Button.svelte";
+	import Button from "$lib/components/common/Button.svelte";
 	import type { Snippet } from "svelte";
 
 	interface Props {
@@ -9,12 +9,7 @@
 		onAudioChange?: (file: File | null, src: string | null) => void;
 	}
 
-	let {
-		imageUrl = null,
-		audioUrl = null,
-		onImageChange,
-		onAudioChange,
-	}: Props = $props();
+	let { imageUrl = null, audioUrl = null, onImageChange, onAudioChange }: Props = $props();
 
 	type MediaStatus = "new" | "current" | "unchanged";
 
@@ -118,9 +113,7 @@
 
 <div class="form-group">
 	<label for="media-upload" class="label">Media Files</label>
-	<p class="muted" style="font-size:0.875rem;margin-bottom:0.5rem">
-		Enhance your question with images and audio
-	</p>
+	<p class="muted" style="font-size:0.875rem;margin-bottom:0.5rem">Enhance your question with images and audio</p>
 
 	<div class="media-section" id="media-upload">
 		<div class="file-input-wrapper">
@@ -152,51 +145,73 @@
 
 	<!-- Media Previews with Status Indicators -->
 	<!-- {#if showImagePreview || showAudioPreview} -->
-		<div class="preview-grid">
-			{#if showImagePreview}
-				<div class="preview-card">
-					<div class="preview-header">
-						<div class="preview-label">Image Preview</div>
-						<div class="media-badge" class:status-new={imageStatus === "new"} class:status-current={imageStatus === "current"}>
-							{imageStatus === "new" ? "⭐ New" : "✓ Current"}
-						</div>
+	<div class="preview-grid">
+		{#if showImagePreview}
+			<div class="preview-card">
+				<div class="preview-header">
+					<div class="preview-label">Image Preview</div>
+					<div
+						class="media-badge"
+						class:status-new={imageStatus === "new"}
+						class:status-current={imageStatus === "current"}
+					>
+						{imageStatus === "new" ? "⭐ New" : "✓ Current"}
 					</div>
-					<div class="preview image-preview">
-						<img src={imagePreview} alt="" />
-					</div>
-					{#if imageStatus !== "unchanged"}
-						<div class="preview-actions">
-							<Button text="Clear" type="button" variant="danger" appearance="outline" size="sm" onclick={clearImage} />
-						</div>
-					{/if}
 				</div>
-			{:else}
-                <div class="preview-placeholder">No Image Uploaded</div>
-            {/if}
+				<div class="preview image-preview">
+					<img src={imagePreview} alt="" />
+				</div>
+				{#if imageStatus !== "unchanged"}
+					<div class="preview-actions">
+						<Button
+							text="Clear"
+							type="button"
+							color="error"
+							preset="outlined"
+							size="sm"
+							onclick={clearImage}
+						/>
+					</div>
+				{/if}
+			</div>
+		{:else}
+			<div class="preview-placeholder">No Image Uploaded</div>
+		{/if}
 
-			{#if showAudioPreview}
-				<div class="preview-card">
-					<div class="preview-header">
-						<div class="preview-label">Audio Preview</div>
-						<div class="media-badge" class:status-new={audioStatus === "new"} class:status-current={audioStatus === "current"}>
-							{audioStatus === "new" ? "⭐ New" : "✓ Current"}
-						</div>
+		{#if showAudioPreview}
+			<div class="preview-card">
+				<div class="preview-header">
+					<div class="preview-label">Audio Preview</div>
+					<div
+						class="media-badge"
+						class:status-new={audioStatus === "new"}
+						class:status-current={audioStatus === "current"}
+					>
+						{audioStatus === "new" ? "⭐ New" : "✓ Current"}
 					</div>
-					<div class="preview audio-preview">
-						<audio controls src={audioPreview}>
-							<!-- fallback -->
-						</audio>
-					</div>
-					{#if audioStatus !== "unchanged"}
-						<div class="preview-actions">
-							<Button text="Clear" type="button" variant="danger" appearance="outline" size="sm" onclick={clearAudio} />
-						</div>
-					{/if}
 				</div>
-			{:else}
-                <div class="preview-placeholder">No Audio Uploaded</div>
-            {/if}
-		</div>
+				<div class="preview audio-preview">
+					<audio controls src={audioPreview}>
+						<!-- fallback -->
+					</audio>
+				</div>
+				{#if audioStatus !== "unchanged"}
+					<div class="preview-actions">
+						<Button
+							text="Clear"
+							type="button"
+							color="error"
+							preset="outlined"
+							size="sm"
+							onclick={clearAudio}
+						/>
+					</div>
+				{/if}
+			</div>
+		{:else}
+			<div class="preview-placeholder">No Audio Uploaded</div>
+		{/if}
+	</div>
 	<!-- {/if} -->
 </div>
 
