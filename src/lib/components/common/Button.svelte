@@ -49,12 +49,38 @@
 
 	const disabled = $derived(disabledProp || loading);
 
+	// Static preset mapping - use complete class names for Tailwind detection
+	const presetColorMap: Record<string, Record<string, string>> = {
+		filled: {
+			primary: "preset-filled-primary-500",
+			secondary: "preset-filled-secondary-500",
+			tertiary: "preset-filled-tertiary-500",
+			success: "preset-filled-success-500",
+			warning: "preset-filled-warning-500",
+			error: "preset-filled-error-500",
+			surface: "preset-filled-surface-500",
+		},
+		outlined: {
+			primary: "preset-outlined-primary-500",
+			secondary: "preset-outlined-secondary-500",
+			tertiary: "preset-outlined-tertiary-500",
+			success: "preset-outlined-success-500",
+			warning: "preset-outlined-warning-500",
+			error: "preset-outlined-error-500",
+			surface: "preset-outlined-surface-500",
+		},
+		ghost: {
+			primary: "preset-ghost-primary",
+			secondary: "preset-ghost-secondary",
+			tertiary: "preset-ghost-tertiary",
+			success: "preset-ghost-success",
+			warning: "preset-ghost-warning",
+			error: "preset-ghost-error",
+			surface: "preset-ghost-surface",
+		},
+	};
 
-	const presetClass = $derived(
-		preset === "filled" || preset === "outlined"
-			? `preset-${preset}-${color}-${500}`
-			: `preset-${preset}-${color}`
-	);
+	const presetClass = $derived(presetColorMap[preset]?.[color] ?? "preset-filled-primary-500");
 </script>
 
 <svelte:element
