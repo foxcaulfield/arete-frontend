@@ -2,7 +2,7 @@ import { fail, isRedirect, redirect, type Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { Backend } from "$lib/server/backend-manager";
 import { ApiError } from "$lib/server/errors";
-import { processExerciseFormData, validateParams } from "$lib/server/form-utils";
+import { validateParams } from "$lib/server/form-utils";
 
 export const load: PageServerLoad = async ({ params, parent }) => {
 	const collectionId = params.slug;
@@ -37,8 +37,7 @@ export const actions = {
 
 		try {
 			// Get and process form data
-			const rawFormData = await request.formData();
-			const formData = processExerciseFormData(rawFormData);
+			const formData = await request.formData();
 
 			// Add collection ID
 			formData.append("collectionId", params.slug!);

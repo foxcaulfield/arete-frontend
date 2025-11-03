@@ -48,8 +48,8 @@
 	// Track if fields should be explicitly set to null
 	let clearExplanation = $state(false);
 	let clearTranslation = $state(false);
-	let clearAdditionalAnswers = $state(false);
-	let clearDistractors = $state(false);
+	let canClearAdditionalAnswers = $state(false);
+	let canClearDistractors = $state(false);
 
 	let additionalCorrectAnswers = $state<Array<{ id: number; value: string }>>(
 		(exercise?.additionalCorrectAnswers || []).map((ans) => ({ id: randomId(), value: ans }))
@@ -79,6 +79,99 @@
 	const questionMaxLength = 300;
 	const answerMaxLength = 50;
 	const translationMaxLength = 300;
+
+	const keepOnlyUnique = (arr: string[]) => [...new Set(arr)];
+	const toAnswerWithId = (val: string) => ({ id: randomId(), value: val });
+	const toTrimmedLower = (val: string) => val.trim().toLowerCase();
+	const showWarningToast = (message: string) => {
+		toast.push(message, {
+			theme: {
+				"--toastBackground": "var(--color-warning-500)",
+				"--toastColor": "white",
+				"--toastBarBackground": "var(--color-warning-700)",
+			},
+		});
+	};
+
+	type ValChangeInfo = { value: string[]; inputValue: string };
+
+	const _handleValidateExtraAnswersInput =
+		(warningMessage: string) =>
+		({ value, inputValue }: ValChangeInfo) => {
+			if (value.map(toTrimmedLower).includes(toTrimmedLower(inputValue))) {
+				showWarningToast(warningMessage);
+				return false;
+			}
+			return true;
+		};
+
+	function handleValidateAdditionalAnswersInput({ value, inputValue }: ValChangeInfo) {
+		return _handleValidateExtraAnswersInput("Duplicate alternative value")({ value, inputValue });
+	}
+
+	function handleValidateDistractorsInput({ value, inputValue }: ValChangeInfo) {
+		return _handleValidateExtraAnswersInput("Duplicate distractor value")({ value, inputValue });
+	}
+
+	function handleDistractorsChange({ value }: { value: string[] }) {
+		distractors = keepOnlyUnique(value).map(toAnswerWithId);
+
+		if (value.length > 0) {
+			canClearDistractors = false;
+		}
+	}
+
+	function handleAdditionalAnswersChange({ value }: { value: string[] }) {
+		additionalCorrectAnswers = keepOnlyUnique(value).map(toAnswerWithId);
+
+		if (value.length > 0) {
+			canClearAdditionalAnswers = false;
+		}
+	}
+
+	function handleClearExplanation() {
+		explanationText = "";
+		clearExplanation = true;
+		showWarningToast("Explanation will be removed");
+	}
+
+	function handleClearTranslation() {
+		translationText = "";
+		clearTranslation = true;
+		showWarningToast("Translation will be removed");
+	}
+
+	function handleClearAdditionalAnswers() {
+		additionalCorrectAnswers = [];
+		canClearAdditionalAnswers = true;
+		showWarningToast("All alternatives will be removed");
+	}
+
+	function handleClearDistractors() {
+		distractors = [];
+		canClearDistractors = true;
+		showWarningToast("All distractors will be removed");
+	}
+
+	function handleUndoClearExplanation() {
+		clearExplanation = false;
+		explanationText = exercise?.explanation ?? "";
+	}
+
+	function handleUndoClearTranslation() {
+		clearTranslation = false;
+		translationText = exercise?.translation ?? "";
+	}
+
+	function handleUndoClearAdditionalAnswers() {
+		canClearAdditionalAnswers = false;
+		additionalCorrectAnswers = (exercise?.additionalCorrectAnswers || []).map(toAnswerWithId);
+	}
+
+	function handleUndoClearDistractors() {
+		canClearDistractors = false;
+		distractors = (exercise?.distractors || []).map(toAnswerWithId);
+	}
 </script>
 
 <!-- Main Form Container -->
@@ -119,42 +212,30 @@
 			method="POST"
 			enctype="multipart/form-data"
 			use:enhance={async ({ formData }) => {
-				// Handle distractors array
-				// distractors?.forEach((distractor) => {
-				// 	formData.append(`distractors`, distractor.value);
-				// });
+				const appendArrayOrEmpty = (
+					key: string,
+					arr: Array<{ id: number; value: string }>,
+					canClear: boolean
+				) => {
+					if (canClear || arr.length === 0) {
+						formData.append(key, "");
+					} else {
+						arr.map((a) => a.value).forEach((v) => formData.append(key, v));
+					}
+				};
 
-				// Handle additional correct answers array
-				// Always send values (empty array if none, which will be handled as empty on backend)
-				if (clearAdditionalAnswers || additionalCorrectAnswers.length === 0) {
-					// Send empty array marker so backend knows to set it to []
-					formData.append("additionalCorrectAnswers", "EMPTY_ARRAY");
-				} else {
-					const uniqueAnswers = [...new Set(additionalCorrectAnswers.map(a => a.value))];
+				const setEmptyIfClearedOrBlank = (key: string, val: string, cleared: boolean) => {
+					if (cleared || val.trim().length === 0) {
+						formData.set(key, "");
+					}
+				};
 
-					uniqueAnswers.forEach((answer) => {
-						formData.append(`additionalCorrectAnswers`, answer);
-					});
-				}
+				appendArrayOrEmpty("additionalCorrectAnswers", additionalCorrectAnswers, canClearAdditionalAnswers);
+				appendArrayOrEmpty("distractors", distractors, canClearDistractors);
 
-				if (clearDistractors || distractors.length === 0) {
-					// Send empty array marker so backend knows to set it to []
-					formData.append("distractors", "EMPTY_ARRAY");
-				} else {
-					const uniqueDistractors = [...new Set(distractors.map(d => d.value))];
+				setEmptyIfClearedOrBlank("explanation", explanationText, clearExplanation);
+				setEmptyIfClearedOrBlank("translation", translationText, clearTranslation);
 
-					uniqueDistractors.forEach((dist) => {
-						formData.append(`distractors`, dist);
-					});
-				}
-
-				// Handle explicit null for text fields
-				if (clearExplanation || explanationText.trim().length === 0) {
-					formData.set("explanation", "NULL");
-				}
-				if (clearTranslation || translationText.trim().length === 0) {
-					formData.set("translation", "NULL");
-				}
 				return async ({ update }) => {
 					await update();
 				};
@@ -296,17 +377,7 @@
 									<button
 										disabled={clearTranslation}
 										type="button"
-										onclick={() => {
-											translationText = "";
-											clearTranslation = true;
-											toast.push("Translation will be removed", {
-												theme: {
-													"--toastBackground": "var(--color-warning-500)",
-													"--toastColor": "white",
-													"--toastBarBackground": "var(--color-warning-700)",
-												},
-											});
-										}}
+										onclick={handleClearTranslation}
 										class="absolute top-2 right-2 rounded p-1 text-surface-400 transition-colors hover:bg-surface-700 hover:text-surface-200 disabled:text-surface-500 disabled:hover:bg-transparent"
 										title="Clear translation (set to null)"
 									>
@@ -326,10 +397,7 @@
 									Translation will be removed
 									<button
 										type="button"
-										onclick={() => {
-											clearTranslation = false;
-											translationText = exercise?.translation ?? "";
-										}}
+										onclick={handleUndoClearTranslation}
 										class="ml-2 underline hover:text-warning-400"
 									>
 										Undo
@@ -389,17 +457,7 @@
 						{#if additionalCorrectAnswers.length > 0 || (mode === "edit" && exercise?.additionalCorrectAnswers?.length)}
 							<button
 								type="button"
-								onclick={() => {
-									additionalCorrectAnswers = [];
-									clearAdditionalAnswers = true;
-									toast.push("Alternatives will be removed", {
-										theme: {
-											"--toastBackground": "var(--color-warning-500)",
-											"--toastColor": "white",
-											"--toastBarBackground": "var(--color-warning-700)",
-										},
-									});
-								}}
+								onclick={handleClearAdditionalAnswers}
 								class="text-xs text-error-500 hover:text-error-400"
 								title="Clear all alternatives"
 							>
@@ -408,39 +466,9 @@
 						{/if}
 					</div>
 					<TagsInput
-						validate={({ value, inputValue }) => {
-							if (value.includes(inputValue)) {
-								toast.push("Duplicate additional answer value", {
-									theme: {
-										"--toastBackground": "var(--color-warning-500)",
-										"--toastColor": "white",
-										"--toastBarBackground": "var(--color-warning-700)",
-									},
-								});
-								return false;
-							}
-							return true;
-						}}
-						onValueChange={({ value }) => {
-							const uniqueValues = [...new Set(value)];
-							if (uniqueValues.length < value.length) {
-								toast.push("Duplicate values removed", {
-									theme: {
-										"--toastBackground": "var(--color-warning-500)",
-										"--toastColor": "white",
-										"--toastBarBackground": "var(--color-warning-700)",
-									},
-								});
-							}
-							additionalCorrectAnswers = uniqueValues.map((val) => ({
-								id: randomId(),
-								value: val,
-							}));
-							// Reset clear flag when user adds new values
-							if (value.length > 0) {
-								clearAdditionalAnswers = false;
-							}
-						}}
+						disabled={canClearAdditionalAnswers}
+						validate={handleValidateAdditionalAnswersInput}
+						onValueChange={handleAdditionalAnswersChange}
 						value={additionalCorrectAnswers.map((d) => d.value)}
 					>
 						<TagsInput.Control class="w-full">
@@ -473,20 +501,12 @@
 						</TagsInput.Control>
 						<TagsInput.HiddenInput />
 					</TagsInput>
-					{#if clearAdditionalAnswers}
+					{#if canClearAdditionalAnswers}
 						<p class="mt-1 text-xs text-warning-500">
 							All alternatives will be removed when you save
 							<button
 								type="button"
-								onclick={() => {
-									clearAdditionalAnswers = false;
-									additionalCorrectAnswers = (exercise?.additionalCorrectAnswers || []).map(
-										(ans) => ({
-											id: randomId(),
-											value: ans,
-										})
-									);
-								}}
+								onclick={handleUndoClearAdditionalAnswers}
 								class="ml-2 underline hover:text-warning-400"
 							>
 								Undo
@@ -509,17 +529,7 @@
 						{#if distractors.length > 0 || (mode === "edit" && exercise?.distractors?.length)}
 							<button
 								type="button"
-								onclick={() => {
-									distractors = [];
-									clearDistractors = true;
-									toast.push("Distractors will be removed", {
-										theme: {
-											"--toastBackground": "var(--color-warning-500)",
-											"--toastColor": "white",
-											"--toastBarBackground": "var(--color-warning-700)",
-										},
-									});
-								}}
+								onclick={handleClearDistractors}
 								class="text-xs text-error-500 hover:text-error-400"
 								title="Clear all distractors"
 							>
@@ -529,33 +539,9 @@
 					</div>
 
 					<TagsInput
-						validate={({ value, inputValue }) => {
-							if (value.includes(inputValue)) {
-								toast.push("Duplicate distractor value", {
-									theme: {
-										"--toastBackground": "var(--color-warning-500)",
-										"--toastColor": "white",
-										"--toastBarBackground": "var(--color-warning-700)",
-									},
-								});
-								return false;
-							}
-							return true;
-						}}
-						onValueChange={({ value }) => {
-							// debugger;
-							const newValues = [...new Set(value)];
-							console.log(newValues);
-							distractors = [... new Set(value)].map((val) => ({
-								id: randomId(),
-								value: val,
-							}));
-
-							// Reset clear flag when user adds new values
-							if (value.length > 0) {
-								clearDistractors = false;
-							}
-						}}
+						disabled={canClearDistractors}
+						validate={handleValidateDistractorsInput}
+						onValueChange={handleDistractorsChange}
 						value={distractors.map((d) => d.value)}
 					>
 						<TagsInput.Control class="w-full">
@@ -588,18 +574,12 @@
 						</TagsInput.Control>
 						<TagsInput.HiddenInput />
 					</TagsInput>
-					{#if clearDistractors}
+					{#if canClearDistractors}
 						<p class="mt-1 text-xs text-warning-500">
 							All distractors will be removed when you save
 							<button
 								type="button"
-								onclick={() => {
-									clearDistractors = false;
-									distractors = (exercise?.distractors || []).map((ans) => ({
-										id: randomId(),
-										value: ans,
-									}));
-								}}
+								onclick={handleUndoClearDistractors}
 								class="ml-2 underline hover:text-warning-400"
 							>
 								Undo
@@ -634,17 +614,7 @@
 							<button
 								disabled={clearExplanation}
 								type="button"
-								onclick={() => {
-									explanationText = "";
-									clearExplanation = true;
-									toast.push("Explanation will be removed", {
-										theme: {
-											"--toastBackground": "var(--color-warning-500)",
-											"--toastColor": "white",
-											"--toastBarBackground": "var(--color-warning-700)",
-										},
-									});
-								}}
+								onclick={handleClearExplanation}
 								class="absolute top-2 right-2 rounded p-1 text-surface-400 transition-colors hover:bg-surface-700 hover:text-surface-200 disabled:text-surface-500 disabled:hover:bg-transparent"
 								title="Clear explanation (set to null)"
 							>
@@ -664,10 +634,7 @@
 							Explanation will be removed when you save
 							<button
 								type="button"
-								onclick={() => {
-									clearExplanation = false;
-									explanationText = exercise?.explanation ?? "";
-								}}
+								onclick={handleUndoClearExplanation}
 								class="ml-2 underline hover:text-warning-400"
 							>
 								Undo

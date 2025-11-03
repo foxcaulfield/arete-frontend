@@ -2,7 +2,7 @@ import { Backend } from "$lib/server/backend-manager";
 import { fail, isRedirect, redirect, type Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { ApiError } from "$lib/server/errors";
-import { processExerciseFormData, validateParams } from "$lib/server/form-utils";
+import { validateParams } from "$lib/server/form-utils";
 
 export const load: PageServerLoad = async ({ params, fetch, parent }) => {
 	const { id: exerciseId } = params;
@@ -48,8 +48,7 @@ export const actions = {
 
 		try {
 			// Get and process form data
-			const rawFormData = await request.formData();
-			const formData = processExerciseFormData(rawFormData);
+			const formData = await request.formData();
 
 			// Submit to backend
 			const backend = new Backend(fetch);
