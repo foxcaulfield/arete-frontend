@@ -2,23 +2,23 @@ import { fail, type Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { Backend } from "$lib/server/backend-manager";
 
-export const load: PageServerLoad = async ({ params, fetch, cookies }) => {
+export const load: PageServerLoad = async ({ params, fetch }) => {
 	const collectionId = params.slug;
 
 	// Read persisted preference from cookie (if present).
 	// // Prefer a collection-scoped cookie but fall back to a global one.
-	const key = `drill.forceTextInput.${collectionId ?? "global"}`;
-	const raw = cookies.get(key) ?? cookies.get("drill.forceTextInput");
-	const forceTextInput = raw === "true";
+	// const key = `drill.forceTextInput.${collectionId ?? "global"}`;
+	// const raw = cookies.get(key) ?? cookies.get("drill.forceTextInput");
+	// const forceTextInput = raw === "true";
 
 	try {
 		const backend = new Backend(fetch);
 		const question = await backend.api.exercises.getDrillQuestion(collectionId);
 
-		return { question, collectionId, forceTextInput };
+		return { question, collectionId, forceTextInput:false };
 	} catch (e) {
 		const flags = Backend.extractApiErrorFlags(e);
-		return { question: null, collectionId, flags, forceTextInput };
+		return { question: null, collectionId, flags, forceTextInput:false };
 	}
 };
 

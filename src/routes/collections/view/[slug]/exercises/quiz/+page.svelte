@@ -41,10 +41,15 @@
 	let lastResult = $state<Quiz.UserAnswerFeedbackDto | null>(null);
 	let lastUserAnswer = $state("");
 
-	// Initialize from server-provided prop when available so initial renders
-	let isForceTextInput = $derived.by(() =>
-		typeof props.data?.forceTextInput === "boolean" ? props.data?.forceTextInput : true
-	);
+	// Track the force text input preference as mutable state
+	let isForceTextInput = $state(false);
+
+	// Sync with server-provided prop when available
+	// $effect(() => {
+	// 	if (typeof props.data?.forceTextInput === "boolean") {
+	// 		isForceTextInput = props.data.forceTextInput;
+	// 	}
+	// });
 
 	// Parse question text into parts (text + hidden answers)
 	const questionParts = $derived.by(() => {
@@ -68,13 +73,13 @@
 
 		// Set a cookie so the server can render the correct UI on
 		// subsequent navigations/partial updates. Keep it for 1 week.
-		try {
-			const key = forceTextStorageCookieKey;
-			const maxAge = 60 * 60 * 24 * 7; // 1 week
-			document.cookie = `${encodeURIComponent(key)}=${isForceTextInput ? "true" : "false"}; path=/; max-age=${maxAge}; SameSite=Lax`;
-		} catch (e) {
-			// ignore cookie set errors
-		}
+		// try {
+		// 	const key = forceTextStorageCookieKey;
+		// 	const maxAge = 60 * 60 * 24 * 7; // 1 week
+		// 	document.cookie = `${encodeURIComponent(key)}=${isForceTextInput ? "true" : "false"}; path=/; max-age=${maxAge}; SameSite=Lax`;
+		// } catch (e) {
+		// 	// ignore cookie set errors
+		// }
 
 		if (isForceTextInput) {
 			await tick();
@@ -254,7 +259,7 @@
 								onclick={handleForceTextInput}
 								title={isForceTextInput ? "Switch to choice" : "Switch to text"}
 							>
-								{isForceTextInput ? "Text" : "Choice"}
+								{isForceTextInput ? "Switch to choice" : "Switch to text "}
 							</button>
 
 							<form method="POST" action="?/getNextQuestion" use:enhance={handleGetNextQuestionEnhance}>
