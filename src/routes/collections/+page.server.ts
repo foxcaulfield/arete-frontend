@@ -4,7 +4,7 @@ import type { PageServerLoad } from "./$types";
 export const load: PageServerLoad = async ({ fetch, parent, url }) => {
 	const urlParams = url.searchParams;
 	const page = Math.max(1, parseInt(urlParams.get("page") || "1"));
-	const limit = Math.max(1, parseInt(urlParams.get("limit") || "5"));
+	const limit = Math.max(1, parseInt(urlParams.get("limit") || "20"));
 
 	const { user } = await parent();
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Button from "../Button.svelte";
+	import Button from "../common/Button.svelte";
 	import FormGroupTextInput from "../FormGroupTextInput.svelte";
 
 	interface Props {
@@ -24,7 +24,7 @@
 	<Button
 		text="Answer"
 		type="submit"
-		variant={userAnswer && !showResult ? "primary" : "secondary"}
+		color={userAnswer && !showResult ? "primary" : "secondary"}
 		disabled={showResult || !userAnswer.trim()}
 	/>
 </div>

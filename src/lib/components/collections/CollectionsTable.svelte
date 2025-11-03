@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
-	let props: { collections: ResponseCollectionDTO[] } = $props();
+	let props: { collections: Collection.ResponseDto[] } = $props();
 
 	function open(id: string) {
 		const query = page.url.search;
@@ -9,8 +9,9 @@
 	}
 </script>
 
-<div class="table-container">
-	<table>
+<div class="table-wrap">
+	<table class="table caption-top w-full">
+		<!-- <caption class="pt-4">A list of collections.</caption> -->
 		<thead>
 			<tr>
 				<th>Name</th>
@@ -20,10 +21,10 @@
 				<th>Updated At</th>
 			</tr>
 		</thead>
-		<tbody>
+		<tbody class="[&>tr]:hover:preset-tonal-primary">
 			{#each props.collections as collection (collection.id)}
+				<!-- class="clickable-row" -->
 				<tr
-					class="clickable-row"
 					role="button"
 					tabindex="0"
 					onclick={() => open(collection.id)}

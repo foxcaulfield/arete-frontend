@@ -1,8 +1,7 @@
 import { Backend } from "$lib/server/backend-manager";
 import type { Actions, PageServerLoad } from "./$types";
-// import { ok } from "$lib/server/error-utils";
-// import { handleActionError } from "$lib/server/error-utils";
-import { fail, redirect } from "@sveltejs/kit";
+import { fail, isRedirect, redirect } from "@sveltejs/kit";
+import { ApiError } from "$lib/server/errors";
 
 export const load: PageServerLoad = async ({ parent }) => {
 	const { user } = await parent();
@@ -12,6 +11,7 @@ export const load: PageServerLoad = async ({ parent }) => {
 
 export const actions = {
 	create: async ({ request, fetch }) => {
+		// Get form data once at the start
 		const data = await request.formData();
 		const name = String(data.get("name") ?? "").trim();
 		const description = (data.get("description")?.toString().trim() || undefined) as string | undefined;
@@ -22,24 +22,50 @@ export const actions = {
 			description: data.get("description")?.toString() ?? "",
 		};
 
+		// Basic client-side validation
 		if (!name) {
 			return fail(400, {
-				message: "Name is required",
-				fieldErrors: { name: "Required" },
+				errorText: "Name is required",
+				fieldErrors: { name: ["Name is required"] },
 				values,
 			});
 		}
+
 		try {
 			const backend = new Backend(fetch);
 			const result = await backend.api.collections.create(name, description);
 
 			throw redirect(303, `/collections/view/${result.id}?created=1`);
-		} catch (e) {
-			const result = Backend.handleActionError(e);
-			// Attach values to preserve form state
-			return fail(result.status, {
-				message: result?.data.message,
-				// fieldErrors: result?.data.values.fieldErrors,
+		} catch (error) {
+			// Handle redirect (not an error)
+			if (isRedirect(error)) {
+				throw error;
+			}
+
+			// Handle API errors
+			if (error instanceof ApiError) {
+				// Validation error with field-specific messages
+				if (error.statusCode === 400 && error.fields) {
+					return fail(400, {
+						errorText: error.message || "Validation failed",
+						fieldErrors: error.fields,
+						values,
+					});
+				}
+
+				// Other API errors (403, 404, etc.)
+				return fail(error.statusCode, {
+					errorText: error.message || "An error occurred",
+					fieldErrors: {},
+					values,
+				});
+			}
+
+			// Unexpected errors
+			console.error("Unexpected error during collection creation:", error);
+			return fail(500, {
+				errorText: error instanceof Error ? error.message : "An unexpected error occurred",
+				fieldErrors: {},
 				values,
 			});
 		}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import TextInput from "./TextInput.svelte";
+	import TextInput from "./common/TextInput.svelte";
 
 	interface FormGroupTextInputProps {
 		cssClass?: string;

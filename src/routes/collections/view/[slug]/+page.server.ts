@@ -4,7 +4,7 @@ import { Backend } from "$lib/server/backend-manager";
 import { redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 
-export const load: PageServerLoad = async ({ params, fetch, parent }) => {
+export const load: PageServerLoad = async ({ params, fetch, parent, url }) => {
 	const collectionId = params.slug;
 	const { user } = await parent();
 
@@ -18,7 +18,22 @@ export const load: PageServerLoad = async ({ params, fetch, parent }) => {
 	try {
 		const backend = new Backend(fetch);
 		const collection = await backend.api.collections.getById(collectionId);
-		const paginatedExercises = await backend.api.exercises.getListByCollectionId(collectionId);
+		// const paginatedExercises = await backend.api.exercises.getListByCollectionId(collectionId);
+
+		// Parse URL params
+		const page = parseInt(url.searchParams.get("page") || "1", 10);
+		const limit = parseInt(url.searchParams.get("limit") || "10", 10);
+
+		// Validate (clamp to safe ranges)
+		const validPage = Math.max(1, page);
+		const validLimit = Math.max(5, Math.min(100, limit));
+
+		// Fetch with pagination
+		const paginatedExercises = await backend.api.exercises.getListByCollectionId(
+			collectionId,
+			validPage,
+			validLimit
+		);
 		return {
 			serverData: { collection, paginatedExercises },
 			flags: null,

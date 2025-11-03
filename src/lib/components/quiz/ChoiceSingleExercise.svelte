@@ -1,22 +1,24 @@
 <script lang="ts">
-	import Button from "../Button.svelte";
+	import Button from "../common/Button.svelte";
 
 	interface Props {
 		distractors: string[];
 		showResult: boolean;
-		lastResult: DrillResult | null;
+		lastResult: Quiz.UserAnswerFeedbackDto | null;
 		lastUserAnswer: string;
 	}
 	const { distractors, showResult, lastResult, lastUserAnswer }: Props = $props();
 	let choiceButtons = $state<HTMLButtonElement[]>([]);
 
-	let isPressed = $state<boolean>(false);
-
 	const KEYBOARD_MAP: Record<string, number> = {
-		"4": 0,
-		"5": 1,
-		"1": 2,
-		"2": 3,
+		"5": 0,
+		"6": 1,
+		"2": 2,
+		"3": 3,
+		"q": 0,
+		"w": 1,
+		"a": 2,
+		"s": 3,
 	};
 
 	function handleKeyDown(e: KeyboardEvent) {
@@ -27,8 +29,7 @@
 		const buttonIndex = KEYBOARD_MAP[e.key.toLowerCase()];
 
 		if (buttonIndex !== undefined && choiceButtons[buttonIndex]) {
-			isPressed = true;
-			e.preventDefault();
+			// e.preventDefault();
 			choiceButtons[buttonIndex]?.click();
 		}
 	}
@@ -40,20 +41,20 @@
 	{#each distractors as distractor, index (index)}
 		<Button
 			bind:buttonElement={choiceButtons[index]}
-			disabled={showResult || isPressed}
+			disabled={showResult}
 			type="submit"
-			variant={showResult
+			color={showResult
 				? lastResult?.isCorrect
 					? distractor === lastResult?.correctAnswer
 						? "success"
 						: "secondary"
 					: distractor === lastUserAnswer
-						? "danger"
+						? "error"
 						: distractor === lastResult?.correctAnswer
 							? "success"
 							: "secondary"
 				: "secondary"}
-			appearance={showResult && distractor === lastUserAnswer ? "filled" : "outline"}
+			preset={showResult && distractor === lastResult?.correctAnswer ? "filled" : "outlined"}
 			name="userAnswer"
 			value={distractor}
 			text={distractor}
