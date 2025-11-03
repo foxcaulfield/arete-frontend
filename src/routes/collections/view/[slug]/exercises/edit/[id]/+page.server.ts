@@ -130,7 +130,7 @@ export const actions = {
 			}
 
 			// Unexpected errors
-			console.error("Unexpected error during exercise update:", error);
+			console.error("Unexpected error during exercise deletion:", error);
 			return fail(500, {
 				errors: {},
 				values: {},
