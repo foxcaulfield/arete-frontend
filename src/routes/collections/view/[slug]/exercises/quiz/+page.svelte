@@ -7,7 +7,6 @@
 	import ExerciseTypeBadge from "$lib/components/quiz/ExerciseTypeBadge.svelte";
 	import ExplanationText from "$lib/components/quiz/ExplanationText.svelte";
 	import FillInExercise from "$lib/components/quiz/FillInExercise.svelte";
-	import TranslationText from "$lib/components/quiz/TranslationText.svelte";
 	import type { SubmitFunction } from "@sveltejs/kit";
 	import { toast } from "@zerodevx/svelte-toast";
 	import { onMount, tick } from "svelte";
@@ -153,6 +152,22 @@
 		};
 	};
 
+	function handleCopyQuestionText() {
+		const textToCopy = questionParts.map((part) => part.text).join(" ");
+		navigator.clipboard.writeText(textToCopy).then(
+			() => {
+				toast.push("Question copied to clipboard", {
+					theme: { "--toastBackground": "#22c55e", "--toastColor": "#000000" },
+				});
+			},
+			() => {
+				toast.push("Failed to copy question", {
+					theme: { "--toastBackground": "#ef4444", "--toastColor": "#000000" },
+				});
+			}
+		);
+	}
+
 	onMount(() => {
 		// Focus the input element on mount if applicable
 		if (currentQuestion && (currentQuestion.type === "FILL_IN_THE_BLANK" || isForceTextInput)) {
@@ -228,18 +243,7 @@
 							<button
 								type="button"
 								class="rounded px-2 py-1 text-xs text-primary-500 transition-colors hover:bg-surface-800 hover:text-primary-400"
-								onclick={() => {
-									navigator.clipboard.writeText(
-										currentQuestion.question.replace(/{/g, "").replace(/}/g, "")
-									);
-									toast.push("Copied!", {
-										theme: {
-											"--toastBackground": "var(--color-success-500)",
-											"--toastColor": "white",
-											"--toastBarBackground": "var(--color-success-700)",
-										},
-									});
-								}}
+								onclick={handleCopyQuestionText}
 								title="Copy question"
 							>
 								Copy
@@ -277,9 +281,17 @@
 
 					<!-- Translation (if available) -->
 					{#if currentQuestion.translation}
-						<div class="mb-4">
-							<TranslationText translationText={currentQuestion.translation} />
+						<div class="translation">
+							Translation: {currentQuestion.translation}
 						</div>
+
+						<style>
+							.translation {
+								margin: 0.5rem 0 1rem 0;
+								font-size: 0.9rem;
+								color: var(--muted, #667085);
+							}
+						</style>
 					{/if}
 
 					<!-- Answer Input/Selection -->
