@@ -2,11 +2,11 @@
 	import { enhance } from "$app/forms";
 	import { goto, invalidateAll } from "$app/navigation";
 	import Button from "$lib/components/common/Button.svelte";
-	import ChoiceSingleExercise from "$lib/components/quiz/ChoiceSingleExercise.svelte";
+	import ChoiceSingleExercise from "$lib/components/quiz/exercise-views/ChoiceSingleExercise.svelte";
 	import ExerciseImage from "$lib/components/quiz/ExerciseImage.svelte";
 	import ExerciseTypeBadge from "$lib/components/quiz/ExerciseTypeBadge.svelte";
 	import ExplanationText from "$lib/components/quiz/ExplanationText.svelte";
-	import FillInExercise from "$lib/components/quiz/FillInExercise.svelte";
+	import FillInExercise from "$lib/components/quiz/exercise-views/FillInExercise.svelte";
 	import type { SubmitFunction } from "@sveltejs/kit";
 	import { toast } from "@zerodevx/svelte-toast";
 	import { onMount, tick } from "svelte";
@@ -281,17 +281,9 @@
 
 					<!-- Translation (if available) -->
 					{#if currentQuestion.translation}
-						<div class="translation">
-							Translation: {currentQuestion.translation}
+						<div class="mb-4 text-sm text-surface-400">
+							<span class="font-medium text-surface-300">Translation:</span> {currentQuestion.translation}
 						</div>
-
-						<style>
-							.translation {
-								margin: 0.5rem 0 1rem 0;
-								font-size: 0.9rem;
-								color: var(--muted, #667085);
-							}
-						</style>
 					{/if}
 
 					<!-- Answer Input/Selection -->

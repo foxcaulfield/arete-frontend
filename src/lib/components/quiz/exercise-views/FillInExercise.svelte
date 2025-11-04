@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Button from "../common/Button.svelte";
+	import Button from "$lib/components/common/Button.svelte";
 	// import FormGroupTextInput from "../FormGroupTextInput.svelte";
 
 	interface Props {
