@@ -1,5 +1,5 @@
-export function getTypeIcon(type: ExerciseType) {
-	const icons: Record<ExerciseType | "default", string> = {
+export function getTypeIcon(type: Exercise.ExerciseType) {
+	const icons: Record<Exercise.ExerciseType | "default", string> = {
 		FILL_IN_THE_BLANK: `
  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
  <rect x="3" y="4" width="18" height="16" rx="2" stroke="#444444" stroke-width="1.5" fill="none"></rect>
@@ -25,7 +25,7 @@ export function getTypeIcon(type: ExerciseType) {
 	return icons[type] ?? icons.default;
 }
 
-export function getTypeLabel(type: ExerciseType) {
+export function getTypeLabel(type: Exercise.ExerciseType) {
 	switch (type) {
 		case "CHOICE_SINGLE":
 			return "Single choice";
@@ -36,7 +36,7 @@ export function getTypeLabel(type: ExerciseType) {
 	}
 }
 
-export function getTypeDesc(type: ExerciseType) {
+export function getTypeDesc(type: Exercise.ExerciseType) {
 	switch (type) {
 		case "CHOICE_SINGLE":
 			return "Choose one option.";
