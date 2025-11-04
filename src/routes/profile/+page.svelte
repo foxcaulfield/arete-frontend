@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageProps } from "./$types";
 	import { page } from "$app/state";
-	import Unauthorized from "$lib/components/Unauthorized.svelte";
+	import Unauthorized from "$lib/components/pages/Unauthorized.svelte";
 	
 	const { data, params }: PageProps = $props();
 	
