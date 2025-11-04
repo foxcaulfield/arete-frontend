@@ -8,10 +8,10 @@
 	import ExplanationText from "$lib/components/quiz/QuestionExplanation.svelte";
 	import FillInExercise from "$lib/components/quiz/question-views/input-text-manually.svelte";
 	import type { SubmitFunction } from "@sveltejs/kit";
-	import { toast } from "@zerodevx/svelte-toast";
 	import { onMount, tick } from "svelte";
 	import type { PageProps } from "./$types";
 	import ControlButtons from "$lib/components/quiz/ControlButtons.svelte";
+	import { toastError, toastSuccess } from "$lib/toast";
 
 	interface TextPart {
 		text: string;
@@ -156,16 +156,8 @@
 	function handleCopyQuestionText() {
 		const textToCopy = questionParts.map((part) => part.text).join(" ");
 		navigator.clipboard.writeText(textToCopy).then(
-			() => {
-				toast.push("Question copied to clipboard", {
-					theme: { "--toastBackground": "#22c55e", "--toastColor": "#000000" },
-				});
-			},
-			() => {
-				toast.push("Failed to copy question", {
-					theme: { "--toastBackground": "#ef4444", "--toastColor": "#000000" },
-				});
-			}
+			() => toastSuccess("Question copied to clipboard"),
+			() => toastError("Failed to copy question")
 		);
 	}
 

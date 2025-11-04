@@ -4,12 +4,12 @@
 	import Button from "$lib/components/common/Button.svelte";
 	import CollectionsTable from "$lib/components/collections/CollectionsTable.svelte";
 	import Unauthorized from "$lib/components/pages/Unauthorized.svelte";
-	import { toast } from "@zerodevx/svelte-toast";
 	import { onMount } from "svelte";
 	import type { PageProps } from "./$types";
 
 	// import { ArrowLeftIcon, ArrowRightIcon } from "@lucide/svelte";
 	import { Pagination } from "@skeletonlabs/skeleton-svelte";
+	import { toastSuccess } from "$lib/toast";
 
 	const props: PageProps = $props();
 	const serverData = $derived(props.data?.serverData);
@@ -44,7 +44,7 @@
 	onMount(() => {
 		const deleted = page.url.searchParams.get("deleted");
 		if (deleted === "1") {
-			toast.push("Collection deleted.");
+			toastSuccess("Collection deleted.");
 			goto(page.url.pathname, { replaceState: true, noScroll: true });
 		}
 	});

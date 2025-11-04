@@ -3,8 +3,8 @@
 	import Button from "$lib/components/common/Button.svelte";
 	import MediaField from "$lib/components/MediaField.svelte";
 	import type { Snippet } from "svelte";
-	import { toast } from "@zerodevx/svelte-toast";
 	import { TagsInput } from "@skeletonlabs/skeleton-svelte";
+	import { toastSuccess, toastWarning } from "$lib/toast";
 
 	interface Props {
 		mode: "create" | "edit";
@@ -83,15 +83,6 @@
 	const keepOnlyUnique = (arr: string[]) => [...new Set(arr)];
 	const toAnswerWithId = (val: string) => ({ id: randomId(), value: val });
 	const toTrimmedLower = (val: string) => val.trim().toLowerCase();
-	const showWarningToast = (message: string) => {
-		toast.push(message, {
-			theme: {
-				"--toastBackground": "var(--color-warning-500)",
-				"--toastColor": "white",
-				"--toastBarBackground": "var(--color-warning-700)",
-			},
-		});
-	};
 
 	type ValChangeInfo = { value: string[]; inputValue: string };
 
@@ -99,7 +90,7 @@
 		(warningMessage: string) =>
 		({ value, inputValue }: ValChangeInfo) => {
 			if (value.map(toTrimmedLower).includes(toTrimmedLower(inputValue))) {
-				showWarningToast(warningMessage);
+				toastWarning(warningMessage);
 				return false;
 			}
 			return true;
@@ -132,25 +123,25 @@
 	function handleClearExplanation() {
 		explanationText = "";
 		clearExplanation = true;
-		showWarningToast("Explanation will be removed");
+		toastWarning("Explanation will be removed");
 	}
 
 	function handleClearTranslation() {
 		translationText = "";
 		clearTranslation = true;
-		showWarningToast("Translation will be removed");
+		toastWarning("Translation will be removed");
 	}
 
 	function handleClearAdditionalAnswers() {
 		additionalCorrectAnswers = [];
 		canClearAdditionalAnswers = true;
-		showWarningToast("All alternatives will be removed");
+		toastWarning("All alternatives will be removed");
 	}
 
 	function handleClearDistractors() {
 		distractors = [];
 		canClearDistractors = true;
-		showWarningToast("All distractors will be removed");
+		toastWarning("All distractors will be removed");
 	}
 
 	function handleUndoClearExplanation() {
@@ -335,13 +326,7 @@
 											navigator.clipboard.writeText(
 												questionText.replace(/{/g, "").replace(/}/g, "")
 											);
-											toast.push("Copied!", {
-												theme: {
-													"--toastBackground": "var(--color-success-500)",
-													"--toastColor": "white",
-													"--toastBarBackground": "var(--color-success-700)",
-												},
-											});
+											toastSuccess("Question copied to clipboard");
 										}}
 									>
 										Copy

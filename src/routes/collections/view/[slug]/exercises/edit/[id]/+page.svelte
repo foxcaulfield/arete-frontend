@@ -1,10 +1,5 @@
-
-<!-- ============================================ -->
-<!-- EDIT PAGE -->
-<!-- ============================================ -->
 <script lang="ts">
 	import { goto } from "$app/navigation";
-	import { toast } from "@zerodevx/svelte-toast";
 	import { enhance } from "$app/forms";
 	import ExerciseForm from "$lib/components/exercises/ExerciseEditForm.svelte";
 	import type { PageProps } from "./$types";
@@ -22,7 +17,7 @@
 	// Show toast on error
 	$effect(() => {
 		if (props.form?.errorText) {
-			toast.push(props.form.errorText, { classes: ["error-toast"] });
+			toastError(props.form.errorText);
 		}
 	});
 
