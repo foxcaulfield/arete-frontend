@@ -4,7 +4,7 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import { toast } from "@zerodevx/svelte-toast";
-	import ExerciseForm from "$lib/components/exercises/ExerciseForm.svelte";
+	import ExerciseForm from "$lib/components/exercises/ExerciseEditForm.svelte";
 	import type { PageProps } from "./$types";
 	// import { enhance } from "$app/forms";
 
