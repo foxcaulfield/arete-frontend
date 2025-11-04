@@ -5,7 +5,7 @@
 	import ChoiceSingleExercise from "$lib/components/quiz/question-views/choose-single-variant.svelte";
 	import ExerciseImage from "$lib/components/quiz/question-image.svelte";
 	import ExerciseTypeBadge from "$lib/components/quiz/ExerciseTypeBadge.svelte";
-	import ExplanationText from "$lib/components/quiz/ExplanationText.svelte";
+	import ExplanationText from "$lib/components/quiz/question-explanation.svelte";
 	import FillInExercise from "$lib/components/quiz/question-views/input-text-manually.svelte";
 	import type { SubmitFunction } from "@sveltejs/kit";
 	import { toast } from "@zerodevx/svelte-toast";
