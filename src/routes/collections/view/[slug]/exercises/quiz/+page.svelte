@@ -11,6 +11,7 @@
 	import { toast } from "@zerodevx/svelte-toast";
 	import { onMount, tick } from "svelte";
 	import type { PageProps } from "./$types";
+	import { Copy, Pen, Check, Image, Music, Lightbulb, LightbulbOff, ImageOff, TextCursorInput } from "@lucide/svelte";
 
 	interface TextPart {
 		text: string;
@@ -42,6 +43,11 @@
 
 	// Track the force text input preference as mutable state
 	let isForceTextInput = $state(false);
+
+	const controlButtonStyles = "px-3 py-1.5 text-xs";
+	const controlButtonTextColor = "text-surface-700 hover:text-surface-100";
+	const controlButtonTextColorActive = "text-primary-400";
+	const setActiveState = (isActive: boolean) => (isActive ? controlButtonTextColorActive : controlButtonTextColor);
 
 	// Sync with server-provided prop when available
 	// $effect(() => {
@@ -215,79 +221,111 @@
 
 				<!-- Question Card -->
 				<div class="rounded-lg border border-surface-700 bg-surface-900 p-4 md:p-6">
-					<!-- Question Header with Controls -->
-					<div
-						class="mb-6 flex flex-col gap-4 border-b border-surface-700 pb-4 md:flex-row md:items-start md:justify-between"
-					>
-						<div class="min-w-0 flex-1">
-							<!-- Question Text with Hidden Answers -->
-							<div class="text-xl leading-relaxed font-semibold text-surface-100 md:text-2xl">
-								{#each questionParts as part, i (i)}
-									{@const shouldReveal = part.isAnswer && showResult}
-									{@const shouldHide = part.isAnswer && !showResult}
-									<span
-										class="rounded px-1"
-										class:text-success-400={shouldReveal}
-										class:bg-primary-500={shouldHide}
-										class:text-primary-500={shouldHide}
-									>
-										{part.text}
-									</span>
-									{#if i < questionParts.length - 1 && !questionParts[i + 1].isAnswer && !part.isAnswer}
-										<span> </span>
-									{/if}
-								{/each}
-							</div>
-						</div>
-						<div class="flex flex-shrink-0 gap-1">
-							<button
-								type="button"
-								class="rounded px-2 py-1 text-xs text-primary-500 transition-colors hover:bg-surface-800 hover:text-primary-400"
-								onclick={handleCopyQuestionText}
-								title="Copy question"
-							>
-								Copy
-							</button>
-							<button
-								type="button"
-								class="rounded px-2 py-1 text-xs text-primary-500 transition-colors hover:bg-surface-800 hover:text-primary-400"
-								onclick={() =>
-									goto(`/collections/view/${collectionId}/exercises/edit/${currentQuestion.id}`)}
-								title="Edit exercise"
-							>
-								Edit
-							</button>
-							<button
-								type="button"
-								class="rounded px-2 py-1 text-xs text-primary-500 transition-colors hover:bg-surface-800 hover:text-primary-400"
-								onclick={handleForceTextInput}
-								title={isForceTextInput ? "Switch to choice" : "Switch to text"}
-							>
-								{isForceTextInput ? "Switch to choice" : "Switch to text "}
-							</button>
+					<!-- Control Buttons -->
+					<div class="flex shrink-1 gap-2">
+						{#if currentQuestion.imageUrl}
+							<Button
+								preset="outlined"
+								color={isForceTextInput ? "primary" : "surface"}
+								class={`${controlButtonStyles} ${setActiveState(showImage)}`}
+								onclick={handleShowImage}
+								useIcon={true}
+								IconComponent={showImage ? ImageOff : Image}
+								isBorderless={true}
+								title={showImage ? "Hide image" : "Show image"}
+							/>
+						{/if}
+						{#if currentQuestion.audioUrl}
+							<Button
+								preset="outlined"
+								color="surface"
+								class={`${controlButtonStyles} ${controlButtonTextColor}`}
+								onclick={handlePlayAudio}
+								useIcon={true}
+								IconComponent={Music}
+								isBorderless={true}
+								title="Play audio"
+							/>
+						{/if}
+						{#if currentQuestion.explanation}
+							<Button
+								preset="outlined"
+								color={isForceTextInput ? "primary" : "surface"}
+								class={`${controlButtonStyles} ${setActiveState(showExplanation)}`}
+								onclick={handleShowExplanation}
+								useIcon={true}
+								IconComponent={showExplanation ? LightbulbOff : Lightbulb}
+								isBorderless={true}
+								title={showExplanation ? "Hide explanation" : "Show explanation"}
+							/>
+						{/if}
+						<Button
+							preset="outlined"
+							color={isForceTextInput ? "primary" : "surface"}
+							class={`${controlButtonStyles} ${setActiveState(isForceTextInput)}`}
+							onclick={handleForceTextInput}
+							useIcon={true}
+							IconComponent={TextCursorInput}
+							isBorderless={true}
+							title={isForceTextInput ? "Switch to choice mode" : "Switch to text input mode"}
+						/>
+						<Button
+							preset="outlined"
+							color="surface"
+							class={`${controlButtonStyles} ${controlButtonTextColor}`}
+							onclick={handleCopyQuestionText}
+							useIcon={true}
+							IconComponent={Copy}
+							isBorderless={true}
+							title="Copy question text"
+						/>
+						<Button
+							preset="outlined"
+							color="surface"
+							class={`${controlButtonStyles} ${controlButtonTextColor}`}
+							onclick={() =>
+								goto(`/collections/view/${collectionId}/exercises/edit/${currentQuestion.id}`)}
+							useIcon={true}
+							IconComponent={Pen}
+							isBorderless={true}
+							title="Edit this exercise"
+						/>
+					</div>
 
-							<form method="POST" action="?/getNextQuestion" use:enhance={handleGetNextQuestionEnhance}>
-								<Button
-									type="submit"
-									bind:buttonElement={nextButtonElement}
-									color="surface"
-									preset="outlined"
-									size="sm"
-									text={`⟳`}
-								/>
-							</form>
+					<!-- Question Header -->
+					<div
+						class="mb-6 flex flex-col gap-4 border-b border-surface-700 pb-4 md:flex-row md:items-center md:justify-between"
+					>
+						<!-- Question Text with Hidden Answers -->
+						<div class="text-xl leading-relaxed font-semibold text-surface-100 md:text-2xl">
+							{#each questionParts as part, i (i)}
+								{@const shouldReveal = part.isAnswer && showResult}
+								{@const shouldHide = part.isAnswer && !showResult}
+								<span
+									class="rounded px-1"
+									class:text-success-400={shouldReveal}
+									class:bg-primary-500={shouldHide}
+									class:text-primary-500={shouldHide}
+								>
+									{part.text}
+								</span>
+								{#if i < questionParts.length - 1 && !questionParts[i + 1].isAnswer && !part.isAnswer}
+									<span> </span>
+								{/if}
+							{/each}
 						</div>
 					</div>
 
 					<!-- Translation (if available) -->
 					{#if currentQuestion.translation}
 						<div class="mb-4 text-sm text-surface-400">
-							<span class="font-medium text-surface-300">Translation:</span> {currentQuestion.translation}
+							<span class="font-medium text-surface-300">Translation:</span>
+							{currentQuestion.translation}
 						</div>
 					{/if}
 
 					<!-- Answer Input/Selection -->
-					<form action="?/handleSubmitAnswer" method="POST" use:enhance={handleFormEnhance} class="mb-4">
+					<form action="?/handleSubmitAnswer" method="POST" use:enhance={handleFormEnhance} class="mb-6">
 						<input type="hidden" name="exerciseId" value={currentQuestion.id} />
 						{#if currentQuestion.type === "FILL_IN_THE_BLANK" || isForceTextInput}
 							<FillInExercise {showResult} bind:userAnswer bind:inputElement />
@@ -301,82 +339,85 @@
 						{/if}
 					</form>
 
-					<!-- Result Feedback -->
-					{#if showResult && lastResult}
-						<div class="mb-4 border-t border-surface-700 pt-4">
-							{#if lastResult.isCorrect}
-								<div
-									class="rounded border border-success-700 bg-success-900 p-3 text-xs text-success-400"
-								>
-									<span class="font-semibold">✓ Correct!</span>
-									<!-- {#if lastResult?.feedback}
-										<p class="mt-1">{lastResult.feedback}</p>
-									{/if} -->
+					<!-- Feedback Card - Reserved Space to Prevent Layout Shift -->
+					<div class="mb-6 min-h-[140px]">
+						{#if showResult && lastResult}
+							<div
+								class="animate-in fade-in slide-in-from-top-2 rounded-lg border-l-4 p-4 duration-300
+							{lastResult.isCorrect
+									? 'border border-success-900 border-l-success-400 bg-success-900/20'
+									: 'border border-error-900 border-l-error-400 bg-error-900/20'}"
+							>
+								<div class="flex items-start gap-4">
+									<div class="flex-shrink-0 pt-1 text-3xl">
+										{lastResult.isCorrect ? "✓" : "✗"}
+									</div>
+									<div class="min-w-0 flex-1">
+										<div
+											class="text-lg font-bold {lastResult.isCorrect
+												? 'text-success-400'
+												: 'text-error-400'}"
+										>
+											{lastResult.isCorrect ? "Correct!" : "Not quite right"}
+										</div>
+										{#if !lastResult.isCorrect}
+											<div class="mt-3 space-y-2 text-sm">
+												<p class="text-surface-300">
+													<span class="text-surface-400">Your answer:</span>
+													<span class="font-medium text-error-300"
+														>{lastUserAnswer || "(empty)"}</span
+													>
+												</p>
+												<p class="text-surface-300">
+													<span class="text-surface-400">Correct answer:</span>
+													<span class="font-semibold text-success-300"
+														>{lastResult.correctAnswer}</span
+													>
+												</p>
+											</div>
+										{/if}
+									</div>
 								</div>
-							{:else}
-								<div class="rounded border border-error-700 bg-error-900 p-3 text-xs text-error-400">
-									<span class="font-semibold">✗ Not quite right</span>
-									<!-- {#if lastResult.feedback}
-										<p class="mt-1">{lastResult.feedback}</p>
-									{/if} -->
-									{#if lastResult.correctAnswer}
-										<p class="mt-2 text-success-400">
-											Correct: <span class="font-semibold">{lastResult.correctAnswer}</span>
-										</p>
-									{/if}
-								</div>
-							{/if}
-						</div>
-					{/if}
+							</div>
+						{/if}
+					</div>
 
-					<!-- Action Buttons -->
-					<div class="flex flex-wrap items-center justify-between gap-2 border-t border-surface-700 pt-4">
+					<!-- Bottom Action Bar -->
+					<div class="flex items-center justify-between gap-4 border-t border-surface-700 pt-4">
+						<!-- Secondary Controls (Left) -->
 						<div>
-							{#if showResult}
-								<form
-									method="POST"
-									action="?/getNextQuestion"
-									use:enhance={handleGetNextQuestionEnhance}
-									class="inline"
-								>
-									<Button
-										type="submit"
-										bind:buttonElement={nextButtonElement}
-										color="primary"
-										size="sm"
-										text="Next"
-									/>
-								</form>
-							{/if}
+							<form method="POST" action="?/getNextQuestion" use:enhance={handleGetNextQuestionEnhance}>
+								<Button
+									type="submit"
+									bind:buttonElement={nextButtonElement}
+									color="surface"
+									preset="outlined"
+									size="sm"
+									text="Skip"
+									isBorderless={true}
+								/>
+							</form>
 						</div>
-						<div class="flex flex-wrap gap-2">
-							{#if currentQuestion.imageUrl}
-								<button
-									type="button"
-									class="rounded border border-surface-600 px-3 py-2 text-xs text-surface-300 transition-colors hover:bg-surface-800 hover:text-surface-200"
-									onclick={handleShowImage}
-								>
-									{showImage ? "Hide Image" : "Image"}
-								</button>
-							{/if}
-							{#if currentQuestion.audioUrl}
-								<button
-									type="button"
-									class="rounded border border-surface-600 px-3 py-2 text-xs text-surface-300 transition-colors hover:bg-surface-800 hover:text-surface-200"
-									onclick={handlePlayAudio}
-								>
-									Audio
-								</button>
-							{/if}
-							{#if currentQuestion.explanation}
-								<button
-									type="button"
-									class="rounded border border-surface-600 px-3 py-2 text-xs text-surface-300 transition-colors hover:bg-surface-800 hover:text-surface-200"
-									onclick={handleShowExplanation}
-								>
-									{showExplanation ? "Hide Explanation" : "Explanation"}
-								</button>
-							{/if}
+
+						<!-- Next Button (Right) -->
+						<div>
+							<!-- {#if showResult} -->
+							<form
+								method="POST"
+								action="?/getNextQuestion"
+								use:enhance={handleGetNextQuestionEnhance}
+								class="inline"
+							>
+								<Button
+									disabled={!showResult}
+									type="submit"
+									bind:buttonElement={nextButtonElement}
+									color="primary"
+									size="sm"
+									text="Next"
+								/>
+							</form>
+							<!-- {/if} -->
 						</div>
 					</div>
 				</div>
