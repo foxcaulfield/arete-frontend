@@ -208,8 +208,11 @@
 					arr: Array<{ id: number; value: string }>,
 					canClear: boolean
 				) => {
+					// debugger;
 					if (canClear || arr.length === 0) {
 						formData.append(key, "");
+					} else if (arr.length === 1) {
+						formData.append(`${key}[]`, arr[0].value);
 					} else {
 						arr.map((a) => a.value).forEach((v) => formData.append(key, v));
 					}
