@@ -330,50 +330,54 @@
 					{/if}
 
 					<!-- Action Buttons -->
-					<div class="flex flex-wrap gap-2 border-t border-surface-700 pt-4">
-						{#if showResult}
-							<form
-								method="POST"
-								action="?/getNextQuestion"
-								use:enhance={handleGetNextQuestionEnhance}
-								class="inline"
-							>
-								<Button
-									type="submit"
-									bind:buttonElement={nextButtonElement}
-									color="primary"
-									size="sm"
-									text="Next"
-								/>
-							</form>
-						{/if}
-						{#if currentQuestion.imageUrl}
-							<button
-								type="button"
-								class="rounded border border-surface-600 px-3 py-2 text-xs text-surface-300 transition-colors hover:bg-surface-800 hover:text-surface-200"
-								onclick={handleShowImage}
-							>
-								{showImage ? "Hide Image" : "Image"}
-							</button>
-						{/if}
-						{#if currentQuestion.audioUrl}
-							<button
-								type="button"
-								class="rounded border border-surface-600 px-3 py-2 text-xs text-surface-300 transition-colors hover:bg-surface-800 hover:text-surface-200"
-								onclick={handlePlayAudio}
-							>
-								Audio
-							</button>
-						{/if}
-						{#if currentQuestion.explanation}
-							<button
-								type="button"
-								class="rounded border border-surface-600 px-3 py-2 text-xs text-surface-300 transition-colors hover:bg-surface-800 hover:text-surface-200"
-								onclick={handleShowExplanation}
-							>
-								{showExplanation ? "Hide Explanation" : "Explanation"}
-							</button>
-						{/if}
+					<div class="flex flex-wrap items-center justify-between gap-2 border-t border-surface-700 pt-4">
+						<div>
+							{#if showResult}
+								<form
+									method="POST"
+									action="?/getNextQuestion"
+									use:enhance={handleGetNextQuestionEnhance}
+									class="inline"
+								>
+									<Button
+										type="submit"
+										bind:buttonElement={nextButtonElement}
+										color="primary"
+										size="sm"
+										text="Next"
+									/>
+								</form>
+							{/if}
+						</div>
+						<div class="flex flex-wrap gap-2">
+							{#if currentQuestion.imageUrl}
+								<button
+									type="button"
+									class="rounded border border-surface-600 px-3 py-2 text-xs text-surface-300 transition-colors hover:bg-surface-800 hover:text-surface-200"
+									onclick={handleShowImage}
+								>
+									{showImage ? "Hide Image" : "Image"}
+								</button>
+							{/if}
+							{#if currentQuestion.audioUrl}
+								<button
+									type="button"
+									class="rounded border border-surface-600 px-3 py-2 text-xs text-surface-300 transition-colors hover:bg-surface-800 hover:text-surface-200"
+									onclick={handlePlayAudio}
+								>
+									Audio
+								</button>
+							{/if}
+							{#if currentQuestion.explanation}
+								<button
+									type="button"
+									class="rounded border border-surface-600 px-3 py-2 text-xs text-surface-300 transition-colors hover:bg-surface-800 hover:text-surface-200"
+									onclick={handleShowExplanation}
+								>
+									{showExplanation ? "Hide Explanation" : "Explanation"}
+								</button>
+							{/if}
+						</div>
 					</div>
 				</div>
 
