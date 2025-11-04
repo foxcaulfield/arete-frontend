@@ -3,6 +3,7 @@
 	import { enhance } from "$app/forms";
 	import ExerciseForm from "$lib/components/exercises/ExerciseEditForm.svelte";
 	import type { PageProps } from "./$types";
+	import { toastError } from "$lib/toast";
 
 	const props: PageProps = $props();
 
@@ -52,7 +53,7 @@
 				await update();
 			} else if (result.type === 'failure') {
 				// Show error toast
-				toast.push(result.data?.errorText || 'Failed to delete exercise', { classes: ['error-toast'] });
+				toastError(JSON.stringify(result.data?.errorText) || 'Failed to delete exercise');
 				await update();
 			}
 		};
