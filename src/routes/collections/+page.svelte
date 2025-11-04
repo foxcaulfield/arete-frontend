@@ -3,7 +3,7 @@
 	import { page } from "$app/state";
 	import Button from "$lib/components/common/Button.svelte";
 	import CollectionsTable from "$lib/components/collections/CollectionsTable.svelte";
-	import Unauthorized from "$lib/components/Unauthorized.svelte";
+	import Unauthorized from "$lib/components/pages/Unauthorized.svelte";
 	import { toast } from "@zerodevx/svelte-toast";
 	import { onMount } from "svelte";
 	import type { PageProps } from "./$types";
