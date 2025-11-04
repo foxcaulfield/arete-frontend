@@ -325,6 +325,7 @@
 						<div>
 							<form method="POST" action="?/getNextQuestion" use:enhance={handleGetNextQuestionEnhance}>
 								<Button
+									disabled={showResult}
 									type="submit"
 									bind:buttonElement={nextButtonElement}
 									color="surface"
@@ -349,7 +350,7 @@
 									disabled={!showResult}
 									type="submit"
 									bind:buttonElement={nextButtonElement}
-									color="primary"
+									color={showResult ? (lastResult?.isCorrect ? "success" : "error") : "surface"}
 									size="sm"
 									text="Next"
 								/>
