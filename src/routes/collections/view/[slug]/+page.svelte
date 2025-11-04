@@ -5,9 +5,9 @@
 	import { page } from "$app/state";
 	import { goto } from "$app/navigation";
 
-	import Forbidden from "$lib/components/Forbidden.svelte";
-	import NotFound from "$lib/components/NotFound.svelte";
-	import Unauthorized from "$lib/components/Unauthorized.svelte";
+	import Forbidden from "$lib/components/pages/Forbidden.svelte";
+	import NotFound from "$lib/components/pages/NotFound.svelte";
+	import Unauthorized from "$lib/components/pages/Unauthorized.svelte";
 
 	import type { PageProps } from "./$types";
 	import ExercisesTable from "$lib/components/exercises/ExercisesTable.svelte";
