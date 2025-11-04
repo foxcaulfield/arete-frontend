@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Button from "../common/Button.svelte";
-	import FormGroupTextInput from "../FormGroupTextInput.svelte";
+	// import FormGroupTextInput from "../FormGroupTextInput.svelte";
 
 	interface Props {
 		showResult: boolean;
@@ -12,7 +12,7 @@
 </script>
 
 <div class="fill-in-exercise">
-	<FormGroupTextInput
+	<!-- <FormGroupTextInput
 		disabled={showResult}
 		class="text-input"
 		idName="userAnswer"
@@ -20,6 +20,18 @@
 		autocomplete="off"
 		bind:value={userAnswer}
 		bind:inputElement
+	/> -->
+
+	<input
+		type="text"
+		disabled={showResult}
+		class="text-input"
+		id="userAnswer"
+		name="userAnswer"
+		placeholder="Enter your answer"
+		autocomplete="off"
+		bind:value={userAnswer}
+		bind:this={inputElement}
 	/>
 	<Button
 		text="Answer"
