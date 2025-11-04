@@ -9,23 +9,14 @@
 	}
 
 	let { showResult, userAnswer = $bindable(), inputElement = $bindable() }: Props = $props();
+	let hasValue = $derived.by(() => userAnswer.trim().length > 0);
 </script>
 
-<div class="fill-in-exercise">
-	<!-- <FormGroupTextInput
-		disabled={showResult}
-		class="text-input"
-		idName="userAnswer"
-		placeholder="Enter your answer"
-		autocomplete="off"
-		bind:value={userAnswer}
-		bind:inputElement
-	/> -->
-
+<div class="flex">
 	<input
 		type="text"
 		disabled={showResult}
-		class="text-input"
+		class={`input rounded-r-none ${hasValue && !showResult ? "bg-primary-50/30 dark:bg-primary-950/30" : ""}`}
 		id="userAnswer"
 		name="userAnswer"
 		placeholder="Enter your answer"
@@ -36,15 +27,10 @@
 	<Button
 		text="Answer"
 		type="submit"
-		color={userAnswer && !showResult ? "primary" : "secondary"}
-		disabled={showResult || !userAnswer.trim()}
+		isBorderless={false}
+		preset={"outlined"}
+		class={`ig-btn rounded-l-none ${!hasValue || showResult ? "hover:cursor-not-allowed hover:opacity-50" : "bg-primary-50/30 dark:bg-primary-950/30"}`}
+		color={showResult || !hasValue ? "surface" : "primary"}
+		disabled={showResult || !hasValue}
 	/>
 </div>
-
-<style>
-	.fill-in-exercise {
-		display: flex;
-		flex-direction: row;
-		gap: 10px;
-	}
-</style>
