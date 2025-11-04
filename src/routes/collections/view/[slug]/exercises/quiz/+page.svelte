@@ -11,7 +11,7 @@
 	import { toast } from "@zerodevx/svelte-toast";
 	import { onMount, tick } from "svelte";
 	import type { PageProps } from "./$types";
-	import { Copy, Pen, Check, Image, Music, Lightbulb, LightbulbOff, ImageOff, TextCursorInput } from "@lucide/svelte";
+	import ControlButtons from "$lib/components/quiz/ControlButtons.svelte";
 
 	interface TextPart {
 		text: string;
@@ -29,8 +29,8 @@
 	let userAnswer = $state("");
 
 	let showResult = $state(false);
-	let showImage = $state(false);
-	let showExplanation = $state(false);
+	let isImageShown = $state(false);
+	let isExplanationShown = $state(false);
 
 	let inputElement = $state<HTMLInputElement | undefined>(undefined);
 	let imageElement = $state<HTMLImageElement | undefined>(undefined);
@@ -43,11 +43,6 @@
 
 	// Track the force text input preference as mutable state
 	let isForceTextInput = $state(false);
-
-	const controlButtonStyles = "px-3 py-1.5 text-xs";
-	const controlButtonTextColor = "text-surface-700 hover:text-surface-100";
-	const controlButtonTextColorActive = "text-primary-400";
-	const setActiveState = (isActive: boolean) => (isActive ? controlButtonTextColorActive : controlButtonTextColor);
 
 	// Sync with server-provided prop when available
 	// $effect(() => {
@@ -121,16 +116,16 @@
 	const scrollOptions = { behavior: "smooth", block: "center" } as const;
 
 	async function handleShowImage() {
-		showImage = !showImage;
-		if (showImage) {
+		isImageShown = !isImageShown;
+		if (isImageShown) {
 			await tick();
 			imageElement?.scrollIntoView(scrollOptions);
 		}
 	}
 
 	async function handleShowExplanation() {
-		showExplanation = !showExplanation;
-		if (showExplanation) {
+		isExplanationShown = !isExplanationShown;
+		if (isExplanationShown) {
 			await tick();
 			explanationElement?.scrollIntoView(scrollOptions);
 		}
@@ -143,8 +138,8 @@
 	}
 	const handleGetNextQuestionEnhance: SubmitFunction = () => {
 		console.log("Refreshing question");
-		showExplanation = false;
-		showImage = false;
+		isExplanationShown = false;
+		isImageShown = false;
 
 		return async ({ update }) => {
 			await invalidateAll();
@@ -172,6 +167,11 @@
 				});
 			}
 		);
+	}
+
+	function handleClickEdit() {
+		if (!currentQuestion) return;
+		goto(`/collections/view/${collectionId}/exercises/edit/${currentQuestion.id}`);
 	}
 
 	onMount(() => {
@@ -222,73 +222,18 @@
 				<!-- Question Card -->
 				<div class="rounded-lg border border-surface-700 bg-surface-900 p-4 md:p-6">
 					<!-- Control Buttons -->
-					<div class="flex shrink-1 gap-2">
-						{#if currentQuestion.imageUrl}
-							<Button
-								preset="outlined"
-								color={isForceTextInput ? "primary" : "surface"}
-								class={`${controlButtonStyles} ${setActiveState(showImage)}`}
-								onclick={handleShowImage}
-								useIcon={true}
-								IconComponent={showImage ? ImageOff : Image}
-								isBorderless={true}
-								title={showImage ? "Hide image" : "Show image"}
-							/>
-						{/if}
-						{#if currentQuestion.audioUrl}
-							<Button
-								preset="outlined"
-								color="surface"
-								class={`${controlButtonStyles} ${controlButtonTextColor}`}
-								onclick={handlePlayAudio}
-								useIcon={true}
-								IconComponent={Music}
-								isBorderless={true}
-								title="Play audio"
-							/>
-						{/if}
-						{#if currentQuestion.explanation}
-							<Button
-								preset="outlined"
-								color={isForceTextInput ? "primary" : "surface"}
-								class={`${controlButtonStyles} ${setActiveState(showExplanation)}`}
-								onclick={handleShowExplanation}
-								useIcon={true}
-								IconComponent={showExplanation ? LightbulbOff : Lightbulb}
-								isBorderless={true}
-								title={showExplanation ? "Hide explanation" : "Show explanation"}
-							/>
-						{/if}
-						<Button
-							preset="outlined"
-							color={isForceTextInput ? "primary" : "surface"}
-							class={`${controlButtonStyles} ${setActiveState(isForceTextInput)}`}
-							onclick={handleForceTextInput}
-							useIcon={true}
-							IconComponent={TextCursorInput}
-							isBorderless={true}
-							title={isForceTextInput ? "Switch to choice mode" : "Switch to text input mode"}
-						/>
-						<Button
-							preset="outlined"
-							color="surface"
-							class={`${controlButtonStyles} ${controlButtonTextColor}`}
-							onclick={handleCopyQuestionText}
-							useIcon={true}
-							IconComponent={Copy}
-							isBorderless={true}
-							title="Copy question text"
-						/>
-						<Button
-							preset="outlined"
-							color="surface"
-							class={`${controlButtonStyles} ${controlButtonTextColor}`}
-							onclick={() =>
-								goto(`/collections/view/${collectionId}/exercises/edit/${currentQuestion.id}`)}
-							useIcon={true}
-							IconComponent={Pen}
-							isBorderless={true}
-							title="Edit this exercise"
+					<div class="flex justify-end">
+						<ControlButtons
+							{currentQuestion}
+							{isImageShown}
+							{isExplanationShown}
+							{isForceTextInput}
+							{handleForceTextInput}
+							{handleShowImage}
+							{handleShowExplanation}
+							{handlePlayAudio}
+							{handleCopyQuestionText}
+							{handleClickEdit}
 						/>
 					</div>
 
@@ -423,14 +368,14 @@
 				</div>
 
 				<!-- Image (if shown) -->
-				{#if showImage && currentQuestion.imageUrl}
+				{#if isImageShown && currentQuestion.imageUrl}
 					<div class="rounded-lg border border-surface-700 bg-surface-900 p-4 md:p-6">
 						<ExerciseImage bind:imageElement imageUrl={currentQuestion.imageUrl} />
 					</div>
 				{/if}
 
 				<!-- Explanation (if shown) -->
-				{#if showExplanation && currentQuestion.explanation}
+				{#if isExplanationShown && currentQuestion.explanation}
 					<div class="rounded-lg border border-surface-700 bg-surface-900 p-4 md:p-6">
 						<ExplanationText bind:explanationEl={explanationElement} text={currentQuestion.explanation} />
 					</div>
