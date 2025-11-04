@@ -2,11 +2,11 @@
 	import { enhance } from "$app/forms";
 	import { goto, invalidateAll } from "$app/navigation";
 	import Button from "$lib/components/common/Button.svelte";
-	import ChoiceSingleExercise from "$lib/components/quiz/exercise-views/ChoiceSingleExercise.svelte";
+	import ChoiceSingleExercise from "$lib/components/quiz/question-views/choose-single-variant.svelte";
 	import ExerciseImage from "$lib/components/quiz/ExerciseImage.svelte";
 	import ExerciseTypeBadge from "$lib/components/quiz/ExerciseTypeBadge.svelte";
 	import ExplanationText from "$lib/components/quiz/ExplanationText.svelte";
-	import FillInExercise from "$lib/components/quiz/exercise-views/FillInExercise.svelte";
+	import FillInExercise from "$lib/components/quiz/question-views/input-text-manually.svelte";
 	import type { SubmitFunction } from "@sveltejs/kit";
 	import { toast } from "@zerodevx/svelte-toast";
 	import { onMount, tick } from "svelte";
