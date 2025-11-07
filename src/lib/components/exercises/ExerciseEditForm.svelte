@@ -86,6 +86,14 @@
 
 	type ValChangeInfo = { value: string[]; inputValue: string };
 
+	// Split comma-separated values into individual items
+	const splitCommaSeparatedValues = (val: string): string[] => {
+		return val
+			.split(",")
+			.map((item) => item.trim())
+			.filter((item) => item.length > 0);
+	};
+
 	const _handleValidateExtraAnswersInput =
 		(warningMessage: string) =>
 		({ value, inputValue }: ValChangeInfo) => {
@@ -97,25 +105,57 @@
 		};
 
 	function handleValidateAdditionalAnswersInput({ value, inputValue }: ValChangeInfo) {
+		// Split comma-separated values
+		const splitValues = splitCommaSeparatedValues(inputValue);
+
+		// If there's a comma, validate each split value
+		if (splitValues.length > 1) {
+			for (const splitVal of splitValues) {
+				if (value.map(toTrimmedLower).includes(toTrimmedLower(splitVal))) {
+					toastWarning("Duplicate alternative value");
+					return false;
+				}
+			}
+			return true;
+		}
+
 		return _handleValidateExtraAnswersInput("Duplicate alternative value")({ value, inputValue });
 	}
 
 	function handleValidateDistractorsInput({ value, inputValue }: ValChangeInfo) {
+		// Split comma-separated values
+		const splitValues = splitCommaSeparatedValues(inputValue);
+
+		// If there's a comma, validate each split value
+		if (splitValues.length > 1) {
+			for (const splitVal of splitValues) {
+				if (value.map(toTrimmedLower).includes(toTrimmedLower(splitVal))) {
+					toastWarning("Duplicate distractor value");
+					return false;
+				}
+			}
+			return true;
+		}
+
 		return _handleValidateExtraAnswersInput("Duplicate distractor value")({ value, inputValue });
 	}
 
 	function handleDistractorsChange({ value }: { value: string[] }) {
-		distractors = keepOnlyUnique(value).map(toAnswerWithId);
+		// Split any comma-separated values
+		const allValues = value.flatMap((v) => splitCommaSeparatedValues(v));
+		distractors = keepOnlyUnique(allValues).map(toAnswerWithId);
 
-		if (value.length > 0) {
+		if (allValues.length > 0) {
 			canClearDistractors = false;
 		}
 	}
 
 	function handleAdditionalAnswersChange({ value }: { value: string[] }) {
-		additionalCorrectAnswers = keepOnlyUnique(value).map(toAnswerWithId);
+		// Split any comma-separated values
+		const allValues = value.flatMap((v) => splitCommaSeparatedValues(v));
+		additionalCorrectAnswers = keepOnlyUnique(allValues).map(toAnswerWithId);
 
-		if (value.length > 0) {
+		if (allValues.length > 0) {
 			canClearAdditionalAnswers = false;
 		}
 	}
