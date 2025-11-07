@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageProps } from "./$types";
-	import Unauthorized from "$lib/components/Unauthorized.svelte";
+	import Unauthorized from "$lib/components/pages/Unauthorized.svelte";
 	import CollectionForm from "$lib/components/collections/CollectionForm.svelte";
 
 	let props: PageProps = $props();
