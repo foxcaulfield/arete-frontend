@@ -6,31 +6,35 @@
 </script>
 
 <div class="table-wrap">
-	<table class="table caption-top w-full">
+	<table class="table w-full table-fixed caption-top">
 		<thead>
 			<tr>
-				<th></th>
-				<th>question</th>
-				<th>answer</th>
-				<th>type</th>
+				<th class="w-20 align-middle"></th>
+				<th class="w-[45%] align-middle">question</th>
+				<th class="w-[20%] align-middle">answer</th>
+				<th class="w-[15%] align-middle">type</th>
+				<th class="w-[10%] align-middle text-right">attempts total</th>
+				<th class="w-[10%] align-middle text-right">correct attempts</th>
 			</tr>
 		</thead>
 		<tbody class="[&>tr]:hover:preset-tonal-surface">
 			{#each props.exercises as exercise (exercise.id)}
 				<tr>
-					<td
-						><Button
+					<td class="w-20 align-middle whitespace-nowrap">
+						<Button
 							text="Edit"
 							size="sm"
 							preset="outlined"
 							color="tertiary"
 							onclick={() =>
 								goto(`/collections/view/${exercise.collectionId}/exercises/edit/${exercise.id}`)}
-						/></td
-					>
-					<td>{exercise.question}</td>
-					<td>{exercise.correctAnswer}</td>
-					<td>{exercise.type}</td>
+						/>
+					</td>
+					<td title={exercise.question} class="w-[45%] truncate align-middle">{exercise.question}</td>
+					<td title={exercise.correctAnswer} class="w-[20%] truncate align-middle">{exercise.correctAnswer}</td>
+					<td title={exercise.type} class="w-[15%] truncate align-middle">{exercise.type}</td>
+					<td class="w-[10%] truncate align-middle text-right">{exercise.totalAttempts}</td>
+					<td class="w-[10%] truncate align-middle text-right">{exercise.correctAttempts}</td>
 				</tr>
 			{/each}
 		</tbody>

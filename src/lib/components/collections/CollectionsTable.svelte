@@ -19,6 +19,8 @@
 				<th>User name</th>
 				<th>Created At</th>
 				<th>Updated At</th>
+				<th>Exercise count</th>
+				<th>Attempt count</th>
 			</tr>
 		</thead>
 		<tbody class="[&>tr]:hover:preset-tonal-primary">
@@ -37,6 +39,8 @@
 					<td>{collection.user?.name}</td>
 					<td>{collection.createdAt}</td>
 					<td>{collection.updatedAt}</td>
+					<td class="text-right">{collection.exerciseCount}</td>
+					<td class="text-right">{collection.attemptCount}</td>
 				</tr>
 			{/each}
 		</tbody>
