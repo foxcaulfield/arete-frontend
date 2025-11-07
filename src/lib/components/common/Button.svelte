@@ -1,8 +1,9 @@
 <script lang="ts">
+	import type { IconProps } from "@lucide/svelte";
+	import type { Component } from "svelte";
 	import type { ClassValue } from "svelte/elements";
 
 	type CommonProps = {
-		text: string;
 		type?: "button" | "submit" | "reset";
 		name?: string;
 		value?: string;
@@ -12,19 +13,29 @@
 		size?: StyleProps.Size;
 		disabled?: boolean;
 		loading?: boolean;
-		icon?: boolean;
 		buttonElement?: HTMLButtonElement | undefined;
 		class?: ClassValue;
 		fullWidth?: boolean;
 		action?: string;
+		isBorderless?: boolean;
 		onsubmit?: (e: Event) => void;
 		onclick?: (e: Event) => void;
 		[rest: string]: any;
 	};
 
+	type WithIcon = {
+		text?: string;
+		useIcon: true;
+		IconComponent: Component<IconProps, {}, "">;
+	};
+	type WithoutIcon = {
+		text: string;
+		useIcon?: false;
+		IconComponent?: undefined;
+	};
 	type WithAction = { withAction: true; action: string; onsubmit?: (e: Event) => void };
 	type WithoutAction = { withAction?: false };
-	type ButtonProps = CommonProps & (WithAction | WithoutAction);
+	type ButtonProps = CommonProps & (WithAction | WithoutAction) & (WithIcon | WithoutIcon);
 
 	let {
 		text,
@@ -42,8 +53,10 @@
 		onsubmit,
 		buttonElement = $bindable(),
 		loading = false,
-		icon = false,
+		useIcon = false,
+		IconComponent,
 		fullWidth = false,
+		isBorderless: withoutBorder = false,
 		...rest
 	}: ButtonProps = $props();
 
@@ -100,27 +113,26 @@
 	style:display={withAction ? "inline" : "inline-block"}
 >
 	<button
-		name={name}
-		value={value}
-		title={title}
+		{name}
+		{value}
+		{title}
 		bind:this={buttonElement}
 		type={type ?? (withAction ? "submit" : "button")}
 		{disabled}
-		class={[
-			"btn",
-			`btn-${size}`,
-			presetClass,
-			cls,
-			fullWidth ? "full-width" : "",
-		]
+		class={["btn", `btn-${size}`, presetClass, cls, fullWidth ? "full-width" : "", withoutBorder ? "border-none" : ""]
 			.filter(Boolean)
 			.join(" ")}
-	{...rest}
+		{...rest}
 	>
 		{#if loading}
-			<span class="spinner"></span>
+			<span class="spinner" aria-hidden="true"></span>
 		{/if}
-		<span>{text}</span>
+		{#if useIcon && !loading}
+			<IconComponent size="1em" />
+		{/if}
+		{#if text && !loading}
+			<span>{text}</span>
+		{/if}
 	</button>
 </svelte:element>
 

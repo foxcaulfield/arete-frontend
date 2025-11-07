@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Unauthorized from "$lib/components/Unauthorized.svelte";
+	import Unauthorized from "$lib/components/pages/Unauthorized.svelte";
 
 	import type { PageProps } from "./$types";
 	const { data }: PageProps = $props();

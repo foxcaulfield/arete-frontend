@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
-	import { goto, invalidateAll } from "$app/navigation";
-	import { toast } from "@zerodevx/svelte-toast";
-	// import { setUser, clearUser, isLoggedIn } from "$lib/stores/auth";
+	import { invalidateAll } from "$app/navigation";
+	import { toastError, toastSuccess } from "$lib/toast";
 	import type { PageProps } from "./$types";
 
 	const props: PageProps = $props();
@@ -12,45 +11,47 @@
 	let email = $state("");
 	let password = $state("");
 	let isLoading = $state(false);
-	
 </script>
 
-<form method="POST" use:enhance={({ action }) => {
-	isLoading = true;
-	
-	return async ({ result }) => {
-		try {
-			if (result.type === "success") {
-				// Sign-in feedback
-				if (action.search.includes("sign-in")) {
-					toast.push("Signed in successfully!");
+<form
+	method="POST"
+	use:enhance={({ action }) => {
+		isLoading = true;
+
+		return async ({ result }) => {
+			try {
+				if (result.type === "success") {
+					// Sign-in feedback
+					if (action.search.includes("sign-in")) {
+						toastSuccess("Signed in successfully!");
+					}
+					// Sign-up feedback
+					else if (action.search.includes("sign-up")) {
+						toastSuccess("Account created. You are signed in.");
+					}
+					// Sign-out feedback
+					else if (action.search.includes("sign-out")) {
+						toastSuccess("Logged out successfully");
+					}
+
+					// Invalidate and redirect together to reduce blink
+					await invalidateAll();
+					// await goto("/");
+				} else if (result.type === "failure" && result.data) {
+					// Show error message from server
+					toastError(JSON.stringify(result.data.message) || "An error occurred");
+					isLoading = false;
 				}
-				// Sign-up feedback
-				else if (action.search.includes("sign-up")) {
-					toast.push("Account created. You are signed in.");
-				}
-				// Sign-out feedback
-				else if (action.search.includes("sign-out")) {
-					toast.push("Logged out successfully");
-				}
-				
-				// Invalidate and redirect together to reduce blink
-				await invalidateAll();
-				// await goto("/");
-			} else if (result.type === "failure" && result.data) {
-				// Show error message from server
-				toast.push(result.data.message || "An error occurred");
+			} catch (error) {
+				console.error("Auth error:", error);
+				toastError("An unexpected error occurred");
+				// isLoading = false;
+			} finally {
 				isLoading = false;
 			}
-		} catch (error) {
-			console.error("Auth error:", error);
-			toast.push("An unexpected error occurred");
-			// isLoading = false;
-		} finally {
-			isLoading = false;
-		}
-	};
-}}>
+		};
+	}}
+>
 	{#if !props.data.user}
 		<fieldset>
 			<legend>Choose action:</legend>

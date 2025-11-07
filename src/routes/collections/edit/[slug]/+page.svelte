@@ -2,8 +2,8 @@
 	import type { PageProps } from "./$types";
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
-	import Unauthorized from "$lib/components/Unauthorized.svelte";
-	import NotFound from "$lib/components/NotFound.svelte";
+	import Unauthorized from "$lib/components/pages/Unauthorized.svelte";
+	import NotFound from "$lib/components/pages/NotFound.svelte";
 	import CollectionForm from "$lib/components/collections/CollectionForm.svelte";
 
 	let props: PageProps = $props();

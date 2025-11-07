@@ -35,6 +35,8 @@ declare global {
 			};
 			createdAt: Date;
 			updatedAt: Date;
+			attemptCount: number;
+			exerciseCount: number;
 		}
 	}
 
@@ -57,6 +59,8 @@ declare global {
 			isActive: boolean;
 			additionalCorrectAnswers: string[] | null;
 			correctAnswer: string | null;
+			totalAttempts: number;
+			correctAttempts: number;
 		}
 
 		interface CreateDto {

@@ -1,13 +1,9 @@
-
-<!-- ============================================ -->
-<!-- EDIT PAGE -->
-<!-- ============================================ -->
 <script lang="ts">
 	import { goto } from "$app/navigation";
-	import { toast } from "@zerodevx/svelte-toast";
 	import { enhance } from "$app/forms";
-	import ExerciseForm from "$lib/components/exercises/ExerciseForm.svelte";
+	import ExerciseForm from "$lib/components/exercises/ExerciseEditForm.svelte";
 	import type { PageProps } from "./$types";
+	import { toastError } from "$lib/toast";
 
 	const props: PageProps = $props();
 
@@ -22,7 +18,7 @@
 	// Show toast on error
 	$effect(() => {
 		if (props.form?.errorText) {
-			toast.push(props.form.errorText, { classes: ["error-toast"] });
+			toastError(props.form.errorText);
 		}
 	});
 
@@ -57,7 +53,7 @@
 				await update();
 			} else if (result.type === 'failure') {
 				// Show error toast
-				toast.push(result.data?.errorText || 'Failed to delete exercise', { classes: ['error-toast'] });
+				toastError(JSON.stringify(result.data?.errorText) || 'Failed to delete exercise');
 				await update();
 			}
 		};

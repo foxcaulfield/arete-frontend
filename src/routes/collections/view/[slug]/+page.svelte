@@ -1,19 +1,18 @@
 <script lang="ts">
-	import { toast } from "@zerodevx/svelte-toast";
-
 	import { onMount } from "svelte";
 	import { page } from "$app/state";
 	import { goto } from "$app/navigation";
 
-	import Forbidden from "$lib/components/Forbidden.svelte";
-	import NotFound from "$lib/components/NotFound.svelte";
-	import Unauthorized from "$lib/components/Unauthorized.svelte";
+	import Forbidden from "$lib/components/pages/Forbidden.svelte";
+	import NotFound from "$lib/components/pages/NotFound.svelte";
+	import Unauthorized from "$lib/components/pages/Unauthorized.svelte";
 
 	import type { PageProps } from "./$types";
 	import ExercisesTable from "$lib/components/exercises/ExercisesTable.svelte";
 	import Button from "$lib/components/common/Button.svelte";
 	import { Pagination } from "@skeletonlabs/skeleton-svelte";
 	import { Dialog, Portal } from "@skeletonlabs/skeleton-svelte";
+	import { toastSuccess } from "$lib/toast";
 	let props: PageProps = $props();
 
 	let serverData = $derived(props.data?.serverData || {});
@@ -92,29 +91,29 @@
 		const isExerciseDeleted = searchParams.get("exerciseDeleted") === "1";
 
 		if (isUpdated) {
-			toast.push("Collection updated successfully!");
+			toastSuccess("Collection updated successfully!");
 			searchParams.delete("updated");
 			changed = true;
 		}
 
 		if (isCreated) {
-			toast.push("Collection created successfully!");
+			toastSuccess("Collection created successfully!");
 			searchParams.delete("created");
 			changed = true;
 		}
 
 		if (isExerciseCreated) {
-			toast.push("Exercise created successfully!");
+			toastSuccess("Exercise created successfully!");
 			searchParams.delete("exerciseCreated");
 			changed = true;
 		}
 
 		if (isExerciseUpdated) {
-			toast.push("Exercise updated successfully!");
+			toastSuccess("Exercise updated successfully!");
 		}
 
 		if (isExerciseDeleted) {
-			toast.push("Exercise deleted successfully!");
+			toastSuccess("Exercise deleted successfully!");
 		}
 		if (changed) {
 			const queryString = searchParams.toString();

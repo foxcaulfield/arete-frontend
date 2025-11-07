@@ -3,8 +3,8 @@
 	import Button from "$lib/components/common/Button.svelte";
 	import MediaField from "$lib/components/MediaField.svelte";
 	import type { Snippet } from "svelte";
-	import { toast } from "@zerodevx/svelte-toast";
 	import { TagsInput } from "@skeletonlabs/skeleton-svelte";
+	import { toastSuccess, toastWarning } from "$lib/toast";
 
 	interface Props {
 		mode: "create" | "edit";
@@ -83,48 +83,79 @@
 	const keepOnlyUnique = (arr: string[]) => [...new Set(arr)];
 	const toAnswerWithId = (val: string) => ({ id: randomId(), value: val });
 	const toTrimmedLower = (val: string) => val.trim().toLowerCase();
-	const showWarningToast = (message: string) => {
-		toast.push(message, {
-			theme: {
-				"--toastBackground": "var(--color-warning-500)",
-				"--toastColor": "white",
-				"--toastBarBackground": "var(--color-warning-700)",
-			},
-		});
-	};
 
 	type ValChangeInfo = { value: string[]; inputValue: string };
+
+	// Split comma-separated values into individual items
+	const splitCommaSeparatedValues = (val: string): string[] => {
+		return val
+			.split(",")
+			.map((item) => item.trim())
+			.filter((item) => item.length > 0);
+	};
 
 	const _handleValidateExtraAnswersInput =
 		(warningMessage: string) =>
 		({ value, inputValue }: ValChangeInfo) => {
 			if (value.map(toTrimmedLower).includes(toTrimmedLower(inputValue))) {
-				showWarningToast(warningMessage);
+				toastWarning(warningMessage);
 				return false;
 			}
 			return true;
 		};
 
 	function handleValidateAdditionalAnswersInput({ value, inputValue }: ValChangeInfo) {
+		// Split comma-separated values
+		const splitValues = splitCommaSeparatedValues(inputValue);
+
+		// If there's a comma, validate each split value
+		if (splitValues.length > 1) {
+			for (const splitVal of splitValues) {
+				if (value.map(toTrimmedLower).includes(toTrimmedLower(splitVal))) {
+					toastWarning("Duplicate alternative value");
+					return false;
+				}
+			}
+			return true;
+		}
+
 		return _handleValidateExtraAnswersInput("Duplicate alternative value")({ value, inputValue });
 	}
 
 	function handleValidateDistractorsInput({ value, inputValue }: ValChangeInfo) {
+		// Split comma-separated values
+		const splitValues = splitCommaSeparatedValues(inputValue);
+
+		// If there's a comma, validate each split value
+		if (splitValues.length > 1) {
+			for (const splitVal of splitValues) {
+				if (value.map(toTrimmedLower).includes(toTrimmedLower(splitVal))) {
+					toastWarning("Duplicate distractor value");
+					return false;
+				}
+			}
+			return true;
+		}
+
 		return _handleValidateExtraAnswersInput("Duplicate distractor value")({ value, inputValue });
 	}
 
 	function handleDistractorsChange({ value }: { value: string[] }) {
-		distractors = keepOnlyUnique(value).map(toAnswerWithId);
+		// Split any comma-separated values
+		const allValues = value.flatMap((v) => splitCommaSeparatedValues(v));
+		distractors = keepOnlyUnique(allValues).map(toAnswerWithId);
 
-		if (value.length > 0) {
+		if (allValues.length > 0) {
 			canClearDistractors = false;
 		}
 	}
 
 	function handleAdditionalAnswersChange({ value }: { value: string[] }) {
-		additionalCorrectAnswers = keepOnlyUnique(value).map(toAnswerWithId);
+		// Split any comma-separated values
+		const allValues = value.flatMap((v) => splitCommaSeparatedValues(v));
+		additionalCorrectAnswers = keepOnlyUnique(allValues).map(toAnswerWithId);
 
-		if (value.length > 0) {
+		if (allValues.length > 0) {
 			canClearAdditionalAnswers = false;
 		}
 	}
@@ -132,25 +163,25 @@
 	function handleClearExplanation() {
 		explanationText = "";
 		clearExplanation = true;
-		showWarningToast("Explanation will be removed");
+		toastWarning("Explanation will be removed");
 	}
 
 	function handleClearTranslation() {
 		translationText = "";
 		clearTranslation = true;
-		showWarningToast("Translation will be removed");
+		toastWarning("Translation will be removed");
 	}
 
 	function handleClearAdditionalAnswers() {
 		additionalCorrectAnswers = [];
 		canClearAdditionalAnswers = true;
-		showWarningToast("All alternatives will be removed");
+		toastWarning("All alternatives will be removed");
 	}
 
 	function handleClearDistractors() {
 		distractors = [];
 		canClearDistractors = true;
-		showWarningToast("All distractors will be removed");
+		toastWarning("All distractors will be removed");
 	}
 
 	function handleUndoClearExplanation() {
@@ -217,8 +248,11 @@
 					arr: Array<{ id: number; value: string }>,
 					canClear: boolean
 				) => {
+					// debugger;
 					if (canClear || arr.length === 0) {
 						formData.append(key, "");
+					} else if (arr.length === 1) {
+						formData.append(`${key}[]`, arr[0].value);
 					} else {
 						arr.map((a) => a.value).forEach((v) => formData.append(key, v));
 					}
@@ -335,13 +369,7 @@
 											navigator.clipboard.writeText(
 												questionText.replace(/{/g, "").replace(/}/g, "")
 											);
-											toast.push("Copied!", {
-												theme: {
-													"--toastBackground": "var(--color-success-500)",
-													"--toastColor": "white",
-													"--toastBarBackground": "var(--color-success-700)",
-												},
-											});
+											toastSuccess("Question copied to clipboard");
 										}}
 									>
 										Copy

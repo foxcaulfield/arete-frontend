@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
-	import Forbidden from "$lib/components/Forbidden.svelte";
+	import Forbidden from "$lib/components/pages/Forbidden.svelte";
 	import CollectionsTable from "$lib/components/collections/CollectionsTable.svelte";
 	import type { PageProps } from "./$types";
 	import Button from "$lib/components/common/Button.svelte";

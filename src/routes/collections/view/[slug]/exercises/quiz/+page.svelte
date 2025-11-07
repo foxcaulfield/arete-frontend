@@ -2,16 +2,16 @@
 	import { enhance } from "$app/forms";
 	import { goto, invalidateAll } from "$app/navigation";
 	import Button from "$lib/components/common/Button.svelte";
-	import ChoiceSingleExercise from "$lib/components/quiz/ChoiceSingleExercise.svelte";
-	import ExerciseImage from "$lib/components/quiz/ExerciseImage.svelte";
-	import ExerciseTypeBadge from "$lib/components/quiz/ExerciseTypeBadge.svelte";
-	import ExplanationText from "$lib/components/quiz/ExplanationText.svelte";
-	import FillInExercise from "$lib/components/quiz/FillInExercise.svelte";
-	import TranslationText from "$lib/components/quiz/TranslationText.svelte";
+	import ChoiceSingleExercise from "$lib/components/quiz/question-views/choose-single-variant.svelte";
+	import ExerciseImage from "$lib/components/quiz/QuestionImage.svelte";
+	import ExerciseTypeBadge from "$lib/components/quiz/QuestionTypeBadge.svelte";
+	import ExplanationText from "$lib/components/quiz/QuestionExplanation.svelte";
+	import FillInExercise from "$lib/components/quiz/question-views/input-text-manually.svelte";
 	import type { SubmitFunction } from "@sveltejs/kit";
-	import { toast } from "@zerodevx/svelte-toast";
 	import { onMount, tick } from "svelte";
 	import type { PageProps } from "./$types";
+	import ControlButtons from "$lib/components/quiz/ControlButtons.svelte";
+	import { toastError, toastSuccess } from "$lib/toast";
 
 	interface TextPart {
 		text: string;
@@ -29,8 +29,8 @@
 	let userAnswer = $state("");
 
 	let showResult = $state(false);
-	let showImage = $state(false);
-	let showExplanation = $state(false);
+	let isImageShown = $state(false);
+	let isExplanationShown = $state(false);
 
 	let inputElement = $state<HTMLInputElement | undefined>(undefined);
 	let imageElement = $state<HTMLImageElement | undefined>(undefined);
@@ -116,16 +116,16 @@
 	const scrollOptions = { behavior: "smooth", block: "center" } as const;
 
 	async function handleShowImage() {
-		showImage = !showImage;
-		if (showImage) {
+		isImageShown = !isImageShown;
+		if (isImageShown) {
 			await tick();
 			imageElement?.scrollIntoView(scrollOptions);
 		}
 	}
 
 	async function handleShowExplanation() {
-		showExplanation = !showExplanation;
-		if (showExplanation) {
+		isExplanationShown = !isExplanationShown;
+		if (isExplanationShown) {
 			await tick();
 			explanationElement?.scrollIntoView(scrollOptions);
 		}
@@ -138,8 +138,8 @@
 	}
 	const handleGetNextQuestionEnhance: SubmitFunction = () => {
 		console.log("Refreshing question");
-		showExplanation = false;
-		showImage = false;
+		isExplanationShown = false;
+		isImageShown = false;
 
 		return async ({ update }) => {
 			await invalidateAll();
@@ -152,6 +152,19 @@
 			}
 		};
 	};
+
+	function handleCopyQuestionText() {
+		const textToCopy = questionParts.map((part) => part.text).join(" ");
+		navigator.clipboard.writeText(textToCopy).then(
+			() => toastSuccess("Question copied to clipboard"),
+			() => toastError("Failed to copy question")
+		);
+	}
+
+	function handleClickEdit() {
+		if (!currentQuestion) return;
+		goto(`/collections/view/${collectionId}/exercises/edit/${currentQuestion.id}`);
+	}
 
 	onMount(() => {
 		// Focus the input element on mount if applicable
@@ -200,90 +213,56 @@
 
 				<!-- Question Card -->
 				<div class="rounded-lg border border-surface-700 bg-surface-900 p-4 md:p-6">
-					<!-- Question Header with Controls -->
-					<div
-						class="mb-6 flex flex-col gap-4 border-b border-surface-700 pb-4 md:flex-row md:items-start md:justify-between"
-					>
-						<div class="min-w-0 flex-1">
-							<!-- Question Text with Hidden Answers -->
-							<div class="text-xl leading-relaxed font-semibold text-surface-100 md:text-2xl">
-								{#each questionParts as part, i (i)}
-									{@const shouldReveal = part.isAnswer && showResult}
-									{@const shouldHide = part.isAnswer && !showResult}
-									<span
-										class="rounded px-1"
-										class:text-success-400={shouldReveal}
-										class:bg-primary-500={shouldHide}
-										class:text-primary-500={shouldHide}
-									>
-										{part.text}
-									</span>
-									{#if i < questionParts.length - 1 && !questionParts[i + 1].isAnswer && !part.isAnswer}
-										<span> </span>
-									{/if}
-								{/each}
-							</div>
-						</div>
-						<div class="flex flex-shrink-0 gap-1">
-							<button
-								type="button"
-								class="rounded px-2 py-1 text-xs text-primary-500 transition-colors hover:bg-surface-800 hover:text-primary-400"
-								onclick={() => {
-									navigator.clipboard.writeText(
-										currentQuestion.question.replace(/{/g, "").replace(/}/g, "")
-									);
-									toast.push("Copied!", {
-										theme: {
-											"--toastBackground": "var(--color-success-500)",
-											"--toastColor": "white",
-											"--toastBarBackground": "var(--color-success-700)",
-										},
-									});
-								}}
-								title="Copy question"
-							>
-								Copy
-							</button>
-							<button
-								type="button"
-								class="rounded px-2 py-1 text-xs text-primary-500 transition-colors hover:bg-surface-800 hover:text-primary-400"
-								onclick={() =>
-									goto(`/collections/view/${collectionId}/exercises/edit/${currentQuestion.id}`)}
-								title="Edit exercise"
-							>
-								Edit
-							</button>
-							<button
-								type="button"
-								class="rounded px-2 py-1 text-xs text-primary-500 transition-colors hover:bg-surface-800 hover:text-primary-400"
-								onclick={handleForceTextInput}
-								title={isForceTextInput ? "Switch to choice" : "Switch to text"}
-							>
-								{isForceTextInput ? "Switch to choice" : "Switch to text "}
-							</button>
+					<!-- Control Buttons -->
+					<div class="flex justify-end">
+						<ControlButtons
+							{currentQuestion}
+							{isImageShown}
+							{isExplanationShown}
+							{isForceTextInput}
+							{handleForceTextInput}
+							{handleShowImage}
+							{handleShowExplanation}
+							{handlePlayAudio}
+							{handleCopyQuestionText}
+							{handleClickEdit}
+						/>
+					</div>
 
-							<form method="POST" action="?/getNextQuestion" use:enhance={handleGetNextQuestionEnhance}>
-								<Button
-									type="submit"
-									bind:buttonElement={nextButtonElement}
-									color="surface"
-									preset="outlined"
-									size="sm"
-									text={`⟳`}
-								/>
-							</form>
+					<!-- Question Header -->
+					<div
+						class="mb-6 flex flex-col gap-4 border-b border-surface-700 pb-4 md:flex-row md:items-center md:justify-between"
+					>
+						<!-- Question Text with Hidden Answers -->
+						<div class="text-xl leading-relaxed font-semibold text-surface-100 md:text-2xl">
+							{#each questionParts as part, i (i)}
+								{@const shouldReveal = part.isAnswer && showResult}
+								{@const shouldHide = part.isAnswer && !showResult}
+								<span
+									class="rounded px-1"
+									class:text-success-400={shouldReveal}
+									class:bg-primary-500={shouldHide}
+									class:text-primary-500={shouldHide}
+								>
+									{part.text}
+								</span>
+								{#if i < questionParts.length - 1 && !questionParts[i + 1].isAnswer && !part.isAnswer}
+									<span> </span>
+								{/if}
+							{/each}
 						</div>
 					</div>
 
 					<!-- Translation (if available) -->
 					{#if currentQuestion.translation}
-						<div class="mb-4">
-							<TranslationText translationText={currentQuestion.translation} />
+						<div class="mb-4 text-sm text-surface-400">
+							<span class="font-medium text-surface-300">Translation:</span>
+							{currentQuestion.translation}
 						</div>
 					{/if}
 
 					<!-- Answer Input/Selection -->
-					<form action="?/handleSubmitAnswer" method="POST" use:enhance={handleFormEnhance} class="mb-4">
+					<form action="?/handleSubmitAnswer" method="POST" use:enhance={handleFormEnhance} class="mb-6">
 						<input type="hidden" name="exerciseId" value={currentQuestion.id} />
 						{#if currentQuestion.type === "FILL_IN_THE_BLANK" || isForceTextInput}
 							<FillInExercise {showResult} bind:userAnswer bind:inputElement />
@@ -297,37 +276,70 @@
 						{/if}
 					</form>
 
-					<!-- Result Feedback -->
-					{#if showResult && lastResult}
-						<div class="mb-4 border-t border-surface-700 pt-4">
-							{#if lastResult.isCorrect}
-								<div
-									class="rounded border border-success-700 bg-success-900 p-3 text-xs text-success-400"
-								>
-									<span class="font-semibold">✓ Correct!</span>
-									<!-- {#if lastResult?.feedback}
-										<p class="mt-1">{lastResult.feedback}</p>
-									{/if} -->
+					<!-- Feedback Card - Reserved Space to Prevent Layout Shift -->
+					<div class="mb-6 min-h-[140px]">
+						{#if showResult && lastResult}
+							<div
+								class="animate-in fade-in slide-in-from-top-2 rounded-lg border-l-4 p-4 duration-300
+							{lastResult.isCorrect
+									? 'border border-success-900 border-l-success-400 bg-success-900/20'
+									: 'border border-error-900 border-l-error-400 bg-error-900/20'}"
+							>
+								<div class="flex items-start gap-4">
+									<div class="flex-shrink-0 pt-1 text-3xl">
+										{lastResult.isCorrect ? "✓" : "✗"}
+									</div>
+									<div class="min-w-0 flex-1">
+										<div
+											class="text-lg font-bold {lastResult.isCorrect
+												? 'text-success-400'
+												: 'text-error-400'}"
+										>
+											{lastResult.isCorrect ? "Correct!" : "Not quite right"}
+										</div>
+										{#if !lastResult.isCorrect}
+											<div class="mt-3 space-y-2 text-sm">
+												<p class="text-surface-300">
+													<span class="text-surface-400">Your answer:</span>
+													<span class="font-medium text-error-300"
+														>{lastUserAnswer || "(empty)"}</span
+													>
+												</p>
+												<p class="text-surface-300">
+													<span class="text-surface-400">Correct answer:</span>
+													<span class="font-semibold text-success-300"
+														>{lastResult.correctAnswer}</span
+													>
+												</p>
+											</div>
+										{/if}
+									</div>
 								</div>
-							{:else}
-								<div class="rounded border border-error-700 bg-error-900 p-3 text-xs text-error-400">
-									<span class="font-semibold">✗ Not quite right</span>
-									<!-- {#if lastResult.feedback}
-										<p class="mt-1">{lastResult.feedback}</p>
-									{/if} -->
-									{#if lastResult.correctAnswer}
-										<p class="mt-2 text-success-400">
-											Correct: <span class="font-semibold">{lastResult.correctAnswer}</span>
-										</p>
-									{/if}
-								</div>
-							{/if}
-						</div>
-					{/if}
+							</div>
+						{/if}
+					</div>
 
-					<!-- Action Buttons -->
-					<div class="flex flex-wrap gap-2 border-t border-surface-700 pt-4">
-						{#if showResult}
+					<!-- Bottom Action Bar -->
+					<div class="flex items-center justify-between gap-4 border-t border-surface-700 pt-4">
+						<!-- Secondary Controls (Left) -->
+						<div>
+							<form method="POST" action="?/getNextQuestion" use:enhance={handleGetNextQuestionEnhance}>
+								<Button
+									disabled={showResult}
+									type="submit"
+									bind:buttonElement={nextButtonElement}
+									color="surface"
+									preset="outlined"
+									size="sm"
+									text="Skip"
+									isBorderless={true}
+								/>
+							</form>
+						</div>
+
+						<!-- Next Button (Right) -->
+						<div>
+							<!-- {#if showResult} -->
 							<form
 								method="POST"
 								action="?/getNextQuestion"
@@ -335,53 +347,28 @@
 								class="inline"
 							>
 								<Button
+									disabled={!showResult}
 									type="submit"
 									bind:buttonElement={nextButtonElement}
-									color="primary"
+									color={showResult ? (lastResult?.isCorrect ? "success" : "error") : "surface"}
 									size="sm"
 									text="Next"
 								/>
 							</form>
-						{/if}
-						{#if currentQuestion.imageUrl}
-							<button
-								type="button"
-								class="rounded border border-surface-600 px-3 py-2 text-xs text-surface-300 transition-colors hover:bg-surface-800 hover:text-surface-200"
-								onclick={handleShowImage}
-							>
-								{showImage ? "Hide Image" : "Image"}
-							</button>
-						{/if}
-						{#if currentQuestion.audioUrl}
-							<button
-								type="button"
-								class="rounded border border-surface-600 px-3 py-2 text-xs text-surface-300 transition-colors hover:bg-surface-800 hover:text-surface-200"
-								onclick={handlePlayAudio}
-							>
-								Audio
-							</button>
-						{/if}
-						{#if currentQuestion.explanation}
-							<button
-								type="button"
-								class="rounded border border-surface-600 px-3 py-2 text-xs text-surface-300 transition-colors hover:bg-surface-800 hover:text-surface-200"
-								onclick={handleShowExplanation}
-							>
-								{showExplanation ? "Hide Explanation" : "Explanation"}
-							</button>
-						{/if}
+							<!-- {/if} -->
+						</div>
 					</div>
 				</div>
 
 				<!-- Image (if shown) -->
-				{#if showImage && currentQuestion.imageUrl}
+				{#if isImageShown && currentQuestion.imageUrl}
 					<div class="rounded-lg border border-surface-700 bg-surface-900 p-4 md:p-6">
 						<ExerciseImage bind:imageElement imageUrl={currentQuestion.imageUrl} />
 					</div>
 				{/if}
 
 				<!-- Explanation (if shown) -->
-				{#if showExplanation && currentQuestion.explanation}
+				{#if isExplanationShown && currentQuestion.explanation}
 					<div class="rounded-lg border border-surface-700 bg-surface-900 p-4 md:p-6">
 						<ExplanationText bind:explanationEl={explanationElement} text={currentQuestion.explanation} />
 					</div>
