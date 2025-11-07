@@ -56,8 +56,8 @@
 				: "secondary"}
 			preset={showResult && distractor === lastResult?.correctAnswer ? "filled" : "outlined"}
 			name="userAnswer"
-			value={distractor}
-			text={distractor}
+			value={distractor.toLowerCase()}
+			text={distractor.toLowerCase()}
 			fullWidth={true}
 			title={`Press '${Object.entries(KEYBOARD_MAP).find(([_, i]) => i === index)?.[0] || ""}' to select`}
 		/>
