@@ -157,6 +157,10 @@
 					>
 						{imageStatus === "new" ? "⭐ New" : "✓ Current"}
 					</div>
+					<label class="flex items-center space-x-2">
+						<input class="checkbox" type="checkbox" name="setNullImage" id="setNullImage" />
+						<p class="text-primary-900">Set image to null</p>
+					</label>
 				</div>
 				<div class="preview image-preview">
 					<img src={imagePreview} alt="" />
@@ -189,6 +193,8 @@
 					>
 						{audioStatus === "new" ? "⭐ New" : "✓ Current"}
 					</div>
+					<label class="text-primary-900" for="setNullAudio">Set audio to null</label>
+					<input type="checkbox" name="setNullAudio" id="setNullAudio" />
 				</div>
 				<div class="preview audio-preview">
 					<audio controls src={audioPreview}>
