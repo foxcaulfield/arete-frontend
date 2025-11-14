@@ -2,7 +2,7 @@ module.exports = {
   branches: [
     'main',
     { name: 'develop', channel: 'beta', prerelease: 'beta' },
-    { name: 'release/*', prerelease: true }
+    { name: 'release/*', channel: 'rc', prerelease: 'rc' }
   ],
   tagFormat: 'v${version}',
   plugins: [
